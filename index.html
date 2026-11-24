@@ -26,8 +26,8 @@
 
             <form id="login-form" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">Email</label>
-                    <input type="email" id="email" required placeholder="tu@sdnpluit03.sch.id"
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">Email (Guru/TU) atau NISN (Ortu)</label>
+                    <input type="text" id="email" required placeholder="Contoh: 3182418273 atau email@..."
                         class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none text-sm">
                 </div>
                 <div>
@@ -56,8 +56,11 @@
                         <span id="user-role-badge" class="text-[11px] font-bold uppercase text-blue-700">Memuat...</span>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span id="user-name" class="hidden sm:block text-sm font-semibold text-slate-700"></span>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <span id="user-name" class="hidden md:block text-sm font-semibold text-slate-700 mr-1"></span>
+                    <button id="btn-open-pass" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-lg transition">
+                        Ganti Password
+                    </button>
                     <button id="btn-logout" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-3.5 py-2 rounded-lg transition">
                         Keluar
                     </button>
@@ -66,71 +69,117 @@
         </nav>
 
         <!-- Konten Utama -->
-        <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
-            <!-- Kartu Ringkasan -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <span class="text-xs font-bold text-slate-500 uppercase">Total Siswa Terdata</span>
-                    <div id="stat-siswa" class="text-3xl font-extrabold text-blue-800 mt-1">0</div>
+        <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1">
+
+            <!-- Menu Tab (Khusus Admin) -->
+            <div id="admin-tabs" class="hidden flex gap-2 mb-6 border-b border-slate-200 pb-3">
+                <button id="tab-btn-siswa" onclick="switchTab('siswa')"
+                    class="px-4 py-2 rounded-xl text-sm font-bold bg-blue-700 text-white transition">
+                    Buku Induk Siswa
+                </button>
+                <button id="tab-btn-users" onclick="switchTab('users')"
+                    class="px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
+                    Manajemen User & Role
+                </button>
+            </div>
+
+            <!-- SECTION 1: DATA SISWA -->
+            <div id="section-siswa">
+                <!-- Kartu Ringkasan -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Total Siswa Terdata</span>
+                        <div id="stat-siswa" class="text-3xl font-extrabold text-blue-800 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Total Rombel Aktif</span>
+                        <div id="stat-rombel" class="text-3xl font-extrabold text-emerald-700 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Status Koneksi</span>
+                        <div class="text-sm font-bold text-emerald-600 mt-2 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Supabase RLS Aktif
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <span class="text-xs font-bold text-slate-500 uppercase">Total Rombel Aktif</span>
-                    <div id="stat-rombel" class="text-3xl font-extrabold text-emerald-700 mt-1">0</div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <span class="text-xs font-bold text-slate-500 uppercase">Status Koneksi</span>
-                    <div class="text-sm font-bold text-emerald-600 mt-2 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Supabase RLS Aktif
+
+                <!-- Panel Tabel Data Siswa -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="font-extrabold text-slate-900 text-lg">Buku Induk Siswa</h2>
+                            <p id="filter-info" class="text-xs text-slate-500">Memuat data...</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2.5">
+                            <input type="text" id="search-input" placeholder="Cari Nama / NISN / NIPD..."
+                                class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 outline-none w-full sm:w-64">
+                            <select id="filter-rombel"
+                                class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-blue-600 outline-none">
+                                <option value="">Semua Rombel</option>
+                            </select>
+                            <button id="btn-refresh" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition">
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                <tr>
+                                    <th class="px-5 py-3">NIPD / NISN</th>
+                                    <th class="px-5 py-3">Nama Lengkap</th>
+                                    <th class="px-5 py-3">L/P</th>
+                                    <th class="px-5 py-3">Rombel</th>
+                                    <th class="px-5 py-3">Status</th>
+                                    <th class="px-5 py-3 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabel-siswa" class="divide-y divide-slate-100">
+                                <tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Memuat data siswa...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="px-5 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs">
+                        <span id="page-info" class="text-slate-600 font-medium">Halaman 1</span>
+                        <div class="flex gap-2">
+                            <button id="btn-prev" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold disabled:opacity-40">Sebelumnya</button>
+                            <button id="btn-next" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold disabled:opacity-40">Berikutnya</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel Tabel Data Siswa -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <!-- Header & Filter -->
-                <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h2 class="font-extrabold text-slate-900 text-lg">Buku Induk Siswa</h2>
-                        <p id="filter-info" class="text-xs text-slate-500">Memuat data...</p>
+            <!-- SECTION 2: MANAJEMEN USER (KHUSUS ADMIN) -->
+            <div id="section-users" class="hidden">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="font-extrabold text-slate-900 text-lg">Manajemen User & Role</h2>
+                            <p class="text-xs text-slate-500">Ubah hak akses (Admin / Guru / Tendik / Siswa) langsung dari sini.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="search-user" placeholder="Cari nama user..."
+                                class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+                            <button onclick="loadUsers()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition">
+                                Refresh
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex flex-col sm:flex-row gap-2.5">
-                        <input type="text" id="search-input" placeholder="Cari Nama / NISN / NIPD..."
-                            class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 outline-none w-full sm:w-64">
-                        <select id="filter-rombel"
-                            class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-blue-600 outline-none">
-                            <option value="">Semua Rombel</option>
-                        </select>
-                        <button id="btn-refresh" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition">
-                            Refresh
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tabel -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                            <tr>
-                                <th class="px-5 py-3">NIPD / NISN</th>
-                                <th class="px-5 py-3">Nama Lengkap</th>
-                                <th class="px-5 py-3">L/P</th>
-                                <th class="px-5 py-3">Rombel</th>
-                                <th class="px-5 py-3">Status</th>
-                                <th class="px-5 py-3 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabel-siswa" class="divide-y divide-slate-100">
-                            <tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Memuat data siswa...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="px-5 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs">
-                    <span id="page-info" class="text-slate-600 font-medium">Halaman 1</span>
-                    <div class="flex gap-2">
-                        <button id="btn-prev" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold disabled:opacity-40">Sebelumnya</button>
-                        <button id="btn-next" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold disabled:opacity-40">Berikutnya</button>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                <tr>
+                                    <th class="px-5 py-3">Nama Lengkap</th>
+                                    <th class="px-5 py-3">Role Saat Ini</th>
+                                    <th class="px-5 py-3 text-right">Ubah Role</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabel-users" class="divide-y divide-slate-100">
+                                <tr><td colspan="3" class="px-5 py-10 text-center text-slate-400">Memuat daftar user...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -138,18 +187,136 @@
     </div>
 
     <!-- MODAL DETAIL SISWA -->
-    <div id="detail-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div id="detail-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-2xl max-h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div>
                     <h3 id="modal-nama" class="font-extrabold text-slate-900 text-lg">Detail Siswa</h3>
                     <p id="modal-sub" class="text-xs text-slate-500"></p>
                 </div>
-                <button id="btn-close-modal" class="text-slate-400 hover:text-slate-700 font-bold text-xl px-2">&times;</button>
+                <button onclick="closeModal('detail-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
             </div>
-            <div id="modal-body" class="p-6 overflow-y-auto space-y-5 text-sm">
-                <!-- Diisi otomatis via JS -->
+            <div id="modal-body" class="p-6 overflow-y-auto space-y-5 text-sm"></div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT SISWA -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl max-h-[88vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-lg">Edit Data Siswa</h3>
+                    <p id="edit-note" class="text-xs text-slate-500"></p>
+                </div>
+                <button onclick="closeModal('edit-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
             </div>
+            <form id="edit-form" class="p-6 overflow-y-auto space-y-4 text-sm">
+                <input type="hidden" id="edit-id">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap</label>
+                        <input type="text" id="f-nama" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Rombel</label>
+                        <input type="text" id="f-rombel" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">NIPD</label>
+                        <input type="text" id="f-nipd" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">NISN</label>
+                        <input type="text" id="f-nisn" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">NIK Siswa</label>
+                        <input type="text" id="f-nik" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">No. Telepon Siswa</label>
+                        <input type="text" id="f-telp" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Alamat</label>
+                        <input type="text" id="f-alamat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">RT</label>
+                        <input type="text" id="f-rt" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">RW</label>
+                        <input type="text" id="f-rw" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Gol. Darah</label>
+                        <input type="text" id="f-goldar" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Tinggi (cm)</label>
+                        <input type="text" id="f-tinggi" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Berat (kg)</label>
+                        <input type="text" id="f-berat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Pekerjaan Ayah</label>
+                        <input type="text" id="f-pek-ayah" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">No. HP Ayah</label>
+                        <input type="text" id="f-hp-ayah" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Pekerjaan Ibu</label>
+                        <input type="text" id="f-pek-ibu" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">No. HP Ibu</label>
+                        <input type="text" id="f-hp-ibu" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('edit-modal')" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 font-bold text-xs">Batal</button>
+                    <button type="submit" id="btn-save-edit" class="px-5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL GANTI PASSWORD -->
+    <div id="pass-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 class="font-extrabold text-slate-900">Ganti Password</h3>
+                <button onclick="closeModal('pass-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
+            </div>
+            <form id="pass-form" class="p-6 space-y-4 text-sm">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Password Baru (min. 6 karakter)</label>
+                    <input type="password" id="new-pass" required minlength="6" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Ulangi Password Baru</label>
+                    <input type="password" id="confirm-pass" required minlength="6" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+                <p id="pass-msg" class="hidden text-xs font-semibold p-2.5 rounded-lg"></p>
+                <button type="submit" id="btn-save-pass" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 rounded-xl transition">
+                    Simpan Password Baru
+                </button>
+            </form>
         </div>
     </div>
 
@@ -162,41 +329,46 @@
 
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        let currentRole = '';
         let allSiswa = [];
         let filteredSiswa = [];
+        let allUsers = [];
         let currentPage = 1;
         const pageSize = 25;
 
         const loginView = document.getElementById('login-view');
         const dashboardView = document.getElementById('dashboard-view');
-        const loginForm = document.getElementById('login-form');
-        const loginError = document.getElementById('login-error');
-        const btnLogin = document.getElementById('btn-login');
+
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         // 1. Cek Session
         async function checkSession() {
             const { data: { session } } = await db.auth.getSession();
-            if (session) {
-                showDashboard(session.user);
-            } else {
+            if (session) showDashboard(session.user);
+            else {
                 loginView.classList.remove('hidden');
                 dashboardView.classList.add('hidden');
             }
         }
 
-        // 2. Login
-        loginForm.addEventListener('submit', async (e) => {
+        // 2. Login Pintar (Email atau NISN)
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const loginError = document.getElementById('login-error');
+            const btnLogin = document.getElementById('btn-login');
             loginError.classList.add('hidden');
             btnLogin.textContent = 'Memproses...';
             btnLogin.disabled = true;
 
-            const email = document.getElementById('email').value.trim();
+            let inputId = document.getElementById('email').value.trim();
+            if (!inputId.includes('@')) {
+                inputId = inputId + '@siswa.sdnpluit03.sch.id';
+            }
             const password = document.getElementById('password').value;
 
-            const { data, error } = await db.auth.signInWithPassword({ email, password });
+            const { data, error } = await db.auth.signInWithPassword({ email: inputId, password });
             if (error) {
-                loginError.textContent = 'Login gagal: Email atau password salah.';
+                loginError.textContent = 'Login gagal: Email/NISN atau password salah.';
                 loginError.classList.remove('hidden');
                 btnLogin.textContent = 'Masuk ke Portal';
                 btnLogin.disabled = false;
@@ -217,8 +389,12 @@
                 .single();
 
             if (profile) {
+                currentRole = profile.role;
                 document.getElementById('user-name').textContent = profile.nama_lengkap;
                 document.getElementById('user-role-badge').textContent = 'Role: ' + profile.role;
+                if (currentRole === 'admin') {
+                    document.getElementById('admin-tabs').classList.remove('hidden');
+                }
             } else {
                 document.getElementById('user-name').textContent = user.email;
                 document.getElementById('user-role-badge').textContent = 'Role belum diatur';
@@ -227,7 +403,25 @@
             loadSiswa();
         }
 
-        // 4. Tarik Semua Data Siswa (Batch per 1000 biar >1000 siswa aman semua)
+        // Switch Tab Admin
+        window.switchTab = function(tab) {
+            const btnSiswa = document.getElementById('tab-btn-siswa');
+            const btnUsers = document.getElementById('tab-btn-users');
+            if (tab === 'siswa') {
+                document.getElementById('section-siswa').classList.remove('hidden');
+                document.getElementById('section-users').classList.add('hidden');
+                btnSiswa.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-blue-700 text-white transition';
+                btnUsers.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition';
+            } else {
+                document.getElementById('section-siswa').classList.add('hidden');
+                document.getElementById('section-users').classList.remove('hidden');
+                btnUsers.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-blue-700 text-white transition';
+                btnSiswa.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition';
+                loadUsers();
+            }
+        };
+
+        // 4. Tarik Data Siswa
         async function loadSiswa() {
             const tbody = document.getElementById('tabel-siswa');
             tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Menarik data dari Supabase...</td></tr>';
@@ -248,7 +442,6 @@
                     tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-10 text-center text-red-500">Error: ${error.message}</td></tr>`;
                     return;
                 }
-
                 hasil = hasil.concat(data);
                 if (data.length < step) break;
                 from += step;
@@ -257,7 +450,6 @@
             allSiswa = hasil;
             document.getElementById('stat-siswa').textContent = allSiswa.length.toLocaleString('id-ID');
 
-            // Isi Dropdown Filter Rombel
             const rombelSet = [...new Set(allSiswa.map(s => s.rombel_saat_ini).filter(Boolean))].sort();
             document.getElementById('stat-rombel').textContent = rombelSet.length;
 
@@ -270,7 +462,6 @@
             applyFilter();
         }
 
-        // 5. Filter & Pencarian
         function applyFilter() {
             const keyword = document.getElementById('search-input').value.toLowerCase().trim();
             const rombel = document.getElementById('filter-rombel').value;
@@ -288,7 +479,6 @@
             renderTable();
         }
 
-        // 6. Render Tabel + Pagination
         function renderTable() {
             const tbody = document.getElementById('tabel-siswa');
             const totalPages = Math.max(1, Math.ceil(filteredSiswa.length / pageSize));
@@ -320,66 +510,199 @@
                     <td class="px-5 py-3">
                         <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">${s.status_siswa || 'Aktif'}</span>
                     </td>
-                    <td class="px-5 py-3 text-right">
-                        <button onclick="openDetail(${s.id})" class="text-xs font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
-                            Detail
-                        </button>
+                    <td class="px-5 py-3 text-right space-x-1">
+                        <button onclick="openDetail(${s.id})" class="text-xs font-bold text-blue-700 hover:bg-blue-100 bg-blue-50 px-2.5 py-1.5 rounded-lg transition">Detail</button>
+                        <button onclick="openEdit(${s.id})" class="text-xs font-bold text-amber-700 hover:bg-amber-100 bg-amber-50 px-2.5 py-1.5 rounded-lg transition">Edit</button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        // 7. Buka Modal Detail Siswa
+        // 5. Detail Siswa
         window.openDetail = function(id) {
             const s = allSiswa.find(x => x.id === id);
             if (!s) return;
-
             document.getElementById('modal-nama').textContent = s.nama_lengkap_siswa || '-';
             document.getElementById('modal-sub').textContent = `${s.rombel_saat_ini || '-'} • NIPD: ${s.nomor_induk_peserta_didik || '-'} • NISN: ${s.nomor_induk_siswa_nasional || '-'}`;
-
-            const row = (label, val) => `
-                <div class="grid grid-cols-3 gap-2 py-1.5 border-b border-slate-100">
-                    <span class="text-slate-500 text-xs font-semibold">${label}</span>
-                    <span class="col-span-2 text-slate-900 font-medium">${val || '-'}</span>
-                </div>`;
-
+            const row = (l, v) => `<div class="grid grid-cols-3 gap-2 py-1.5 border-b border-slate-100"><span class="text-slate-500 text-xs font-semibold">${l}</span><span class="col-span-2 text-slate-900 font-medium">${v || '-'}</span></div>`;
             document.getElementById('modal-body').innerHTML = `
                 <div>
                     <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Biodata Siswa</h4>
                     ${row('NIK', s.nomor_induk_kependudukan_siswa)}
                     ${row('Jenis Kelamin', s.jenis_kelamin_siswa)}
                     ${row('TTL', (s.tempat_lahir_siswa || '-') + ', ' + (s.tanggal_lahir_siswa || '-'))}
-                    ${row('Agama', s.agama_siswa)}
                     ${row('Alamat', `${s.alamat_siswa || '-'} RT ${s.rt_siswa || '-'} / RW ${s.rw_siswa || '-'}`)}
                     ${row('No. Telepon', s.nomor_telepon_siswa)}
-                    ${row('Beasiswa', s.beasiswa)}
+                    ${row('Kesehatan', `Gol. Darah: ${s.golongan_darah_siswa || '-'} | TB: ${s.tinggi_badan_siswa || '-'} cm | BB: ${s.berat_badan_siswa || '-'} kg`)}
                 </div>
                 <div>
-                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Data Ayah</h4>
-                    ${row('Nama Ayah', s.nama_ayah)}
-                    ${row('Pekerjaan', s.pekerjaan_ayah)}
-                    ${row('Penghasilan', s.penghasilan_per_bulan_ayah)}
-                    ${row('No. Telepon', s.nomor_telepon_ayah)}
-                </div>
-                <div>
-                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Data Ibu</h4>
-                    ${row('Nama Ibu', s.nama_ibu)}
-                    ${row('Pekerjaan', s.pekerjaan_ibu)}
-                    ${row('Penghasilan', s.penghasilan_per_bulan_ibu)}
-                    ${row('No. Telepon', s.nomor_telepon_ibu)}
-                </div>
-            `;
-
+                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Orang Tua</h4>
+                    ${row('Ayah', `${s.nama_ayah || '-'} (${s.pekerjaan_ayah || '-'}) • HP: ${s.nomor_telepon_ayah || '-'}`)}
+                    ${row('Ibu', `${s.nama_ibu || '-'} (${s.pekerjaan_ibu || '-'}) • HP: ${s.nomor_telepon_ibu || '-'}`)}
+                </div>`;
             document.getElementById('detail-modal').classList.remove('hidden');
         };
+
+        // 6. Edit Siswa
+        window.openEdit = function(id) {
+            const s = allSiswa.find(x => x.id === id);
+            if (!s) return;
+            document.getElementById('edit-id').value = s.id;
+            document.getElementById('f-nama').value = s.nama_lengkap_siswa || '';
+            document.getElementById('f-rombel').value = s.rombel_saat_ini || '';
+            document.getElementById('f-nipd').value = s.nomor_induk_peserta_didik || '';
+            document.getElementById('f-nisn').value = s.nomor_induk_siswa_nasional || '';
+            document.getElementById('f-nik').value = s.nomor_induk_kependudukan_siswa || '';
+            document.getElementById('f-telp').value = s.nomor_telepon_siswa || '';
+            document.getElementById('f-alamat').value = s.alamat_siswa || '';
+            document.getElementById('f-rt').value = s.rt_siswa || '';
+            document.getElementById('f-rw').value = s.rw_siswa || '';
+            document.getElementById('f-goldar').value = s.golongan_darah_siswa || '';
+            document.getElementById('f-tinggi').value = s.tinggi_badan_siswa || '';
+            document.getElementById('f-berat').value = s.berat_badan_siswa || '';
+            document.getElementById('f-pek-ayah').value = s.pekerjaan_ayah || '';
+            document.getElementById('f-hp-ayah').value = s.nomor_telepon_ayah || '';
+            document.getElementById('f-pek-ibu').value = s.pekerjaan_ibu || '';
+            document.getElementById('f-hp-ibu').value = s.nomor_telepon_ibu || '';
+
+            // Kunci kolom sakral jika yang login adalah siswa/ortu
+            const isSiswa = currentRole === 'siswa';
+            document.querySelectorAll('.sacred-field').forEach(el => el.disabled = isSiswa);
+            document.getElementById('edit-note').textContent = isSiswa
+                ? 'Kolom berwarna abu-abu dikunci oleh sekolah. Hubungi Wali Kelas/TU jika ada kesalahan.'
+                : 'Anda dapat memperbarui data siswa ini.';
+
+            document.getElementById('edit-modal').classList.remove('hidden');
+        };
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-edit');
+            btn.textContent = 'Menyimpan...';
+            btn.disabled = true;
+
+            const id = document.getElementById('edit-id').value;
+            const payload = {
+                nomor_telepon_siswa: document.getElementById('f-telp').value.trim(),
+                alamat_siswa: document.getElementById('f-alamat').value.trim(),
+                rt_siswa: document.getElementById('f-rt').value.trim(),
+                rw_siswa: document.getElementById('f-rw').value.trim(),
+                golongan_darah_siswa: document.getElementById('f-goldar').value.trim(),
+                tinggi_badan_siswa: document.getElementById('f-tinggi').value.trim(),
+                berat_badan_siswa: document.getElementById('f-berat').value.trim(),
+                pekerjaan_ayah: document.getElementById('f-pek-ayah').value.trim(),
+                nomor_telepon_ayah: document.getElementById('f-hp-ayah').value.trim(),
+                pekerjaan_ibu: document.getElementById('f-pek-ibu').value.trim(),
+                nomor_telepon_ibu: document.getElementById('f-hp-ibu').value.trim()
+            };
+
+            if (currentRole !== 'siswa') {
+                payload.nama_lengkap_siswa = document.getElementById('f-nama').value.trim();
+                payload.rombel_saat_ini = document.getElementById('f-rombel').value.trim();
+                payload.nomor_induk_peserta_didik = document.getElementById('f-nipd').value.trim();
+                payload.nomor_induk_siswa_nasional = document.getElementById('f-nisn').value.trim();
+                payload.nomor_induk_kependudukan_siswa = document.getElementById('f-nik').value.trim();
+            }
+
+            const { error } = await db.from('master_siswa').update(payload).eq('id', id);
+            btn.textContent = 'Simpan Perubahan';
+            btn.disabled = false;
+
+            if (error) {
+                alert('Gagal menyimpan: ' + error.message);
+            } else {
+                closeModal('edit-modal');
+                loadSiswa();
+            }
+        });
+
+        // 7. Manajemen User (Khusus Admin)
+        window.loadUsers = async function() {
+            const tbody = document.getElementById('tabel-users');
+            tbody.innerHTML = '<tr><td colspan="3" class="px-5 py-8 text-center text-slate-400">Memuat daftar user...</td></tr>';
+            const { data, error } = await db.from('profiles').select('*').order('nama_lengkap', { ascending: true });
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-5 py-8 text-center text-red-500">Error: ${error.message}</td></tr>`;
+                return;
+            }
+            allUsers = data || [];
+            renderUsers();
+        };
+
+        function renderUsers() {
+            const kw = document.getElementById('search-user').value.toLowerCase().trim();
+            const list = allUsers.filter(u => (u.nama_lengkap || '').toLowerCase().includes(kw) || (u.role || '').toLowerCase().includes(kw));
+            const tbody = document.getElementById('tabel-users');
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="px-5 py-8 text-center text-slate-400">User tidak ditemukan.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(u => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-5 py-3 font-bold text-slate-900">${u.nama_lengkap || '-'}</td>
+                    <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold uppercase bg-blue-50 text-blue-700">${u.role}</span></td>
+                    <td class="px-5 py-3 text-right">
+                        <select onchange="updateUserRole('${u.id}', this.value)" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold bg-white">
+                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>ADMIN</option>
+                            <option value="guru" ${u.role === 'guru' ? 'selected' : ''}>GURU</option>
+                            <option value="tendik" ${u.role === 'tendik' ? 'selected' : ''}>TENDIK</option>
+                            <option value="siswa" ${u.role === 'siswa' ? 'selected' : ''}>SISWA</option>
+                        </select>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.updateUserRole = async function(userId, newRole) {
+            const { error } = await db.from('profiles').update({ role: newRole }).eq('id', userId);
+            if (error) alert('Gagal ubah role: ' + error.message);
+            else loadUsers();
+        };
+
+        // 8. Ganti Password Mandiri
+        document.getElementById('btn-open-pass').addEventListener('click', () => {
+            document.getElementById('pass-form').reset();
+            document.getElementById('pass-msg').classList.add('hidden');
+            document.getElementById('pass-modal').classList.remove('hidden');
+        });
+
+        document.getElementById('pass-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const p1 = document.getElementById('new-pass').value;
+            const p2 = document.getElementById('confirm-pass').value;
+            const msg = document.getElementById('pass-msg');
+
+            if (p1 !== p2) {
+                msg.textContent = 'Konfirmasi password tidak cocok!';
+                msg.className = 'text-xs font-semibold p-2.5 rounded-lg bg-red-50 text-red-600';
+                return;
+            }
+
+            const btn = document.getElementById('btn-save-pass');
+            btn.textContent = 'Menyimpan...';
+            btn.disabled = true;
+
+            const { error } = await db.auth.updateUser({ password: p1 });
+            btn.textContent = 'Simpan Password Baru';
+            btn.disabled = false;
+
+            if (error) {
+                msg.textContent = 'Gagal: ' + error.message;
+                msg.className = 'text-xs font-semibold p-2.5 rounded-lg bg-red-50 text-red-600';
+            } else {
+                msg.textContent = 'Password berhasil diubah!';
+                msg.className = 'text-xs font-semibold p-2.5 rounded-lg bg-emerald-50 text-emerald-700';
+                setTimeout(() => closeModal('pass-modal'), 1200);
+            }
+        });
 
         // Event Listeners
         document.getElementById('search-input').addEventListener('input', applyFilter);
         document.getElementById('filter-rombel').addEventListener('change', applyFilter);
+        document.getElementById('search-user').addEventListener('input', renderUsers);
         document.getElementById('btn-refresh').addEventListener('click', loadSiswa);
         document.getElementById('btn-prev').addEventListener('click', () => { currentPage--; renderTable(); });
         document.getElementById('btn-next').addEventListener('click', () => { currentPage++; renderTable(); });
-        document.getElementById('btn-close-modal').addEventListener('click', () => document.getElementById('detail-modal').classList.add('hidden'));
         document.getElementById('btn-logout').addEventListener('click', async () => {
             await db.auth.signOut();
             location.reload();

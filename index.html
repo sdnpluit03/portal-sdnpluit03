@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Internal - SDN Pluit 03</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+
+    <!-- HALAMAN LOGIN -->
+    <div id="login-view" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-slate-200 p-8">
+            <div class="text-center mb-8">
+                <div class="w-14 h-14 bg-blue-700 text-white font-extrabold text-xl rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md">
+                    P03
+                </div>
+                <h1 class="text-2xl font-extrabold text-slate-900">Portal Internal</h1>
+                <p class="text-sm text-slate-500 mt-1">SDN Pluit 03 • Jakarta Utara</p>
+            </div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">Email</label>
+                    <input type="email" id="email" required placeholder="tu@sdnpluit03.sch.id"
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">Password</label>
+                    <input type="password" id="password" required placeholder="••••••••"
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none text-sm">
+                </div>
+                <p id="login-error" class="hidden text-xs text-red-600 font-semibold bg-red-50 p-3 rounded-lg"></p>
+                <button type="submit" id="btn-login"
+                    class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-xl shadow-md transition">
+                    Masuk ke Portal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- HALAMAN DASHBOARD (Tampil setelah Login) -->
+    <div id="dashboard-view" class="hidden min-h-screen flex flex-col">
+        <!-- Navbar Dashboard -->
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-30">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-blue-700 text-white font-extrabold text-xs rounded-xl flex items-center justify-center">P03</div>
+                    <div>
+                        <span class="font-extrabold text-slate-900 block leading-none">PORTAL SDN PLUIT 03</span>
+                        <span id="user-role-badge" class="text-[11px] font-bold uppercase text-blue-700">Memuat...</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="user-name" class="hidden sm:block text-sm font-semibold text-slate-700"></span>
+                    <button id="btn-logout" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-3.5 py-2 rounded-lg transition">
+                        Keluar
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Konten Utama -->
+        <main class="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+            <!-- Ringkasan -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Total Siswa Terdata</span>
+                    <div id="stat-siswa" class="text-3xl font-extrabold text-blue-800 mt-1">0</div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Status Koneksi</span>
+                    <div class="text-sm font-bold text-emerald-600 mt-2 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Terhubung ke Supabase (RLS Aktif)
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Menu Cepat</span>
+                    <div class="mt-2 flex gap-2">
+                        <button id="btn-refresh" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition">
+                            Refresh Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Data Siswa -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                    <h2 class="font-extrabold text-slate-900">Data Buku Induk Siswa</h2>
+                    <span class="text-xs text-slate-500">Menampilkan data sesuai hak akses</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                            <tr>
+                                <th class="px-5 py-3">NIS / NISN</th>
+                                <th class="px-5 py-3">Nama Lengkap</th>
+                                <th class="px-5 py-3">L/P</th>
+                                <th class="px-5 py-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-siswa" class="divide-y divide-slate-100">
+                            <tr><td colspan="4" class="px-5 py-8 text-center text-slate-400">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==========================================
+        // TEMPEL KUNCI SUPABASE LO DI SINI
+        // ==========================================
+        const SUPABASE_URL = "GANTI_DENGAN_PROJECT_URL_SUPABASE";
+        const SUPABASE_ANON_KEY = "GANTI_DENGAN_ANON_PUBLIC_KEY_SUPABASE";
+
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const btnLogin = document.getElementById('btn-login');
+
+        // 1. Cek apakah user sudah login saat halaman dibuka
+        async function checkSession() {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) {
+                showDashboard(session.user);
+            } else {
+                loginView.classList.remove('hidden');
+                dashboardView.classList.add('hidden');
+            }
+        }
+
+        // 2. Proses Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.classList.add('hidden');
+            btnLogin.textContent = 'Memproses...';
+            btnLogin.disabled = true;
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                loginError.textContent = 'Login gagal: Email atau password salah.';
+                loginError.classList.remove('hidden');
+                btnLogin.textContent = 'Masuk ke Portal';
+                btnLogin.disabled = false;
+            } else {
+                showDashboard(data.user);
+            }
+        });
+
+        // 3. Tampilkan Dashboard & Ambil Profil + Data Siswa
+        async function showDashboard(user) {
+            loginView.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+
+            // Ambil data profil (nama & role)
+            const { data: profile } = await db
+                .from('profiles')
+                .select('nama_lengkap, role')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                document.getElementById('user-name').textContent = profile.nama_lengkap;
+                document.getElementById('user-role-badge').textContent = 'Role: ' + profile.role;
+            } else {
+                document.getElementById('user-name').textContent = user.email;
+                document.getElementById('user-role-badge').textContent = 'Role belum diatur';
+            }
+
+            loadSiswa();
+        }
+
+        // 4. Ambil Data Siswa (Otomatis difilter oleh RLS Supabase!)
+        async function loadSiswa() {
+            const tbody = document.getElementById('tabel-siswa');
+            tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-8 text-center text-slate-400">Memuat data...</td></tr>';
+
+            const { data, error } = await db
+                .from('master_siswa')
+                .select('nis, nisn, nama_lengkap, jenis_kelamin, status')
+                .order('nama_lengkap', { ascending: true });
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-5 py-8 text-center text-red-500">Error: ${error.message}</td></tr>`;
+                return;
+            }
+
+            document.getElementById('stat-siswa').textContent = data.length;
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-8 text-center text-slate-400">Belum ada data siswa di database.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(s => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-5 py-3 font-medium text-slate-700">${s.nis || '-'} / ${s.nisn || '-'}</td>
+                    <td class="px-5 py-3 font-bold text-slate-900">${s.nama_lengkap}</td>
+                    <td class="px-5 py-3">${s.jenis_kelamin || '-'}</td>
+                    <td class="px-5 py-3">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">${s.status}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 5. Tombol Refresh & Logout
+        document.getElementById('btn-refresh').addEventListener('click', loadSiswa);
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            await db.auth.signOut();
+            location.reload();
+        });
+
+        checkSession();
+    </script>
+</body>
+</html>

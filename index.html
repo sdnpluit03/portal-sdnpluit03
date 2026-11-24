@@ -641,13 +641,17 @@
                 <tr class="hover:bg-slate-50">
                     <td class="px-5 py-3 font-bold text-slate-900">${u.nama_lengkap || '-'}</td>
                     <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold uppercase bg-blue-50 text-blue-700">${u.role}</span></td>
-                    <td class="px-5 py-3 text-right">
+                    <td class="px-5 py-3 text-right whitespace-nowrap">
                         <select onchange="updateUserRole('${u.id}', this.value)" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold bg-white">
                             <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>ADMIN</option>
                             <option value="guru" ${u.role === 'guru' ? 'selected' : ''}>GURU</option>
                             <option value="tendik" ${u.role === 'tendik' ? 'selected' : ''}>TENDIK</option>
                             <option value="siswa" ${u.role === 'siswa' ? 'selected' : ''}>SISWA</option>
                         </select>
+                        <button onclick="resetUserPassword('${u.id}', '${(u.nama_lengkap || '').replace(/'/g, "\\'")}')"
+                            class="ml-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition">
+                            Reset PW
+                        </button>
                     </td>
                 </tr>
             `).join('');
@@ -657,6 +661,23 @@
             const { error } = await db.from('profiles').update({ role: newRole }).eq('id', userId);
             if (error) alert('Gagal ubah role: ' + error.message);
             else loadUsers();
+        };
+
+        window.resetUserPassword = async function(userId, nama) {
+            const newPass = prompt(`Masukkan password baru untuk ${nama} (minimal 6 karakter):`, 'Pluit03#2026');
+            if (!newPass) return;
+            if (newPass.trim().length < 6) {
+                alert('Gagal: Password minimal 6 karakter!');
+                return;
+            }
+
+            const { error } = await db.rpc('admin_reset_password', {
+                target_user_id: userId,
+                new_password: newPass.trim()
+            });
+
+            if (error) alert('Gagal reset password: ' + error.message);
+            else alert(`Berhasil! Password untuk ${nama} sudah diganti menjadi: ${newPass.trim()}`);
         };
 
         // 8. Ganti Password Mandiri

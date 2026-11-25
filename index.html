@@ -9,9 +9,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(180deg,#e8f0fb 0,#f6f8fc 340px) fixed; }
-        #login-view { background-image: radial-gradient(circle at 12% 18%, rgba(251,191,36,.2), transparent 38%), linear-gradient(135deg,#1e3a8a,#1e40af 55%,#312e81); }
-        nav { box-shadow: 0 10px 28px -20px rgba(15,23,42,.35); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .wave-front { animation: wave 16s linear infinite; }
+        .wave-back { animation: wave 26s linear infinite reverse; }
+        @keyframes wave { to { transform: translateX(-50%); } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
         #stats-row > div { border-left: 4px solid #1d4ed8; }
         #stats-row > div:nth-child(2) { border-left-color: #047857; }
         #stats-row > div:nth-child(3) { border-left-color: #f59e0b; }
@@ -136,8 +138,9 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 
     <!-- HALAMAN LOGIN -->
-    <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 p-8">
+    <div id="login-view" class="relative overflow-hidden min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+        <svg class="wave-back absolute bottom-0 left-0 w-[200%] h-20 md:h-28 text-slate-50/50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,80 360,0 720,40 C1080,80 1080,0 1440,40 C1800,80 1800,0 2160,40 C2520,80 2520,0 2880,40 V80 H0Z"/></svg><svg class="wave-front absolute bottom-0 left-0 w-[200%] h-14 md:h-20 text-slate-50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,0 360,80 720,40 C1080,0 1080,80 1440,40 C1800,0 1800,80 2160,40 C2520,0 2520,80 2880,40 V80 H0Z"/></svg>
+        <div class="relative z-10 bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 p-8">
             <div class="text-center mb-8">
                 <img src="logo.png" alt="Logo SDN Pluit 03" class="h-14 w-14 object-contain rounded-2xl mx-auto mb-3 shadow-sm"
                      onerror="this.outerHTML='<div class=\'w-14 h-14 bg-blue-700 text-white font-extrabold text-xl rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md\'>P03</div>'">
@@ -165,6 +168,7 @@
                     Masuk ke Portal &rarr;
                 </button>
             </form>
+            <a href="../" class="block text-center text-xs font-semibold text-slate-500 hover:text-blue-700 mt-5">&larr; Kembali ke beranda sekolah</a>
         </div>
     </div>
 
@@ -187,6 +191,7 @@
                         class="hidden bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-2 rounded-lg transition">
                         Profil Pegawai
                     </button>
+                    <a href="../" class="hidden sm:inline text-xs font-bold text-slate-600 hover:text-blue-700 px-2">Beranda</a>
                     <button id="btn-open-pass" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-lg transition">
                         Ganti Password
                     </button>
@@ -1524,7 +1529,7 @@
             document.getElementById('siswa-profile-card').classList.toggle('hidden', !isSiswa);
             const heroName = (document.getElementById('user-name').textContent || '').trim().split(/\s+/)[0];
             const heroMsg = { admin: 'Kelola seluruh data sekolah dari satu tempat.', guru: 'Isi nilai dan pantau data siswa di kelas Anda.', tendik: 'Kelola administrasi dan mutasi siswa.', siswa: 'Lihat dan lengkapi data diri Anda di sini.' }[currentRole] || '';
-            document.getElementById('welcome-hero').innerHTML = `<div class="rounded-2xl p-6 sm:p-7 text-white bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 shadow-md"><p class="text-blue-200 text-xs font-semibold">SDN Pluit 03 &bull; Penjaringan, Jakarta Utara</p><h2 class="text-2xl font-extrabold mt-1">Halo, ${escHtml(heroName)}</h2><p class="text-blue-100 text-sm mt-1">${heroMsg}</p></div>`;
+            document.getElementById('welcome-hero').innerHTML = `<div class="relative overflow-hidden rounded-2xl text-white bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 shadow-md"><div class="relative z-10 px-6 sm:px-8 pt-7 pb-14"><span class="inline-block bg-blue-700/60 backdrop-blur-sm border border-blue-300/30 text-blue-100 text-xs font-semibold px-3 py-1 rounded-full mb-3">SDN Pluit 03 &bull; Penjaringan, Jakarta Utara</span><h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">Halo, ${escHtml(heroName)}</h2><p class="text-blue-100 text-sm sm:text-base mt-2 max-w-xl">${heroMsg}</p></div><svg class="wave-back absolute bottom-0 left-0 w-[200%] h-8 text-slate-50/50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,80 360,0 720,40 C1080,80 1080,0 1440,40 C1800,80 1800,0 2160,40 C2520,80 2520,0 2880,40 V80 H0Z"/></svg><svg class="wave-front absolute bottom-0 left-0 w-[200%] h-6 text-slate-50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,0 360,80 720,40 C1080,0 1080,80 1440,40 C1800,0 1800,80 2160,40 C2520,0 2520,80 2880,40 V80 H0Z"/></svg></div>`;
             document.getElementById('toolbar-filter-siswa').classList.toggle('hidden', isSiswa);
             document.getElementById('btn-open-pegawai-profile').classList.toggle('hidden', isSiswa);
 

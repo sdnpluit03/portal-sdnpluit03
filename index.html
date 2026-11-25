@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Internal - SDN Pluit 03</title>
+    <title>Portal Internal • SDN Pluit 03 - Jakarta Utara</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,6 +15,7 @@
             color: #ffffff;
             border-color: #1d4ed8;
         }
+        :focus-visible { outline: 3px solid #fbbf24; outline-offset: 2px; }
 
         /* =========================================================
            PRINT STYLES (BUKU INDUK FORMAT S-4 • KERTAS F4 / FOLIO)
@@ -126,14 +128,16 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 
     <!-- HALAMAN LOGIN -->
-    <div id="login-view" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-slate-200 p-8">
+    <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 p-8">
             <div class="text-center mb-8">
-                <div class="w-14 h-14 bg-blue-700 text-white font-extrabold text-xl rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md">
-                    P03
-                </div>
-                <h1 class="text-2xl font-extrabold text-slate-900">Portal Internal</h1>
-                <p class="text-sm text-slate-500 mt-1">SDN Pluit 03 • Jakarta Utara</p>
+                <img src="logo.png" alt="Logo SDN Pluit 03" class="h-14 w-14 object-contain rounded-2xl mx-auto mb-3 shadow-sm"
+                     onerror="this.outerHTML='<div class=\'w-14 h-14 bg-blue-700 text-white font-extrabold text-xl rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md\'>P03</div>'">
+                <span class="inline-block bg-blue-50 text-blue-700 text-[11px] font-bold px-3 py-0.5 rounded-full mb-2">
+                    Portal Internal Sekolah
+                </span>
+                <h1 class="text-2xl font-extrabold text-slate-900">SDN PLUIT 03</h1>
+                <p class="text-xs text-slate-500 font-medium mt-1">Penjaringan, Jakarta Utara • NPSN 20104896</p>
             </div>
 
             <form id="login-form" class="space-y-4">
@@ -149,8 +153,8 @@
                 </div>
                 <p id="login-error" class="hidden text-xs text-red-600 font-semibold bg-red-50 p-3 rounded-lg"></p>
                 <button type="submit" id="btn-login"
-                    class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-xl shadow-md transition">
-                    Masuk ke Portal
+                    class="w-full bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold py-3 rounded-xl shadow-md transition">
+                    Masuk ke Portal &rarr;
                 </button>
             </form>
         </div>
@@ -158,13 +162,14 @@
 
     <!-- HALAMAN DASHBOARD -->
     <div id="dashboard-view" class="hidden min-h-screen flex flex-col">
-        <!-- Navbar -->
-        <nav class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <!-- Navbar (Selaras dengan Web Utama SDN Pluit 03) -->
+        <nav class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-blue-700 text-white font-extrabold text-xs rounded-xl flex items-center justify-center">P03</div>
+                    <img src="logo.png" alt="Logo SDN Pluit 03" class="h-10 w-10 object-contain rounded-lg"
+                         onerror="this.outerHTML='<div class=\'h-10 w-10 rounded-xl bg-blue-700 text-white flex items-center justify-center font-extrabold text-sm shadow-sm\'>P03</div>'">
                     <div>
-                        <span class="font-extrabold text-slate-900 block leading-none">PORTAL SDN PLUIT 03</span>
+                        <span class="font-extrabold text-base sm:text-lg text-slate-900 block leading-none">SDN PLUIT 03</span>
                         <span id="user-role-badge" class="text-[11px] font-bold uppercase text-blue-700">Memuat...</span>
                     </div>
                 </div>
@@ -229,6 +234,7 @@
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
+                            <span class="text-blue-700 font-bold text-[11px] uppercase tracking-wider">Permendikdasmen No. 13 Tahun 2025</span>
                             <h2 id="judul-daftar-siswa" class="font-extrabold text-slate-900 text-lg">Buku Induk Siswa (Format S-4)</h2>
                             <p id="filter-info" class="text-xs text-slate-500">Memuat data...</p>
                         </div>
@@ -308,7 +314,6 @@
 
             <!-- SECTION 3: SETTING KELAS, WALI KELAS & MIGRASI / ACAK SISWA (KHUSUS ADMIN) -->
             <div id="section-rombel" class="hidden space-y-6">
-                <!-- Panel Tahun Ajaran & Buat Rombel Baru -->
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-4 border-b border-slate-200">
                         <div>
@@ -334,7 +339,6 @@
                         </div>
                     </div>
 
-                    <!-- Tambah Rombel di Tahun Ajaran Terpilih -->
                     <div class="pt-4 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Tingkat Kelas (1–6)</label>
@@ -367,7 +371,6 @@
                     </div>
                 </div>
 
-                <!-- Tabel Daftar Rombel & Wali Kelas pada TA Terpilih -->
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="p-5 border-b border-slate-200 flex items-center justify-between">
                         <div>
@@ -400,7 +403,7 @@
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
                     <div>
                         <h3 class="font-extrabold text-slate-900 text-base">Penugasan Guru Mapel / Guru Pendamping per Rombel</h3>
-                        <p class="text-xs text-slate-500">Tugaskan guru mapel (Agama, PJOK, B. Inggris, Koding, dll.) ke rombel tertentu agar dapat membantu input nilai &amp; perkembangan siswa di rombel tersebut.</p>
+                        <p class="text-xs text-slate-500">Tugaskan guru mapel (PAI, Pendidikan Pancasila, B. Indonesia, Matematika, IPAS, PJOK, Seni Budaya, B. Inggris, Koding &amp; KA, Mulok) ke rombel tertentu agar dapat membantu input nilai &amp; perkembangan siswa di rombel tersebut.</p>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
                         <div>
@@ -417,7 +420,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">Keterangan / Mapel</label>
-                            <input type="text" id="gr-mapel-input" placeholder="Contoh: PJOK / PAI / B. Inggris"
+                            <input type="text" id="gr-mapel-input" placeholder="Contoh: PJOK / PAI / B. Inggris / Koding"
                                 class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
                         </div>
                         <div>
@@ -486,7 +489,7 @@
                             Sekaligus perbarui kolom <code>rombel_saat_ini</code> pada data utama siswa (disarankan untuk Tahun Ajaran Aktif)
                         </label>
                         <button onclick="eksekusiPenempatanSiswa()" id="btn-eksekusi-migrasi"
-                            class="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-sm transition">
+                            class="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-extrabold px-5 py-2.5 rounded-xl shadow-sm transition">
                             Jalankan Penempatan Siswa
                         </button>
                     </div>
@@ -528,11 +531,147 @@
                     </div>
                 </div>
             </div>
+
+            <!-- HALAMAN PENUH: PROFIL PEGAWAI (GURU, TENDIK, ADMIN & KEPSEK) -->
+            <div id="section-profil-pegawai" class="hidden space-y-6">
+                <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white rounded-2xl p-6 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="inline-block bg-amber-400/20 border border-amber-300/40 text-amber-200 text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-2">
+                            Halaman Profil Pegawai • SDN Pluit 03
+                        </span>
+                        <h2 id="pegawai-page-title" class="text-2xl font-extrabold tracking-tight">Profil Pegawai (PTK)</h2>
+                        <p id="pegawai-page-sub" class="text-blue-100 text-xs sm:text-sm mt-1">Kelola biodata kepegawaian, penugasan, dan foto profil terkompresi.</p>
+                    </div>
+                    <button type="button" onclick="backFromPegawaiPage()"
+                        class="bg-white/15 hover:bg-white/25 border border-white/30 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition self-start sm:self-center">
+                        &larr; Kembali
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <form id="pegawai-form" class="p-6 sm:p-8 space-y-6 text-sm">
+                        <input type="hidden" id="pg-id">
+                        <input type="hidden" id="pg-user-id">
+
+                        <!-- Foto Profil Pegawai (Auto-Compress) -->
+                        <div class="bg-blue-50/70 border border-blue-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-5">
+                            <div class="w-24 h-32 rounded-xl border border-slate-300 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
+                                <img id="pg-preview-foto" src="" alt="Foto Pegawai" class="hidden w-full h-full object-cover">
+                                <span id="pg-placeholder-foto" class="text-[11px] text-slate-400 font-semibold text-center px-2">Belum ada foto</span>
+                            </div>
+                            <div class="space-y-2 flex-1 w-full">
+                                <label class="block text-xs font-extrabold uppercase text-blue-900">Foto Profil Pegawai (Otomatis Dikompres ~40–80 KB)</label>
+                                <input type="file" id="pg-input-foto" accept="image/jpeg,image/png,image/webp"
+                                    class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-700 file:text-white hover:file:bg-blue-800 cursor-pointer">
+                                <p id="pg-foto-status" class="text-xs text-slate-600 font-medium"></p>
+                            </div>
+                        </div>
+
+                        <!-- Field Utama master_pegawai -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap (dengan Gelar) *</label>
+                                <input type="text" id="pg-nama" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Kelamin</label>
+                                <select id="pg-jk" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-600 outline-none">
+                                    <option value="">-</option>
+                                    <option value="L">L (Laki-laki)</option>
+                                    <option value="P">P (Perempuan)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">NIP</label>
+                                <input type="text" id="pg-nip" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">NUPTK</label>
+                                <input type="text" id="pg-nuptk" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">NIK</label>
+                                <input type="text" id="pg-nik" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Tempat Lahir</label>
+                                <input type="text" id="pg-tempat-lahir" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Tanggal Lahir</label>
+                                <input type="text" id="pg-tgl-lahir" placeholder="YYYY-MM-DD" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Agama</label>
+                                <input type="text" id="pg-agama" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Status Kepegawaian</label>
+                                <input type="text" id="pg-status-peg" placeholder="PNS / PPPK / KKI / Honorer" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Jenis PTK / Jabatan</label>
+                                <input type="text" id="pg-jenis-ptk" placeholder="Kepala Sekolah / Guru Kelas / Pengelola TU" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Pangkat / Golongan</label>
+                                <input type="text" id="pg-golongan" placeholder="Penata Muda / III/a" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Pendidikan Terakhir</label>
+                                <input type="text" id="pg-pendidikan" placeholder="S1 / S.Pd / S.Kom" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">No. HP / WhatsApp</label>
+                                <input type="text" id="pg-hp" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Email Aktif</label>
+                                <input type="email" id="pg-email" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div class="sm:col-span-2 lg:col-span-3">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Alamat Domisili</label>
+                                <input type="text" id="pg-alamat" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">TMT Pengangkatan</label>
+                                <input type="text" id="pg-tmt" placeholder="YYYY-MM-DD" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">No. SK Pengangkatan</label>
+                                <input type="text" id="pg-sk" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 outline-none">
+                            </div>
+                            <div id="pg-link-user-wrap" class="hidden">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Tautkan Akun Login (Admin)</label>
+                                <select id="pg-select-user" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs">
+                                    <option value="">-- Belum ditautkan --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Field Tambahan Dinamis dari Tabel master_pegawai -->
+                        <div id="pg-extra-fields-container" class="hidden pt-4 border-t border-slate-100 space-y-3">
+                            <h4 class="text-xs font-extrabold uppercase text-slate-700">Data Kepegawaian Tambahan</h4>
+                            <div id="pg-extra-fields-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+                        </div>
+
+                        <div class="pt-5 border-t border-slate-200 flex justify-end gap-3">
+                            <button type="button" onclick="backFromPegawaiPage()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-xs">Batal</button>
+                            <button type="submit" id="btn-save-pegawai" class="px-6 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs shadow-sm transition">Simpan Profil Pegawai</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
+
+        <!-- Footer Selaras dengan Web Utama SDN Pluit 03 -->
+        <footer class="bg-slate-900 text-slate-400 py-5 mt-12 border-t border-slate-800 text-xs text-center">
+            &copy; <span id="year">2026</span> SDN Pluit 03 Jakarta Utara • Jl. Komp. Nelayan Muara Angke Rt.001/001, Penjaringan.
+        </footer>
     </div>
 
-    <!-- MODAL DETAIL SISWA (BIODATA & RAPOR READ-ONLY UNTUK SEMUA ROLE TERMASUK SISWA/ORTU) -->
-    <div id="detail-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+    <!-- MODAL DETAIL SISWA -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-3xl max-h-[88vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div>
@@ -550,8 +689,8 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT BUKU INDUK (TAB OTOMATIS MENYESUAIKAN ROLE) -->
-    <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+    <!-- MODAL EDIT BUKU INDUK -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-4xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div>
@@ -561,7 +700,6 @@
                 <button onclick="closeModal('edit-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
             </div>
 
-            <!-- Sub-tab Lengkap S-4 (Di-filter sesuai role) -->
             <div id="edit-tabs-bar" class="px-6 pt-3 pb-2.5 border-b border-slate-200 bg-white flex flex-wrap gap-1.5">
                 <button type="button" id="etab-btn-a" onclick="switchEditTab('a')"
                     class="edit-tab-btn px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold transition">
@@ -588,7 +726,6 @@
             <form id="edit-form" class="p-6 overflow-y-auto space-y-5 text-sm">
                 <input type="hidden" id="edit-id">
 
-                <!-- TAB A: KETERANGAN SISWA + PAS FOTO -->
                 <div id="etab-a" class="space-y-5">
                     <div id="blok-pas-foto" class="bg-blue-50/60 border border-blue-200 rounded-xl p-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
@@ -769,7 +906,6 @@
                     </div>
                 </div>
 
-                <!-- TAB B-D: KETERANGAN AYAH, IBU & WALI -->
                 <div id="etab-bcd" class="hidden space-y-6">
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                         <h4 class="text-xs font-extrabold uppercase text-blue-800">B. Keterangan Ayah Kandung Siswa</h4>
@@ -910,7 +1046,6 @@
                     </div>
                 </div>
 
-                <!-- TAB E-F & J-K: RIWAYAT TAHUNAN KELAS 1 - 6 -->
                 <div id="etab-efjk" class="hidden space-y-4">
                     <div class="flex items-center justify-between bg-amber-50 border border-amber-200 px-4 py-3 rounded-xl">
                         <div>
@@ -989,7 +1124,6 @@
                     </div>
                 </div>
 
-                <!-- TAB G: PRESTASI BELAJAR / PENILAIAN SISWA (SM 1 - 12) -->
                 <div id="etab-g" class="hidden space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                         <div class="admin-only-field">
@@ -1040,7 +1174,7 @@
                             <thead class="bg-slate-100 text-slate-700 font-bold">
                                 <tr>
                                     <th class="px-3 py-2 text-left w-10">No</th>
-                                    <th class="px-3 py-2 text-left">Mata Pelajaran</th>
+                                    <th class="px-3 py-2 text-left">Mata Pelajaran (Permendikdasmen 13/2025)</th>
                                     <th class="px-3 py-2 text-center w-24">KKM</th>
                                     <th class="px-3 py-2 text-center w-24">Nilai</th>
                                 </tr>
@@ -1101,7 +1235,6 @@
                     </div>
                 </div>
 
-                <!-- TAB H-I: PINDAH / MUTASI & CATATAN PENTING -->
                 <div id="etab-hi" class="hidden space-y-5">
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                         <h4 class="text-xs font-extrabold uppercase text-blue-800">H.1 Pindah Sekolah / Mutasi Keluar</h4>
@@ -1214,132 +1347,8 @@
         </div>
     </div>
 
-    <!-- MODAL PROFIL PEGAWAI (GURU, TENDIK, ADMIN & KEPSEK) -->
-    <div id="pegawai-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-3xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                <div>
-                    <h3 id="pegawai-modal-title" class="font-extrabold text-slate-900 text-lg">Profil Pegawai (PTK)</h3>
-                    <p id="pegawai-modal-sub" class="text-xs text-slate-500">Lengkapi biodata kepegawaian dan foto profil Anda.</p>
-                </div>
-                <button onclick="closeModal('pegawai-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
-            </div>
-            <form id="pegawai-form" class="p-6 overflow-y-auto space-y-5 text-sm">
-                <input type="hidden" id="pg-id">
-                <input type="hidden" id="pg-user-id">
-
-                <!-- Foto Profil Pegawai (Auto-Compress) -->
-                <div class="bg-blue-50/60 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row items-center gap-4">
-                    <div class="w-20 h-24 rounded-xl border border-slate-300 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
-                        <img id="pg-preview-foto" src="" alt="Foto Pegawai" class="hidden w-full h-full object-cover">
-                        <span id="pg-placeholder-foto" class="text-[10px] text-slate-400 font-semibold text-center px-1.5">Belum ada foto</span>
-                    </div>
-                    <div class="space-y-1.5 flex-1 w-full">
-                        <label class="block text-xs font-extrabold uppercase text-blue-900">Foto Profil Pegawai (Otomatis Dikompres ~40–80 KB)</label>
-                        <input type="file" id="pg-input-foto" accept="image/jpeg,image/png,image/webp"
-                            class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-700 file:text-white hover:file:bg-blue-800 cursor-pointer">
-                        <p id="pg-foto-status" class="text-[11px] text-slate-600 font-medium"></p>
-                    </div>
-                </div>
-
-                <!-- Field Utama master_pegawai -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap (dengan Gelar) *</label>
-                        <input type="text" id="pg-nama" required class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Kelamin</label>
-                        <select id="pg-jk" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                            <option value="">-</option>
-                            <option value="L">L (Laki-laki)</option>
-                            <option value="P">P (Perempuan)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">NIP</label>
-                        <input type="text" id="pg-nip" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">NUPTK</label>
-                        <input type="text" id="pg-nuptk" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">NIK</label>
-                        <input type="text" id="pg-nik" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Tempat Lahir</label>
-                        <input type="text" id="pg-tempat-lahir" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Tanggal Lahir</label>
-                        <input type="text" id="pg-tgl-lahir" placeholder="YYYY-MM-DD" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Agama</label>
-                        <input type="text" id="pg-agama" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Status Kepegawaian</label>
-                        <input type="text" id="pg-status-peg" placeholder="PNS / PPPK / KKI / Honorer" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Jenis PTK / Jabatan</label>
-                        <input type="text" id="pg-jenis-ptk" placeholder="Kepala Sekolah / Guru Kelas / Pengelola TU" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Pangkat / Golongan</label>
-                        <input type="text" id="pg-golongan" placeholder="Penata Muda / III/a" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Pendidikan Terakhir</label>
-                        <input type="text" id="pg-pendidikan" placeholder="S1 / S.Pd / S.Kom" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">No. HP / WhatsApp</label>
-                        <input type="text" id="pg-hp" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Email Aktif</label>
-                        <input type="email" id="pg-email" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div class="sm:col-span-3">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Alamat Domisili</label>
-                        <input type="text" id="pg-alamat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">TMT Pengangkatan</label>
-                        <input type="text" id="pg-tmt" placeholder="YYYY-MM-DD" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">No. SK Pengangkatan</label>
-                        <input type="text" id="pg-sk" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div id="pg-link-user-wrap" class="hidden">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Tautkan Akun Login (Admin)</label>
-                        <select id="pg-select-user" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs">
-                            <option value="">-- Belum ditautkan --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Field Tambahan Dinamis dari Tabel master_pegawai (jika ada kolom ekstra di DB) -->
-                <div id="pg-extra-fields-container" class="hidden pt-3 border-t border-slate-100 space-y-3">
-                    <h4 class="text-xs font-extrabold uppercase text-slate-700">Data Kepegawaian Tambahan</h4>
-                    <div id="pg-extra-fields-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
-                </div>
-
-                <div class="pt-4 border-t border-slate-200 flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('pegawai-modal')" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 font-bold text-xs">Batal</button>
-                    <button type="submit" id="btn-save-pegawai" class="px-5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs">Simpan Profil Pegawai</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- MODAL GANTI PASSWORD -->
-    <div id="pass-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+    <div id="pass-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <h3 class="font-extrabold text-slate-900">Ganti Password</h3>
@@ -1374,8 +1383,10 @@
 
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        const yearEl = document.getElementById('year');
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+
         // Daftar Mata Pelajaran SD sesuai Permendikdasmen No. 13 Tahun 2025
-        // minKelas: jenjang minimal mapel berlaku (IPAS & B.Inggris mulai Kelas 3; Koding & KA mulai Kelas 5)
         const MAPEL_LIST = [
             { name: "Pendidikan Agama dan Budi Pekerti", minKelas: 1, status: "Wajib" },
             { name: "Pendidikan Pancasila", minKelas: 1, status: "Wajib" },
@@ -1397,7 +1408,6 @@
             return getKelasFromSemester(sm) >= mapelObj.minKelas;
         }
 
-        // Konfigurasi tab yang diizinkan per role
         const ROLE_ALLOWED_TABS = {
             admin: ['a', 'bcd', 'efjk', 'g', 'hi'],
             guru: ['g', 'efjk'],
@@ -1407,6 +1417,7 @@
 
         let currentRole = 'siswa';
         let currentAuthUser = null;
+        let allowedGuruRombelNames = null;
         let allSiswa = [];
         let filteredSiswa = [];
         let allUsers = [];
@@ -1483,7 +1494,7 @@
             if (error) {
                 loginError.textContent = 'Login gagal: Email/NISN atau password salah.';
                 loginError.classList.remove('hidden');
-                btnLogin.textContent = 'Masuk ke Portal';
+                btnLogin.textContent = 'Masuk ke Portal →';
                 btnLogin.disabled = false;
             } else {
                 showDashboard(data.user);
@@ -1549,7 +1560,7 @@
 
         window.switchTab = function(tab) {
             if (currentRole !== 'admin') return;
-            const tabs = ['siswa', 'rombel', 'pegawai', 'users'];
+            const tabs = ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai'];
             tabs.forEach(t => {
                 const sec = document.getElementById('section-' + t);
                 const btn = document.getElementById('tab-btn-' + t);
@@ -1565,14 +1576,11 @@
             if (tab === 'rombel') initRombelManagement();
         };
 
-        let allowedGuruRombelNames = null;
-
         async function resolveGuruAssignedRombels() {
             if (currentRole !== 'guru' || !currentAuthUser) {
                 allowedGuruRombelNames = null;
                 return;
             }
-            // Cari ID pegawai di master_pegawai yang terhubung dengan akun guru ini
             const { data: pgList } = await db.from('master_pegawai').select('*');
             const myName = (document.getElementById('user-name').textContent || '').toLowerCase().trim();
             const myEmail = (currentAuthUser.email || '').toLowerCase().trim();
@@ -1585,7 +1593,6 @@
                 candidateIds.push(String(myPg.id));
             }
 
-            // Ambil Tahun Ajaran aktif (jika ada)
             const { data: taList } = await db.from('tahun_ajaran').select('*');
             const activeTA = (taList || []).find(t => t.is_aktif) || (taList || [])[0];
 
@@ -1602,7 +1609,6 @@
                 }
             });
 
-            // Cek juga penugasan tambahan di tabel guru_rombel (untuk Guru Mapel / Guru Pendamping)
             if (myPg && myPg.id !== undefined && myPg.id !== null) {
                 const { data: grRows } = await db
                     .from('guru_rombel')
@@ -1741,7 +1747,7 @@
         }
 
         // ==========================================
-        // MODAL DETAIL LENGKAP (A - K, TERMASUK RAPOR READ-ONLY UNTUK SISWA/ORTU)
+        // MODAL DETAIL LENGKAP (A - K)
         // ==========================================
         window.openDetail = function(id) {
             const s = allSiswa.find(x => x.id === id);
@@ -1804,7 +1810,6 @@
                 `;
             }).join('');
 
-            // Ringkasan Nilai Rapor per Semester (SM 1 - 12) sesuai Permendikdasmen 13/2025
             const raporCards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(sm => {
                 const smObj = sem[String(sm)] || {};
                 const mArr = smObj.mapel || [];
@@ -2020,9 +2025,6 @@
             }
         });
 
-        // ==========================================
-        // HELPER SUB-FORM RIWAYAT KELAS (E,F,J,K) & PRESTASI (G)
-        // ==========================================
         function saveCurrentRiwayatKelasToDraft() {
             if (!draftExtra.riwayat_kelas) draftExtra.riwayat_kelas = {};
             draftExtra.riwayat_kelas[currentRiwayatKelas] = {
@@ -2141,9 +2143,6 @@
             loadSemesterGFromDraft(document.getElementById('g-semester-select').value);
         };
 
-        // ==========================================
-        // TERAPKAN TAMPILAN & FIELD SESUAI ROLE SAAT OPEN EDIT
-        // ==========================================
         function applyRoleEditPermissions() {
             const allowedTabs = ROLE_ALLOWED_TABS[currentRole] || ROLE_ALLOWED_TABS.siswa;
             ['a', 'bcd', 'efjk', 'g', 'hi'].forEach(t => {
@@ -2155,12 +2154,10 @@
             const isTendik = currentRole === 'tendik';
             const isSiswa = currentRole === 'siswa';
 
-            // Field khusus Admin (Nomor Urut, NIPD, NISN, Rombel, Seri Rapor, No Peserta Ujian)
             document.querySelectorAll('.admin-only-field').forEach(el => {
                 el.classList.toggle('hidden', !isAdmin);
             });
 
-            // Field sakral (Nama, JK, NIK, TTL) hanya boleh diubah Admin & Tendik; dikunci pada Guru & Siswa
             document.querySelectorAll('.sacred-field').forEach(el => {
                 el.disabled = !(isAdmin || isTendik);
             });
@@ -2182,9 +2179,6 @@
             switchEditTab(allowedTabs[0]);
         }
 
-        // ==========================================
-        // OPEN EDIT & SUBMIT SESUAI ROLE (A - K)
-        // ==========================================
         window.openEdit = function(id) {
             const s = allSiswa.find(x => x.id === id);
             if (!s) return;
@@ -2203,7 +2197,6 @@
             document.getElementById('foto-kelas-slot').value = defaultKls;
             renderFotoSlotPreview();
 
-            // Tab A
             document.getElementById('edit-id').value = s.id;
             document.getElementById('f-nomor-urut').value = a.nomor_urut || '';
             document.getElementById('f-nama').value = s.nama_lengkap_siswa || '';
@@ -2240,7 +2233,6 @@
             document.getElementById('f-kjp-pip').value = a.no_kjp_pip || '';
             document.getElementById('f-telp').value = s.nomor_telepon_siswa || '';
 
-            // Tab B-D
             document.getElementById('b-nama').value = s.nama_ayah || '';
             document.getElementById('b-hp').value = s.nomor_telepon_ayah || '';
             document.getElementById('b-tempat').value = b.tempat_lahir || '';
@@ -2274,18 +2266,15 @@
             document.getElementById('d-pekerjaan').value = d.pekerjaan || '';
             document.getElementById('d-penghasilan').value = d.penghasilan || '';
 
-            // Tab E,F,J,K
             document.getElementById('riwayat-kelas-select').value = defaultKls;
             loadRiwayatKelasFromDraft(defaultKls);
 
-            // Tab G
             document.getElementById('g-seri-rapor').value = g.no_seri_rapor || '';
             document.getElementById('g-no-ujian').value = g.no_peserta_ujian || '';
             const defaultSm = String((parseInt(defaultKls, 10) - 1) * 2 + 1);
             document.getElementById('g-semester-select').value = defaultSm;
             loadSemesterGFromDraft(defaultSm);
 
-            // Tab H-I
             document.getElementById('h1-surat').value = h.mutasi_surat || '';
             document.getElementById('h1-tgl').value = h.mutasi_tgl || '';
             document.getElementById('h1-kelas').value = h.mutasi_kelas || '';
@@ -2444,9 +2433,7 @@
                 draftExtra.catatan_penting = document.getElementById('i-catatan').value.trim();
             }
 
-            const payload = {
-                data_tambahan: draftExtra
-            };
+            const payload = { data_tambahan: draftExtra };
 
             if (isAdmin || isTendik || isSiswa) {
                 payload.nomor_telepon_siswa = document.getElementById('f-telp').value.trim();
@@ -3000,7 +2987,7 @@
                             <option value="tendik" ${u.role === 'tendik' ? 'selected' : ''}>TENDIK</option>
                             <option value="siswa" ${u.role === 'siswa' ? 'selected' : ''}>SISWA</option>
                         </select>
-                        <button onclick="resetUserPassword('${u.id}', '${(u.nama_lengkap || '').replace(/'/g, "'")}')"
+                        <button onclick="resetUserPassword('${u.id}', '${(u.nama_lengkap || '').replace(/'/g, "\'")}')"
                             class="ml-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition">
                             Reset PW
                         </button>
@@ -3071,7 +3058,7 @@
         });
 
         // ==========================================
-        // PROFIL PEGAWAI (GURU, TENDIK, ADMIN & KEPSEK)
+        // HALAMAN PENUH: PROFIL PEGAWAI (GURU, TENDIK, ADMIN & KEPSEK)
         // ==========================================
         const KNOWN_PEGAWAI_KEYS = new Set([
             'id', 'user_id', 'profile_id', 'created_at', 'updated_at',
@@ -3082,6 +3069,26 @@
             'email', 'alamat', 'tmt_pengangkatan', 'tmt', 'no_sk', 'sk_pengangkatan',
             'foto_url', 'foto', 'avatar_url', 'data_tambahan'
         ]);
+
+        function showPegawaiFullPage() {
+            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai'].forEach(t => {
+                const sec = document.getElementById('section-' + t);
+                if (sec) sec.classList.toggle('hidden', t !== 'profil-pegawai');
+                const btn = document.getElementById('tab-btn-' + t);
+                if (btn) btn.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition';
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.backFromPegawaiPage = function() {
+            if (currentRole === 'admin') {
+                switchTab('siswa');
+            } else {
+                document.getElementById('section-profil-pegawai').classList.add('hidden');
+                document.getElementById('section-siswa').classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
 
         function getPegawaiFoto(pg) {
             if (!pg) return '';
@@ -3159,7 +3166,6 @@
 
             setPegawaiPhotoPreview(getPegawaiFoto(pg));
 
-            // Render kolom ekstra dinamis jika tabel master_pegawai punya kolom tambahan di DB
             const extraWrap = document.getElementById('pg-extra-fields-container');
             const extraGrid = document.getElementById('pg-extra-fields-grid');
             const dynamicKeys = pg ? Object.keys(pg).filter(k => !KNOWN_PEGAWAI_KEYS.has(k)) : [];
@@ -3177,7 +3183,6 @@
                 extraGrid.innerHTML = '';
             }
 
-            // Dropdown tautkan user (khusus Admin saat edit data pegawai)
             const linkWrap = document.getElementById('pg-link-user-wrap');
             if (currentRole === 'admin' && !isSelfMode) {
                 linkWrap.classList.remove('hidden');
@@ -3192,10 +3197,9 @@
 
         window.openPegawaiProfileModal = async function() {
             if (!currentAuthUser) return;
-            document.getElementById('pegawai-modal-title').textContent = 'Profil Pegawai Saya';
-            document.getElementById('pegawai-modal-sub').textContent = 'Perbarui biodata kepegawaian dan foto profil Anda.';
+            document.getElementById('pegawai-page-title').textContent = 'Profil Pegawai Saya';
+            document.getElementById('pegawai-page-sub').textContent = 'Perbarui biodata kepegawaian dan foto profil Anda.';
 
-            // Cari record di master_pegawai berdasarkan user_id, email, atau nama
             let found = null;
             const { data: rows } = await db.from('master_pegawai').select('*');
             if (rows && rows.length > 0) {
@@ -3207,7 +3211,7 @@
             }
 
             populatePegawaiModalForm(found, true);
-            document.getElementById('pegawai-modal').classList.remove('hidden');
+            showPegawaiFullPage();
         };
 
         window.openEditPegawaiAdmin = async function(pgId) {
@@ -3217,10 +3221,10 @@
                 allUsers = data || [];
             }
             const pg = allPegawai.find(x => String(x.id) === String(pgId));
-            document.getElementById('pegawai-modal-title').textContent = pg ? 'Edit Data Pegawai (PTK)' : 'Tambah Pegawai Baru (PTK)';
-            document.getElementById('pegawai-modal-sub').textContent = 'Kelola data kepegawaian guru, tendik, admin, dan kepala sekolah.';
+            document.getElementById('pegawai-page-title').textContent = pg ? 'Edit Data Pegawai (PTK)' : 'Tambah Pegawai Baru (PTK)';
+            document.getElementById('pegawai-page-sub').textContent = 'Kelola data kepegawaian guru, tendik, admin, dan kepala sekolah.';
             populatePegawaiModalForm(pg, false);
-            document.getElementById('pegawai-modal').classList.remove('hidden');
+            showPegawaiFullPage();
         };
 
         window.openNewPegawaiModal = () => openEditPegawaiAdmin(null);
@@ -3345,11 +3349,9 @@
                 foto_url: uploadedFotoUrl
             };
 
-            // Simpan salinan lengkap di data_tambahan agar aman meski nama kolom fisik bervariasi
             prevExtra.profil_ptk = formValues;
             if (uploadedFotoUrl) prevExtra.foto_url = uploadedFotoUrl;
 
-            // Bangun payload menyesuaikan kolom yang benar-benar ada di activePegawaiRecord (atau kolom standar)
             const payload = {};
             const sampleCols = activePegawaiRecord ? Object.keys(activePegawaiRecord) : (allPegawai[0] ? Object.keys(allPegawai[0]) : null);
 
@@ -3416,7 +3418,6 @@
                 res = await db.from('master_pegawai').insert([payload]);
             }
 
-            // Sinkronkan nama_lengkap ke profiles jika ditautkan
             if (!res.error && targetUserId && formValues.nama_lengkap) {
                 await db.from('profiles').update({ nama_lengkap: formValues.nama_lengkap }).eq('id', targetUserId);
                 if (currentAuthUser && targetUserId === currentAuthUser.id) {
@@ -3431,11 +3432,11 @@
                 alert('Gagal menyimpan profil pegawai: ' + res.error.message);
             } else {
                 pendingPegawaiFotoBlob = null;
-                closeModal('pegawai-modal');
+                alert('Profil pegawai berhasil disimpan!');
                 if (currentRole === 'admin' && !document.getElementById('section-pegawai').classList.contains('hidden')) {
                     loadPegawai();
                 } else {
-                    alert('Profil pegawai berhasil disimpan!');
+                    backFromPegawaiPage();
                 }
             }
         });
@@ -3452,7 +3453,6 @@
                 const { data } = await db.from('master_pegawai').select('*');
                 allPegawai = data || [];
             }
-            // Jika master_pegawai ada, pakai id pegawai (int4/text) agar cocok dengan foreign key wali_kelas_id di tabel rombel
             if (allPegawai.length > 0) {
                 return allPegawai.map(p => {
                     const nama = p.nama_lengkap || p.nama || `Pegawai #${p.id}`;
@@ -3477,7 +3477,6 @@
             waliSel.innerHTML = '<option value="">-- Pilih Wali Kelas --</option>' +
                 guruOpts.map(g => `<option value="${g.id}">${escHtml(g.label)}</option>`).join('');
 
-            // Isi sumber rombel dari allSiswa saat ini
             const rombelSet = [...new Set(allSiswa.map(s => s.rombel_saat_ini).filter(Boolean))].sort();
             const srcSel = document.getElementById('mig-source-rombel');
             srcSel.innerHTML = '<option value="">-- Pilih Rombel Asal --</option>' +
@@ -3622,7 +3621,6 @@
             })).sort((a, b) => a._tingkat - b._tingkat || (a.nama_rombel || '').localeCompare(b.nama_rombel || ''));
             const guruOpts = await getGuruOptionsList();
 
-            // Hitung anggota rombel jika tabel anggota_rombel tersedia
             const { data: anggotaList } = await db
                 .from('anggota_rombel')
                 .select('rombel_id, siswa_id')
@@ -3850,7 +3848,6 @@
                 return;
             }
 
-            // Siapkan pasangan [siswa, targetRombelObj]
             let assignments = [];
             if (mode === 'direct') {
                 const targetId = document.getElementById('mig-single-target')?.value;
@@ -3870,7 +3867,6 @@
                 }
                 if (!confirm(`Acak merata ${siswaList.length} siswa dari "${srcRombel}" ke ${targets.length} rombel tujuan?`)) return;
 
-                // Acak terpisah Laki-laki dan Perempuan lalu bagi round-robin agar gender merata
                 const laki = fisherYatesShuffle(siswaList.filter(s => (s.jenis_kelamin_siswa || '').toUpperCase() === 'L'));
                 const perempuan = fisherYatesShuffle(siswaList.filter(s => (s.jenis_kelamin_siswa || '').toUpperCase() === 'P'));
                 const lainnya = fisherYatesShuffle(siswaList.filter(s => !['L', 'P'].includes((s.jenis_kelamin_siswa || '').toUpperCase())));
@@ -3884,7 +3880,6 @@
             btn.disabled = true;
             btn.textContent = 'Menyimpan penempatan...';
 
-            // 1. Catat ke anggota_rombel (riwayat per tahun ajaran)
             const anggotaRows = assignments.map(item => ({
                 rombel_id: item.rombel.id,
                 siswa_id: item.siswa.id
@@ -3897,7 +3892,6 @@
                 console.warn('Info anggota_rombel:', errAnggota.message);
             }
 
-            // 2. Jika dicentang, update rombel_saat_ini pada master_siswa per rombel tujuan
             if (syncMaster) {
                 const groupedByRombelName = {};
                 assignments.forEach(item => {

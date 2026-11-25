@@ -187,6 +187,7 @@
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3">
                     <span id="user-name" class="hidden md:block text-sm font-semibold text-slate-700 mr-1"></span>
+                    <button id="btn-open-absensi" onclick="openAbsensi()" class="hidden bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold px-3 py-2 rounded-lg transition">Absensi</button>
                     <button id="btn-open-pegawai-profile" onclick="openPegawaiProfileModal()"
                         class="hidden bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-2 rounded-lg transition">
                         Profil Pegawai
@@ -223,6 +224,10 @@
                 <button id="tab-btn-users" onclick="switchTab('users')"
                     class="px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
                     Manajemen User &amp; Role
+                </button>
+                <button id="tab-btn-absensi" onclick="switchTab('absensi')"
+                    class="px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
+                    Absensi Siswa
                 </button>
             </div>
 
@@ -544,6 +549,33 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <div id="section-absensi" class="hidden space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div><h2 class="text-xl font-extrabold text-slate-900">Absensi Siswa</h2>
+                    <p class="text-xs text-slate-500">Kalender mengikuti tanggal asli. Sabtu, Minggu, dan hari libur otomatis tidak dihitung.</p></div>
+                    <button id="ab-back" onclick="closeAbsensi()" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold px-4 py-2.5 rounded-xl transition">&larr; Kembali</button>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-wrap items-center gap-3">
+                    <select id="ab-rombel" onchange="abLoadMonth()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm bg-white font-bold"></select>
+                    <div class="flex items-center gap-1">
+                        <button onclick="abMonth(-1)" aria-label="Bulan sebelumnya" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold">&lsaquo;</button>
+                        <span id="ab-month-label" class="text-sm font-extrabold w-36 text-center"></span>
+                        <button onclick="abMonth(1)" aria-label="Bulan berikutnya" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold">&rsaquo;</button>
+                    </div>
+                    <div class="flex gap-1.5 sm:ml-auto">
+                        <button id="ab-tab-input" onclick="abView('input')">Input harian</button>
+                        <button id="ab-tab-rekap" onclick="abView('rekap')">Rekap bulanan</button>
+                        <button id="ab-tab-libur" onclick="abView('libur')">Hari libur</button>
+                    </div>
+                </div>
+                <div class="grid lg:grid-cols-5 gap-5">
+                    <div id="ab-calwrap" class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 self-start">
+                        <div id="ab-cal"></div><div id="ab-legend" class="mt-3 text-xs text-slate-500 space-y-1"></div>
+                    </div>
+                    <div id="ab-panel" class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"></div>
                 </div>
             </div>
 
@@ -1532,6 +1564,7 @@
             document.getElementById('welcome-hero').innerHTML = `<div class="relative overflow-hidden rounded-2xl text-white bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 shadow-md"><div class="relative z-10 px-6 sm:px-8 pt-7 pb-14"><span class="inline-block bg-blue-700/60 backdrop-blur-sm border border-blue-300/30 text-blue-100 text-xs font-semibold px-3 py-1 rounded-full mb-3">SDN Pluit 03 &bull; Penjaringan, Jakarta Utara</span><h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">Halo, ${escHtml(heroName)}</h2><p class="text-blue-100 text-sm sm:text-base mt-2 max-w-xl">${heroMsg}</p></div><svg class="wave-back absolute bottom-0 left-0 w-[200%] h-8 text-slate-50/50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,80 360,0 720,40 C1080,80 1080,0 1440,40 C1800,80 1800,0 2160,40 C2520,80 2520,0 2880,40 V80 H0Z"/></svg><svg class="wave-front absolute bottom-0 left-0 w-[200%] h-6 text-slate-50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,0 360,80 720,40 C1080,0 1080,80 1440,40 C1800,0 1800,80 2160,40 C2520,0 2520,80 2880,40 V80 H0Z"/></svg></div>`;
             document.getElementById('toolbar-filter-siswa').classList.toggle('hidden', isSiswa);
             document.getElementById('btn-open-pegawai-profile').classList.toggle('hidden', isSiswa);
+            document.getElementById('btn-open-absensi').classList.toggle('hidden', !(isGuru || isTendik));
 
             const badgeText = {
                 admin: 'Role: ADMIN (Super Akses)',
@@ -1582,7 +1615,7 @@
 
         window.switchTab = function(tab) {
             if (currentRole !== 'admin') return;
-            const tabs = ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai'];
+            const tabs = ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'absensi'];
             tabs.forEach(t => {
                 const sec = document.getElementById('section-' + t);
                 const btn = document.getElementById('tab-btn-' + t);
@@ -1596,6 +1629,7 @@
             if (tab === 'users') loadUsers();
             if (tab === 'pegawai') loadPegawai();
             if (tab === 'rombel') initRombelManagement();
+            if (tab === 'absensi') initAbsensi();
         };
 
         async function resolveGuruAssignedRombels() {
@@ -3149,7 +3183,7 @@
         ]);
 
         function showPegawaiFullPage() {
-            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai'].forEach(t => {
+            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'absensi'].forEach(t => {
                 const sec = document.getElementById('section-' + t);
                 if (sec) sec.classList.toggle('hidden', t !== 'profil-pegawai');
                 const btn = document.getElementById('tab-btn-' + t);
@@ -4046,6 +4080,174 @@
             await db.auth.signOut();
             location.reload();
         });
+
+        // ==========================================
+        // ABSENSI SISWA
+        // ==========================================
+        const AB = { H: ['Hadir', 'has-[:checked]:bg-emerald-600'], S: ['Sakit', 'has-[:checked]:bg-amber-500'], I: ['Izin', 'has-[:checked]:bg-sky-600'], A: ['Alfa', 'has-[:checked]:bg-rose-600'] };
+        const abS = { rombel: '', ym: '', date: '', view: 'input', libur: {}, rec: {}, sis: [] };
+        const abISO = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const abCanInput = () => currentRole === 'admin' || currentRole === 'guru';
+        const abCanLibur = () => currentRole === 'admin' || currentRole === 'tendik';
+        const abDow = iso => new Date(iso + 'T00:00:00').getDay();
+        const abWhy = iso => (abDow(iso) === 0 || abDow(iso) === 6) ? 'Akhir pekan' : (abS.libur[iso] || '');
+        const abInp = 'w-full px-3 py-2 rounded-xl border border-slate-300 text-sm';
+
+        window.openAbsensi = function() {
+            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai'].forEach(k => { const s = document.getElementById('section-' + k); if (s) s.classList.add('hidden'); });
+            document.getElementById('section-absensi').classList.remove('hidden');
+            initAbsensi();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        window.closeAbsensi = function() {
+            document.getElementById('section-absensi').classList.add('hidden');
+            document.getElementById('section-siswa').classList.remove('hidden');
+        };
+
+        window.initAbsensi = function() {
+            const names = [...new Set(allSiswa.filter(s => (s.status_siswa || 'Aktif') === 'Aktif').map(s => s.rombel_saat_ini).filter(Boolean))].sort();
+            document.getElementById('ab-rombel').innerHTML = names.map(r => `<option value="${escHtml(r)}">${escHtml(r)}</option>`).join('') || '<option value="">Belum ada rombel</option>';
+            if (!abS.date) abS.date = abISO(new Date());
+            abS.ym = abS.date.slice(0, 7);
+            document.getElementById('ab-back').classList.toggle('hidden', currentRole === 'admin');
+            abS.view = abCanInput() ? 'input' : 'rekap';
+            abLoadMonth();
+        };
+
+        window.abLoadMonth = async function() {
+            abS.rombel = document.getElementById('ab-rombel').value;
+            const [y, m] = abS.ym.split('-').map(Number);
+            const first = `${abS.ym}-01`, last = abISO(new Date(y, m, 0));
+            abS.sis = allSiswa.filter(s => s.rombel_saat_ini === abS.rombel && (s.status_siswa || 'Aktif') === 'Aktif')
+                .sort((a, b) => (a.nama_lengkap_siswa || '').localeCompare(b.nama_lengkap_siswa || ''));
+            document.getElementById('ab-month-label').textContent = new Date(y, m - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+            const [lb, ab] = await Promise.all([
+                db.from('kalender_libur').select('tanggal,keterangan').gte('tanggal', first).lte('tanggal', last),
+                abS.sis.length ? db.from('absensi_siswa').select('siswa_id,tanggal,status').in('siswa_id', abS.sis.map(s => s.id)).gte('tanggal', first).lte('tanggal', last).range(0, 4999) : Promise.resolve({ data: [] })
+            ]);
+            if (lb.error || ab.error) alert('Gagal memuat absensi: ' + (lb.error || ab.error).message + '\n\nPastikan absensi_setup.sql sudah dijalankan di Supabase.');
+            abS.libur = {}; (lb.data || []).forEach(r => { abS.libur[r.tanggal] = r.keterangan; });
+            abS.rec = {}; (ab.data || []).forEach(r => { (abS.rec[r.tanggal] = abS.rec[r.tanggal] || {})[r.siswa_id] = r.status; });
+            if (abS.date.slice(0, 7) !== abS.ym) abS.date = first;
+            abRender();
+        };
+        window.abMonth = function(d) { const [y, m] = abS.ym.split('-').map(Number); abS.ym = abISO(new Date(y, m - 1 + d, 1)).slice(0, 7); abLoadMonth(); };
+        window.abView = function(v) { abS.view = v; abRender(); };
+        window.abPick = function(iso) { abS.date = iso; abRender(); };
+
+        function abRender() {
+            const v = abS.view, perm = { input: abCanInput(), rekap: true, libur: abCanLibur() };
+            ['input', 'rekap', 'libur'].forEach(k => {
+                const el = document.getElementById('ab-tab-' + k);
+                el.className = 'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (k === v ? 'bg-blue-700 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100');
+                el.classList.toggle('hidden', !perm[k]);
+            });
+            const [y, m] = abS.ym.split('-').map(Number), today = abISO(new Date());
+            const lead = (new Date(y, m - 1, 1).getDay() + 6) % 7, days = new Date(y, m, 0).getDate();
+            let h = '<div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-400 mb-1">' + ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(d => `<div>${d}</div>`).join('') + '</div><div class="grid grid-cols-7 gap-1">' + '<div></div>'.repeat(lead);
+            for (let d = 1; d <= days; d++) {
+                const iso = `${abS.ym}-${String(d).padStart(2, '0')}`, why = abWhy(iso);
+                const done = abS.rec[iso] && Object.keys(abS.rec[iso]).length;
+                const base = why ? (abS.libur[iso] ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-400') : 'bg-white text-slate-800 hover:bg-blue-50 border border-slate-200';
+                h += `<button type="button" onclick="abPick('${iso}')" title="${escHtml(why)}" class="relative aspect-square rounded-lg text-sm font-bold ${base} ${iso === abS.date ? 'ring-2 ring-amber-400' : ''} ${iso === today ? 'underline decoration-2 decoration-blue-600' : ''}">${d}${done ? '<span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500"></span>' : ''}</button>`;
+            }
+            document.getElementById('ab-cal').innerHTML = h + '</div>';
+            const lib = Object.entries(abS.libur).sort().map(([k, x]) => `<div><b class="text-red-700">${+k.slice(8)}</b> ${escHtml(x)}</div>`).join('');
+            document.getElementById('ab-legend').innerHTML = (lib || 'Tidak ada hari libur terdaftar bulan ini.') + '<div class="pt-1">Titik hijau = sudah diabsen.</div>';
+            document.getElementById('ab-calwrap').classList.toggle('hidden', v === 'rekap');
+            const panel = document.getElementById('ab-panel');
+            panel.classList.toggle('lg:col-span-5', v === 'rekap'); panel.classList.toggle('lg:col-span-3', v !== 'rekap');
+            if (v === 'input') abPanelInput(); else if (v === 'rekap') abPanelRekap(); else abPanelLibur();
+        }
+
+        function abPanelInput() {
+            const iso = abS.date, why = abWhy(iso), rec = abS.rec[iso] || {};
+            const label = new Date(iso + 'T00:00:00').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            let h = `<div class="p-4 border-b border-slate-200"><h3 class="font-extrabold text-slate-900">${label}</h3><p class="text-xs text-slate-500">Kelas ${escHtml(abS.rombel)} &bull; ${abS.sis.length} siswa</p></div>`;
+            if (why) h += `<div class="p-10 text-center text-sm font-semibold text-red-600">Bukan hari sekolah: ${escHtml(why)}.</div>`;
+            else if (!abS.sis.length) h += '<div class="p-10 text-center text-sm text-slate-400">Belum ada siswa aktif di kelas ini.</div>';
+            else {
+                h += abS.sis.map(s => {
+                    const cur = rec[s.id] || 'H';
+                    return `<div class="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-100"><div class="min-w-0"><div class="text-sm font-bold text-slate-900 truncate">${escHtml(s.nama_lengkap_siswa)}</div>${rec[s.id] ? '' : '<div class="text-[11px] text-amber-600">Belum diabsen</div>'}</div><div class="flex gap-1 shrink-0">${Object.entries(AB).map(([k, [l, c]]) => `<label class="cursor-pointer px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 ${c} has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-amber-400"><input type="radio" class="sr-only" name="ab-${s.id}" value="${k}" ${cur === k ? 'checked' : ''}>${l}</label>`).join('')}</div></div>`;
+                }).join('') + `<div class="p-4 bg-slate-50 flex justify-end gap-2"><button type="button" onclick="abAllH()" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-sm font-bold px-4 py-2.5 rounded-xl transition">Hadir semua</button><button type="button" id="ab-save" onclick="abSave()" class="bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">Simpan absensi</button></div>`;
+            }
+            document.getElementById('ab-panel').innerHTML = h;
+        }
+        window.abAllH = function() { document.querySelectorAll('#ab-panel input[value="H"]').forEach(r => { r.checked = true; }); };
+        window.abSave = async function() {
+            if (!abCanInput() || abWhy(abS.date)) return;
+            const rows = abS.sis.map(s => ({ siswa_id: s.id, tanggal: abS.date, status: (document.querySelector(`input[name="ab-${s.id}"]:checked`) || {}).value || 'H' }));
+            const btn = document.getElementById('ab-save'); btn.disabled = true; btn.textContent = 'Menyimpan...';
+            const { data, error } = await db.from('absensi_siswa').upsert(rows, { onConflict: 'siswa_id,tanggal' }).select('id');
+            btn.disabled = false; btn.textContent = 'Simpan absensi';
+            if (error) return alert('Gagal menyimpan: ' + error.message);
+            if (!data || data.length !== rows.length) return alert('Absensi tidak tersimpan penuh (cek izin RLS).');
+            await abLoadMonth();
+        };
+
+        function abPanelRekap() {
+            const [y, m] = abS.ym.split('-').map(Number), today = abISO(new Date()), eff = [];
+            for (let d = 1; d <= new Date(y, m, 0).getDate(); d++) { const iso = `${abS.ym}-${String(d).padStart(2, '0')}`; if (iso <= today && !abWhy(iso)) eff.push(iso); }
+            const tot = { H: 0, S: 0, I: 0, A: 0, B: 0 };
+            const rows = abS.sis.map((s, i) => {
+                const c = { H: 0, S: 0, I: 0, A: 0 }; let rc = 0;
+                eff.forEach(d => { const st = (abS.rec[d] || {})[s.id]; if (st) { c[st]++; rc++; } });
+                const bl = eff.length - rc, pct = eff.length ? Math.round(c.H / eff.length * 100) : 0;
+                Object.keys(c).forEach(k => { tot[k] += c[k]; }); tot.B += bl;
+                return `<tr class="border-b border-slate-100"><td class="px-3 py-2 text-slate-400">${i + 1}</td><td class="px-3 py-2 font-bold text-slate-900">${escHtml(s.nama_lengkap_siswa)}</td><td class="px-3 py-2 text-center">${c.H}</td><td class="px-3 py-2 text-center">${c.S}</td><td class="px-3 py-2 text-center">${c.I}</td><td class="px-3 py-2 text-center ${c.A ? 'text-rose-600 font-bold' : ''}">${c.A}</td><td class="px-3 py-2 text-center text-amber-600">${bl}</td><td class="px-3 py-2 text-center font-bold ${pct < 80 ? 'text-rose-600' : 'text-emerald-700'}">${pct}%</td></tr>`;
+            }).join('') || '<tr><td colspan="8" class="p-10 text-center text-slate-400">Belum ada siswa aktif di kelas ini.</td></tr>';
+            document.getElementById('ab-panel').innerHTML = `<div class="p-4 border-b border-slate-200"><h3 class="font-extrabold text-slate-900">Rekap kelas ${escHtml(abS.rombel)}</h3><p class="text-xs text-slate-500">Hari efektif sampai hari ini: <b>${eff.length}</b> hari (tanpa akhir pekan dan hari libur). Kolom Belum = hari efektif yang belum diabsen.</p></div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200"><tr><th class="px-3 py-2">No</th><th class="px-3 py-2">Nama</th><th class="px-3 py-2 text-center">Hadir</th><th class="px-3 py-2 text-center">Sakit</th><th class="px-3 py-2 text-center">Izin</th><th class="px-3 py-2 text-center">Alfa</th><th class="px-3 py-2 text-center">Belum</th><th class="px-3 py-2 text-center">% Hadir</th></tr></thead><tbody>${rows}</tbody><tfoot class="bg-slate-50 font-bold text-xs"><tr><td></td><td class="px-3 py-2">Total kelas</td><td class="px-3 py-2 text-center">${tot.H}</td><td class="px-3 py-2 text-center">${tot.S}</td><td class="px-3 py-2 text-center">${tot.I}</td><td class="px-3 py-2 text-center">${tot.A}</td><td class="px-3 py-2 text-center">${tot.B}</td><td></td></tr></tfoot></table></div>`;
+        }
+
+        function abPanelLibur() {
+            const list = Object.entries(abS.libur).sort().map(([k, x]) => `<div class="flex items-center justify-between gap-2 py-1.5 border-b border-slate-100 text-sm"><span><b>${k.slice(8)}</b> ${escHtml(x)}</span><button onclick="abDelLibur('${k}')" class="text-xs font-bold text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg">Hapus</button></div>`).join('') || '<p class="text-sm text-slate-400">Belum ada hari libur di bulan ini.</p>';
+            document.getElementById('ab-panel').innerHTML = `<div class="p-4 space-y-4 text-sm">
+                <div><h3 class="font-extrabold text-slate-900">Tambah hari libur</h3><p class="text-xs text-slate-500">Libur nasional dan cuti bersama mengikuti SKB 3 Menteri, libur sekolah mengikuti kalender pendidikan. Sabtu dan Minggu sudah otomatis libur.</p></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="lb-from" type="date" value="${abS.date}" class="${abInp}" aria-label="Mulai">
+                    <input id="lb-to" type="date" class="${abInp}" aria-label="Sampai (opsional)">
+                    <input id="lb-ket" placeholder="Keterangan, mis. Libur semester" class="col-span-2 ${abInp}">
+                    <select id="lb-jenis" class="${abInp} bg-white"><option value="sekolah">Libur sekolah</option><option value="nasional">Nasional / cuti bersama</option></select>
+                    <button onclick="abAddLibur()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl px-4 py-2 transition">Simpan libur</button>
+                </div>
+                <details class="rounded-xl border border-slate-200 p-3"><summary class="font-bold text-xs cursor-pointer">Tempel banyak tanggal sekaligus</summary>
+                    <textarea id="lb-paste" rows="5" placeholder="2026-12-24 Cuti bersama Natal&#10;2026-12-25 Hari Raya Natal" class="${abInp} mt-2"></textarea>
+                    <button onclick="abPasteLibur()" class="mt-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg px-4 py-2">Impor sebagai libur nasional</button></details>
+                <div><h4 class="font-extrabold text-xs text-slate-500 mb-1">Libur bulan ini</h4>${list}</div></div>`;
+        }
+        async function abSaveLibur(rows) {
+            if (!rows.length) return alert('Tidak ada tanggal yang valid.');
+            const { data, error } = await db.from('kalender_libur').upsert(rows, { onConflict: 'tanggal' }).select('tanggal');
+            if (error) return alert('Gagal menyimpan libur: ' + error.message);
+            if (!data || data.length !== rows.length) return alert('Libur tidak tersimpan penuh (cek izin RLS).');
+            await abLoadMonth();
+        }
+        window.abAddLibur = function() {
+            const from = document.getElementById('lb-from').value, to = document.getElementById('lb-to').value || from;
+            const ket = document.getElementById('lb-ket').value.trim(), jenis = document.getElementById('lb-jenis').value;
+            if (!from || !ket) return alert('Isi tanggal dan keterangan libur.');
+            const rows = [];
+            for (let d = new Date(from + 'T00:00:00'), e = new Date(to + 'T00:00:00'); d <= e && rows.length < 400; d.setDate(d.getDate() + 1)) {
+                if (d.getDay() !== 0 && d.getDay() !== 6) rows.push({ tanggal: abISO(d), keterangan: ket, jenis });
+            }
+            abSaveLibur(rows);
+        };
+        window.abPasteLibur = function() {
+            const rows = [];
+            document.getElementById('lb-paste').value.split('\n').forEach(l => {
+                const mt = l.trim().match(/^(\d{4}-\d{2}-\d{2})\s*[-:]?\s*(.+)$/);
+                if (mt) rows.push({ tanggal: mt[1], keterangan: mt[2].trim(), jenis: 'nasional' });
+            });
+            abSaveLibur(rows);
+        };
+        window.abDelLibur = async function(iso) {
+            if (!confirm('Hapus hari libur tanggal ' + iso + '?')) return;
+            const { data, error } = await db.from('kalender_libur').delete().eq('tanggal', iso).select('tanggal');
+            if (error) return alert('Gagal menghapus: ' + error.message);
+            if (!data || !data.length) return alert('Tidak terhapus (cek izin RLS).');
+            await abLoadMonth();
+        };
 
         db.auth.onAuthStateChange((ev) => {
             if (ev === 'SIGNED_OUT' && !dashboardView.classList.contains('hidden')) location.reload();

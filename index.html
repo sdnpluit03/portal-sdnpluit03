@@ -9,6 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .edit-tab-btn.active {
+            background-color: #1d4ed8;
+            color: #ffffff;
+            border-color: #1d4ed8;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
@@ -85,7 +90,6 @@
 
             <!-- SECTION 1: DATA SISWA -->
             <div id="section-siswa">
-                <!-- Kartu Ringkasan -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                         <span class="text-xs font-bold text-slate-500 uppercase">Total Siswa Terdata</span>
@@ -103,7 +107,6 @@
                     </div>
                 </div>
 
-                <!-- Panel Tabel Data Siswa -->
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
@@ -200,123 +203,233 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT SISWA & UPLOAD PAS FOTO -->
+    <!-- MODAL EDIT SISWA (FORMAT S-4 BAGIAN A: KETERANGAN SISWA + PAS FOTO) -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div>
-                    <h3 class="font-extrabold text-slate-900 text-lg">Edit Data & Pas Foto Siswa</h3>
+                    <h3 class="font-extrabold text-slate-900 text-lg">Edit Buku Induk • Bagian A (Keterangan Siswa)</h3>
                     <p id="edit-note" class="text-xs text-slate-500"></p>
                 </div>
                 <button onclick="closeModal('edit-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
             </div>
-            <form id="edit-form" class="p-6 overflow-y-auto space-y-4 text-sm">
+
+            <!-- Sub-tab Bagian A -->
+            <div class="px-6 pt-3 pb-2 border-b border-slate-200 bg-white flex flex-wrap gap-2">
+                <button type="button" id="etab-btn-identitas" onclick="switchEditTab('identitas')"
+                    class="edit-tab-btn active px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold transition">
+                    1. Identitas & Keluarga
+                </button>
+                <button type="button" id="etab-btn-jasmani" onclick="switchEditTab('jasmani')"
+                    class="edit-tab-btn px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                    2. Jasmani & Alamat
+                </button>
+                <button type="button" id="etab-btn-akses" onclick="switchEditTab('akses')"
+                    class="edit-tab-btn px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                    3. Akses, KJP/PIP & Foto
+                </button>
+            </div>
+
+            <form id="edit-form" class="p-6 overflow-y-auto space-y-5 text-sm">
                 <input type="hidden" id="edit-id">
 
-                <!-- BLOK PAS FOTO 3x4 PER KELAS (SLOT 1 - 6) -->
-                <div class="bg-blue-50/60 border border-blue-200 rounded-xl p-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <!-- SUB-TAB 1: IDENTITAS & KELUARGA (A.1 - A.8) -->
+                <div id="etab-identitas" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-extrabold uppercase text-blue-900">Pas Foto 3x4 (Buku Induk Format S-4)</label>
-                            <p class="text-[11px] text-slate-600">Pilih jenjang kelas, lalu pilih foto (otomatis dikompres ~70 KB).</p>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.1a Nama Siswa Lengkap</label>
+                            <input type="text" id="f-nama" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
                         </div>
-                        <select id="foto-kelas-slot" onchange="renderFotoSlotPreview()"
-                            class="px-3 py-1.5 rounded-lg border border-blue-300 text-xs font-bold bg-white text-blue-900">
-                            <option value="1">Slot Kelas 1</option>
-                            <option value="2">Slot Kelas 2</option>
-                            <option value="3">Slot Kelas 3</option>
-                            <option value="4">Slot Kelas 4</option>
-                            <option value="5">Slot Kelas 5</option>
-                            <option value="6">Slot Kelas 6</option>
-                        </select>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="w-20 h-24 rounded-lg border border-slate-300 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
-                            <img id="preview-foto-siswa" src="" alt="Pas Foto" class="hidden w-full h-full object-cover">
-                            <span id="placeholder-foto-siswa" class="text-[10px] text-slate-400 font-semibold text-center px-1.5">Belum ada foto</span>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.1b Nama Panggilan</label>
+                            <input type="text" id="f-panggilan" placeholder="Contoh: Zaq" class="w-full px-3 py-2 rounded-lg border border-slate-300">
                         </div>
-                        <div class="space-y-1.5 flex-1">
-                            <input type="file" id="input-foto-siswa" accept="image/jpeg,image/png,image/webp"
-                                class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-700 file:text-white hover:file:bg-blue-800 cursor-pointer">
-                            <p id="foto-status-text" class="text-[11px] text-slate-600 font-medium"></p>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Rombel Saat Ini</label>
+                            <input type="text" id="f-rombel" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.2 Jenis Kelamin (L / P)</label>
+                            <select id="f-jk" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 bg-white disabled:bg-slate-100 disabled:text-slate-500">
+                                <option value="">-</option>
+                                <option value="L">L (Laki-laki)</option>
+                                <option value="P">P (Perempuan)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">NIPD (Nomor Induk)</label>
+                            <input type="text" id="f-nipd" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">NISN</label>
+                            <input type="text" id="f-nisn" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.3a Tempat Lahir</label>
+                            <input type="text" id="f-tempat-lahir" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.3b Tanggal Lahir</label>
+                            <input type="text" id="f-tgl-lahir" placeholder="YYYY-MM-DD atau DD-MM-YYYY" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.4 Agama</label>
+                            <input type="text" id="f-agama" placeholder="Islam / Kristen / Katolik / Hindu / Buddha / Konghucu" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.5 NIK Siswa</label>
+                            <input type="text" id="f-nik" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.6 Kewarganegaraan</label>
+                            <input type="text" id="f-kewarganegaraan" placeholder="WNI" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.8 Bahasa Sehari-hari di Keluarga</label>
+                            <input type="text" id="f-bahasa" placeholder="Bahasa Indonesia" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100">
+                        <label class="block text-xs font-extrabold uppercase text-slate-700 mb-2">A.7 Jumlah Saudara</label>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Kandung (Orang)</label>
+                                <input type="number" min="0" id="f-saudara-kandung" placeholder="0" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Tiri (Orang)</label>
+                                <input type="number" min="0" id="f-saudara-tiri" placeholder="0" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Angkat (Orang)</label>
+                                <input type="number" min="0" id="f-saudara-angkat" placeholder="0" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- BIODATA UTAMA -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap</label>
-                        <input type="text" id="f-nama" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
+                <!-- SUB-TAB 2: JASMANI & ALAMAT (A.9 - A.11) -->
+                <div id="etab-jasmani" class="hidden space-y-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.9a Berat Badan (Kg)</label>
+                            <input type="text" id="f-berat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.9b Tinggi Badan (Cm)</label>
+                            <input type="text" id="f-tinggi" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.9c Golongan Darah</label>
+                            <input type="text" id="f-goldar" placeholder="A / B / AB / O" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.10 Penyakit Pernah Diderita</label>
+                            <input type="text" id="f-penyakit" placeholder="Tidak ada / Asma / dll." class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Rombel</label>
-                        <input type="text" id="f-rombel" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">NIPD</label>
-                        <input type="text" id="f-nipd" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">NISN</label>
-                        <input type="text" id="f-nisn" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">NIK Siswa</label>
-                        <input type="text" id="f-nik" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">No. Telepon Siswa</label>
-                        <input type="text" id="f-telp" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+
+                    <div class="pt-3 border-t border-slate-100 space-y-4">
+                        <h4 class="text-xs font-extrabold uppercase text-slate-700">A.11 Alamat Peserta Didik</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-6 gap-4">
+                            <div class="sm:col-span-4">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Jl. / Kampung</label>
+                                <input type="text" id="f-alamat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">RT</label>
+                                <input type="text" id="f-rt" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">RW</label>
+                                <input type="text" id="f-rw" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Desa / Kelurahan</label>
+                                <input type="text" id="f-kelurahan" placeholder="Pluit" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Kecamatan</label>
+                                <input type="text" id="f-kecamatan" placeholder="Penjaringan" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Kabupaten / Kota</label>
+                                <input type="text" id="f-kabupaten" placeholder="Jakarta Utara" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1">Provinsi</label>
+                                    <input type="text" id="f-provinsi" placeholder="DKI Jakarta" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1">Kode Pos</label>
+                                    <input type="text" id="f-kodepos" placeholder="14450" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Alamat</label>
-                        <input type="text" id="f-alamat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                <!-- SUB-TAB 3: AKSES, KJP/PIP & PAS FOTO (A.12 - A.16 + SLOT FOTO 1-6) -->
+                <div id="etab-akses" class="hidden space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.12 Bertempat Tinggal Pada</label>
+                            <input type="text" id="f-tinggal-pada" placeholder="Orang tua / Wali / Asrama" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.13 Alat Transportasi ke Sekolah</label>
+                            <input type="text" id="f-transportasi" placeholder="Jalan kaki / Sepeda motor / Angkot" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.14a Jarak ke Sekolah (Km)</label>
+                            <input type="text" id="f-jarak-km" placeholder="Contoh: 1.5" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.14b Waktu Tempuh (Menit)</label>
+                            <input type="text" id="f-waktu-tempuh" placeholder="Contoh: 15" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.15 No. KJP / PIP (Jika Ada)</label>
+                            <input type="text" id="f-kjp-pip" placeholder="Nomor kartu KJP / PIP" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">A.16 Nomor Kontak</label>
+                            <input type="text" id="f-telp" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">RT</label>
-                        <input type="text" id="f-rt" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">RW</label>
-                        <input type="text" id="f-rw" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Gol. Darah</label>
-                        <input type="text" id="f-goldar" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Tinggi (cm)</label>
-                        <input type="text" id="f-tinggi" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Berat (kg)</label>
-                        <input type="text" id="f-berat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Pekerjaan Ayah</label>
-                        <input type="text" id="f-pek-ayah" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">No. HP Ayah</label>
-                        <input type="text" id="f-hp-ayah" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Pekerjaan Ibu</label>
-                        <input type="text" id="f-pek-ibu" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">No. HP Ibu</label>
-                        <input type="text" id="f-hp-ibu" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    <!-- BLOK PAS FOTO 3x4 PER KELAS (SLOT 1 - 6) -->
+                    <div class="bg-blue-50/60 border border-blue-200 rounded-xl p-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <div>
+                                <label class="block text-xs font-extrabold uppercase text-blue-900">Pas Foto 3x4 (Buku Induk Format S-4)</label>
+                                <p class="text-[11px] text-slate-600">Pilih slot kelas (1–6), lalu pilih foto (otomatis dikompres ~30–80 KB).</p>
+                            </div>
+                            <select id="foto-kelas-slot" onchange="renderFotoSlotPreview()"
+                                class="px-3 py-1.5 rounded-lg border border-blue-300 text-xs font-bold bg-white text-blue-900">
+                                <option value="1">Slot Kelas 1</option>
+                                <option value="2">Slot Kelas 2</option>
+                                <option value="3">Slot Kelas 3</option>
+                                <option value="4">Slot Kelas 4</option>
+                                <option value="5">Slot Kelas 5</option>
+                                <option value="6">Slot Kelas 6</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-20 h-24 rounded-lg border border-slate-300 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
+                                <img id="preview-foto-siswa" src="" alt="Pas Foto" class="hidden w-full h-full object-cover">
+                                <span id="placeholder-foto-siswa" class="text-[10px] text-slate-400 font-semibold text-center px-1.5">Belum ada foto</span>
+                            </div>
+                            <div class="space-y-1.5 flex-1">
+                                <input type="file" id="input-foto-siswa" accept="image/jpeg,image/png,image/webp"
+                                    class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-700 file:text-white hover:file:bg-blue-800 cursor-pointer">
+                                <p id="foto-status-text" class="text-[11px] text-slate-600 font-medium"></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -376,14 +489,31 @@
 
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
-        // Helper ambil URL foto per slot kelas (1 - 6)
+        window.switchEditTab = function(tabName) {
+            const tabs = ['identitas', 'jasmani', 'akses'];
+            tabs.forEach(t => {
+                document.getElementById('etab-' + t).classList.toggle('hidden', t !== tabName);
+                document.getElementById('etab-btn-' + t).classList.toggle('active', t === tabName);
+            });
+        };
+
+        function getExtra(siswa) {
+            return (siswa && typeof siswa.data_tambahan === 'object' && siswa.data_tambahan !== null)
+                ? siswa.data_tambahan
+                : {};
+        }
+
+        function getBagianA(siswa) {
+            const extra = getExtra(siswa);
+            return (extra.bagian_a && typeof extra.bagian_a === 'object') ? extra.bagian_a : {};
+        }
+
         function getFotoUrlBySlot(siswa, slot) {
-            const extra = siswa?.data_tambahan || {};
+            const extra = getExtra(siswa);
             const fotos = extra.pas_foto || {};
             return fotos[`kelas_${slot}`] || '';
         }
 
-        // 1. Cek Session
         async function checkSession() {
             const { data: { session } } = await db.auth.getSession();
             if (session) showDashboard(session.user);
@@ -393,7 +523,6 @@
             }
         }
 
-        // 2. Login Pintar (Email atau NISN)
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const loginError = document.getElementById('login-error');
@@ -419,7 +548,6 @@
             }
         });
 
-        // 3. Tampilkan Dashboard
         async function showDashboard(user) {
             loginView.classList.add('hidden');
             dashboardView.classList.remove('hidden');
@@ -445,7 +573,6 @@
             loadSiswa();
         }
 
-        // Switch Tab Admin
         window.switchTab = function(tab) {
             const btnSiswa = document.getElementById('tab-btn-siswa');
             const btnUsers = document.getElementById('tab-btn-users');
@@ -463,7 +590,6 @@
             }
         };
 
-        // 4. Tarik Data Siswa
         async function loadSiswa() {
             const tbody = document.getElementById('tabel-siswa');
             tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Menarik data dari Supabase...</td></tr>';
@@ -560,10 +686,11 @@
             `).join('');
         }
 
-        // 5. Detail Siswa (termasuk Galeri 6 Slot Pas Foto)
         window.openDetail = function(id) {
             const s = allSiswa.find(x => x.id === id);
             if (!s) return;
+            const a = getBagianA(s);
+
             document.getElementById('modal-nama').textContent = s.nama_lengkap_siswa || '-';
             document.getElementById('modal-sub').textContent = `${s.rombel_saat_ini || '-'} • NIPD: ${s.nomor_induk_peserta_didik || '-'} • NISN: ${s.nomor_induk_siswa_nasional || '-'}`;
 
@@ -583,29 +710,51 @@
             }).join('');
 
             const row = (l, v) => `<div class="grid grid-cols-3 gap-2 py-1.5 border-b border-slate-100"><span class="text-slate-500 text-xs font-semibold">${l}</span><span class="col-span-2 text-slate-900 font-medium">${v || '-'}</span></div>`;
+
+            const saudaraText = `Kandung: ${a.saudara_kandung || '-'} • Tiri: ${a.saudara_tiri || '-'} • Angkat: ${a.saudara_angkat || '-'}`;
+            const alamatLengkap = [
+                s.alamat_siswa || '-',
+                (s.rt_siswa || s.rw_siswa) ? `RT ${s.rt_siswa || '-'} / RW ${s.rw_siswa || '-'}` : '',
+                a.kelurahan ? `Kel. ${a.kelurahan}` : '',
+                a.kecamatan ? `Kec. ${a.kecamatan}` : '',
+                a.kabupaten || '',
+                a.provinsi || '',
+                a.kodepos ? `(${a.kodepos})` : ''
+            ].filter(Boolean).join(', ');
+
             document.getElementById('modal-body').innerHTML = `
                 <div>
                     <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Pas Foto 3x4 per Jenjang</h4>
                     <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">${fotoGrid}</div>
                 </div>
                 <div>
-                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Biodata Siswa</h4>
-                    ${row('NIK', s.nomor_induk_kependudukan_siswa)}
-                    ${row('Jenis Kelamin', s.jenis_kelamin_siswa)}
-                    ${row('TTL', (s.tempat_lahir_siswa || '-') + ', ' + (s.tanggal_lahir_siswa || '-'))}
-                    ${row('Alamat', `${s.alamat_siswa || '-'} RT ${s.rt_siswa || '-'} / RW ${s.rw_siswa || '-'}`)}
-                    ${row('No. Telepon', s.nomor_telepon_siswa)}
-                    ${row('Kesehatan', `Gol. Darah: ${s.golongan_darah_siswa || '-'} | TB: ${s.tinggi_badan_siswa || '-'} cm | BB: ${s.berat_badan_siswa || '-'} kg`)}
+                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">A. Keterangan Siswa</h4>
+                    ${row('A.1 Nama Lengkap', s.nama_lengkap_siswa)}
+                    ${row('A.1b Nama Panggilan', a.nama_panggilan)}
+                    ${row('A.2 Jenis Kelamin', s.jenis_kelamin_siswa)}
+                    ${row('A.3 Tempat, Tgl Lahir', (s.tempat_lahir_siswa || '-') + ', ' + (s.tanggal_lahir_siswa || '-'))}
+                    ${row('A.4 Agama', a.agama)}
+                    ${row('A.5 NIK Siswa', s.nomor_induk_kependudukan_siswa)}
+                    ${row('A.6 Kewarganegaraan', a.kewarganegaraan)}
+                    ${row('A.7 Jumlah Saudara', saudaraText)}
+                    ${row('A.8 Bahasa Sehari-hari', a.bahasa_sehari_hari)}
+                    ${row('A.9 Keadaan Jasmani', `BB: ${s.berat_badan_siswa || '-'} kg | TB: ${s.tinggi_badan_siswa || '-'} cm | Gol. Darah: ${s.golongan_darah_siswa || '-'}`)}
+                    ${row('A.10 Penyakit Diderita', a.penyakit_diderita)}
+                    ${row('A.11 Alamat', alamatLengkap)}
+                    ${row('A.12 Tinggal Pada', a.tinggal_pada)}
+                    ${row('A.13 Transportasi', a.transportasi)}
+                    ${row('A.14 Jarak & Waktu', `Jarak: ${a.jarak_km || '-'} km • Waktu: ${a.waktu_tempuh_menit || '-'} menit`)}
+                    ${row('A.15 No. KJP / PIP', a.no_kjp_pip)}
+                    ${row('A.16 Nomor Kontak', s.nomor_telepon_siswa)}
                 </div>
                 <div>
-                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Orang Tua</h4>
+                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Orang Tua (Ringkasan)</h4>
                     ${row('Ayah', `${s.nama_ayah || '-'} (${s.pekerjaan_ayah || '-'}) • HP: ${s.nomor_telepon_ayah || '-'}`)}
                     ${row('Ibu', `${s.nama_ibu || '-'} (${s.pekerjaan_ibu || '-'}) • HP: ${s.nomor_telepon_ibu || '-'}`)}
                 </div>`;
             document.getElementById('detail-modal').classList.remove('hidden');
         };
 
-        // 6. Preview & Auto-Compress Pas Foto
         window.renderFotoSlotPreview = function() {
             pendingCompressedBlob = null;
             document.getElementById('input-foto-siswa').value = '';
@@ -665,7 +814,6 @@
             if (!file) return;
             const statusEl = document.getElementById('foto-status-text');
 
-            // Batasi file asal maksimal 10 MB
             if (file.size > 10 * 1024 * 1024) {
                 statusEl.textContent = 'Ukuran file terlalu besar (maksimal 10 MB). Pilih foto lain.';
                 e.target.value = '';
@@ -692,40 +840,60 @@
             }
         });
 
-        // 7. Edit Siswa & Upload Foto
         window.openEdit = function(id) {
             const s = allSiswa.find(x => x.id === id);
             if (!s) return;
             activeEditSiswa = s;
+            const a = getBagianA(s);
 
-            // Otomatis pilih slot kelas sesuai angka rombel saat ini (1 - 6)
+            switchEditTab('identitas');
+
             const matchKelas = (s.rombel_saat_ini || '').match(/[1-6]/);
             document.getElementById('foto-kelas-slot').value = matchKelas ? matchKelas[0] : '1';
             renderFotoSlotPreview();
 
             document.getElementById('edit-id').value = s.id;
             document.getElementById('f-nama').value = s.nama_lengkap_siswa || '';
+            document.getElementById('f-panggilan').value = a.nama_panggilan || '';
             document.getElementById('f-rombel').value = s.rombel_saat_ini || '';
+            document.getElementById('f-jk').value = s.jenis_kelamin_siswa || '';
             document.getElementById('f-nipd').value = s.nomor_induk_peserta_didik || '';
             document.getElementById('f-nisn').value = s.nomor_induk_siswa_nasional || '';
+            document.getElementById('f-tempat-lahir').value = s.tempat_lahir_siswa || '';
+            document.getElementById('f-tgl-lahir').value = s.tanggal_lahir_siswa || '';
+            document.getElementById('f-agama').value = a.agama || '';
             document.getElementById('f-nik').value = s.nomor_induk_kependudukan_siswa || '';
-            document.getElementById('f-telp').value = s.nomor_telepon_siswa || '';
+            document.getElementById('f-kewarganegaraan').value = a.kewarganegaraan || 'WNI';
+            document.getElementById('f-bahasa').value = a.bahasa_sehari_hari || 'Bahasa Indonesia';
+            document.getElementById('f-saudara-kandung').value = a.saudara_kandung ?? '';
+            document.getElementById('f-saudara-tiri').value = a.saudara_tiri ?? '';
+            document.getElementById('f-saudara-angkat').value = a.saudara_angkat ?? '';
+
+            document.getElementById('f-berat').value = s.berat_badan_siswa || '';
+            document.getElementById('f-tinggi').value = s.tinggi_badan_siswa || '';
+            document.getElementById('f-goldar').value = s.golongan_darah_siswa || '';
+            document.getElementById('f-penyakit').value = a.penyakit_diderita || '';
             document.getElementById('f-alamat').value = s.alamat_siswa || '';
             document.getElementById('f-rt').value = s.rt_siswa || '';
             document.getElementById('f-rw').value = s.rw_siswa || '';
-            document.getElementById('f-goldar').value = s.golongan_darah_siswa || '';
-            document.getElementById('f-tinggi').value = s.tinggi_badan_siswa || '';
-            document.getElementById('f-berat').value = s.berat_badan_siswa || '';
-            document.getElementById('f-pek-ayah').value = s.pekerjaan_ayah || '';
-            document.getElementById('f-hp-ayah').value = s.nomor_telepon_ayah || '';
-            document.getElementById('f-pek-ibu').value = s.pekerjaan_ibu || '';
-            document.getElementById('f-hp-ibu').value = s.nomor_telepon_ibu || '';
+            document.getElementById('f-kelurahan').value = a.kelurahan || '';
+            document.getElementById('f-kecamatan').value = a.kecamatan || '';
+            document.getElementById('f-kabupaten').value = a.kabupaten || '';
+            document.getElementById('f-provinsi').value = a.provinsi || '';
+            document.getElementById('f-kodepos').value = a.kodepos || '';
+
+            document.getElementById('f-tinggal-pada').value = a.tinggal_pada || '';
+            document.getElementById('f-transportasi').value = a.transportasi || '';
+            document.getElementById('f-jarak-km').value = a.jarak_km || '';
+            document.getElementById('f-waktu-tempuh').value = a.waktu_tempuh_menit || '';
+            document.getElementById('f-kjp-pip').value = a.no_kjp_pip || '';
+            document.getElementById('f-telp').value = s.nomor_telepon_siswa || '';
 
             const isSiswa = currentRole === 'siswa';
             document.querySelectorAll('.sacred-field').forEach(el => el.disabled = isSiswa);
             document.getElementById('edit-note').textContent = isSiswa
-                ? 'Kolom abu-abu dikunci sekolah. Anda dapat memperbarui alamat, kontak, dan pas foto.'
-                : 'Anda dapat memperbarui biodata dan pas foto siswa ini.';
+                ? 'Field berlatar abu-abu dikunci sekolah. Anda dapat melengkapi bagian A lainnya serta pas foto.'
+                : 'Lengkapi data Bagian A (Keterangan Siswa) dan pas foto per kelas.';
 
             document.getElementById('edit-modal').classList.remove('hidden');
         };
@@ -738,9 +906,8 @@
 
             const id = document.getElementById('edit-id').value;
             const slot = document.getElementById('foto-kelas-slot').value;
-            const existingExtra = JSON.parse(JSON.stringify(activeEditSiswa?.data_tambahan || {}));
+            const existingExtra = JSON.parse(JSON.stringify(getExtra(activeEditSiswa)));
 
-            // Upload foto jika ada file baru yang sudah dikompres
             if (pendingCompressedBlob) {
                 const filePath = `${id}/kelas_${slot}.jpg`;
                 const { error: uploadErr } = await db.storage
@@ -762,6 +929,27 @@
                 existingExtra.pas_foto[`kelas_${slot}`] = pub.publicUrl;
             }
 
+            existingExtra.bagian_a = {
+                nama_panggilan: document.getElementById('f-panggilan').value.trim(),
+                agama: document.getElementById('f-agama').value.trim(),
+                kewarganegaraan: document.getElementById('f-kewarganegaraan').value.trim(),
+                bahasa_sehari_hari: document.getElementById('f-bahasa').value.trim(),
+                saudara_kandung: document.getElementById('f-saudara-kandung').value.trim(),
+                saudara_tiri: document.getElementById('f-saudara-tiri').value.trim(),
+                saudara_angkat: document.getElementById('f-saudara-angkat').value.trim(),
+                penyakit_diderita: document.getElementById('f-penyakit').value.trim(),
+                kelurahan: document.getElementById('f-kelurahan').value.trim(),
+                kecamatan: document.getElementById('f-kecamatan').value.trim(),
+                kabupaten: document.getElementById('f-kabupaten').value.trim(),
+                provinsi: document.getElementById('f-provinsi').value.trim(),
+                kodepos: document.getElementById('f-kodepos').value.trim(),
+                tinggal_pada: document.getElementById('f-tinggal-pada').value.trim(),
+                transportasi: document.getElementById('f-transportasi').value.trim(),
+                jarak_km: document.getElementById('f-jarak-km').value.trim(),
+                waktu_tempuh_menit: document.getElementById('f-waktu-tempuh').value.trim(),
+                no_kjp_pip: document.getElementById('f-kjp-pip').value.trim()
+            };
+
             const payload = {
                 nomor_telepon_siswa: document.getElementById('f-telp').value.trim(),
                 alamat_siswa: document.getElementById('f-alamat').value.trim(),
@@ -770,18 +958,17 @@
                 golongan_darah_siswa: document.getElementById('f-goldar').value.trim(),
                 tinggi_badan_siswa: document.getElementById('f-tinggi').value.trim(),
                 berat_badan_siswa: document.getElementById('f-berat').value.trim(),
-                pekerjaan_ayah: document.getElementById('f-pek-ayah').value.trim(),
-                nomor_telepon_ayah: document.getElementById('f-hp-ayah').value.trim(),
-                pekerjaan_ibu: document.getElementById('f-pek-ibu').value.trim(),
-                nomor_telepon_ibu: document.getElementById('f-hp-ibu').value.trim(),
                 data_tambahan: existingExtra
             };
 
             if (currentRole !== 'siswa') {
                 payload.nama_lengkap_siswa = document.getElementById('f-nama').value.trim();
                 payload.rombel_saat_ini = document.getElementById('f-rombel').value.trim();
+                payload.jenis_kelamin_siswa = document.getElementById('f-jk').value;
                 payload.nomor_induk_peserta_didik = document.getElementById('f-nipd').value.trim();
                 payload.nomor_induk_siswa_nasional = document.getElementById('f-nisn').value.trim();
+                payload.tempat_lahir_siswa = document.getElementById('f-tempat-lahir').value.trim();
+                payload.tanggal_lahir_siswa = document.getElementById('f-tgl-lahir').value.trim();
                 payload.nomor_induk_kependudukan_siswa = document.getElementById('f-nik').value.trim();
             }
 
@@ -798,7 +985,6 @@
             }
         });
 
-        // 8. Manajemen User & Reset Password (Khusus Admin)
         window.loadUsers = async function() {
             const tbody = document.getElementById('tabel-users');
             tbody.innerHTML = '<tr><td colspan="3" class="px-5 py-8 text-center text-slate-400">Memuat daftar user...</td></tr>';
@@ -830,7 +1016,7 @@
                             <option value="tendik" ${u.role === 'tendik' ? 'selected' : ''}>TENDIK</option>
                             <option value="siswa" ${u.role === 'siswa' ? 'selected' : ''}>SISWA</option>
                         </select>
-                        <button onclick="resetUserPassword('${u.id}', '${(u.nama_lengkap || '').replace(/'/g, "\\'")}')"
+                        <button onclick="resetUserPassword('${u.id}', '${(u.nama_lengkap || '').replace(/'/g, "\'")}')"
                             class="ml-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition">
                             Reset PW
                         </button>
@@ -862,7 +1048,6 @@
             else alert(`Berhasil! Password untuk ${nama} sudah diganti menjadi: ${newPass.trim()}`);
         };
 
-        // 9. Ganti Password Mandiri
         document.getElementById('btn-open-pass').addEventListener('click', () => {
             document.getElementById('pass-form').reset();
             document.getElementById('pass-msg').classList.add('hidden');
@@ -899,7 +1084,6 @@
             }
         });
 
-        // Event Listeners
         document.getElementById('search-input').addEventListener('input', applyFilter);
         document.getElementById('filter-rombel').addEventListener('change', applyFilter);
         document.getElementById('search-user').addEventListener('input', renderUsers);

@@ -396,6 +396,54 @@
                     </div>
                 </div>
 
+                <!-- Panel Penugasan Guru Mapel / Pendamping per Rombel -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+                    <div>
+                        <h3 class="font-extrabold text-slate-900 text-base">Penugasan Guru Mapel / Guru Pendamping per Rombel</h3>
+                        <p class="text-xs text-slate-500">Tugaskan guru mapel (Agama, PJOK, B. Inggris, Koding, dll.) ke rombel tertentu agar dapat membantu input nilai &amp; perkembangan siswa di rombel tersebut.</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Pilih Rombel (TA Terpilih)</label>
+                            <select id="gr-rombel-select" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                                <option value="">-- Pilih Rombel --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Pilih Guru Mapel / Pendamping</label>
+                            <select id="gr-pegawai-select" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                                <option value="">-- Pilih Guru --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Keterangan / Mapel</label>
+                            <input type="text" id="gr-mapel-input" placeholder="Contoh: PJOK / PAI / B. Inggris"
+                                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                        </div>
+                        <div>
+                            <button onclick="tambahGuruRombel()"
+                                class="w-full bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition">
+                                + Tugaskan Guru
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-500 uppercase border-b border-slate-200">
+                                <tr>
+                                    <th class="px-4 py-2.5">Rombel</th>
+                                    <th class="px-4 py-2.5">Guru Mapel / Pendamping</th>
+                                    <th class="px-4 py-2.5">Keterangan Mapel</th>
+                                    <th class="px-4 py-2.5 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabel-guru-rombel" class="divide-y divide-slate-100">
+                                <tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">Memuat penugasan guru mapel...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Panel Migrasi Langsung vs Acak Siswa per Tingkat -->
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
                     <div>
@@ -1517,9 +1565,63 @@
             if (tab === 'rombel') initRombelManagement();
         };
 
+        let allowedGuruRombelNames = null;
+
+        async function resolveGuruAssignedRombels() {
+            if (currentRole !== 'guru' || !currentAuthUser) {
+                allowedGuruRombelNames = null;
+                return;
+            }
+            // Cari ID pegawai di master_pegawai yang terhubung dengan akun guru ini
+            const { data: pgList } = await db.from('master_pegawai').select('*');
+            const myName = (document.getElementById('user-name').textContent || '').toLowerCase().trim();
+            const myEmail = (currentAuthUser.email || '').toLowerCase().trim();
+            const myPg = (pgList || []).find(r => r.user_id === currentAuthUser.id || r.profile_id === currentAuthUser.id)
+                || (pgList || []).find(r => (r.email || '').toLowerCase().trim() === myEmail)
+                || (pgList || []).find(r => (r.nama_lengkap || r.nama || '').toLowerCase().trim() === myName);
+
+            const candidateIds = [String(currentAuthUser.id)];
+            if (myPg && myPg.id !== undefined && myPg.id !== null) {
+                candidateIds.push(String(myPg.id));
+            }
+
+            // Ambil Tahun Ajaran aktif (jika ada)
+            const { data: taList } = await db.from('tahun_ajaran').select('*');
+            const activeTA = (taList || []).find(t => t.is_aktif) || (taList || [])[0];
+
+            let rombelQuery = db.from('rombel').select('*');
+            if (activeTA) rombelQuery = rombelQuery.eq('tahun_ajaran_id', activeTA.id);
+            const { data: rombels } = await rombelQuery;
+
+            const assignedSet = new Set();
+            const rombelById = {};
+            (rombels || []).forEach(r => {
+                rombelById[String(r.id)] = r.nama_rombel;
+                if (candidateIds.includes(String(r.wali_kelas_id))) {
+                    assignedSet.add(r.nama_rombel);
+                }
+            });
+
+            // Cek juga penugasan tambahan di tabel guru_rombel (untuk Guru Mapel / Guru Pendamping)
+            if (myPg && myPg.id !== undefined && myPg.id !== null) {
+                const { data: grRows } = await db
+                    .from('guru_rombel')
+                    .select('rombel_id')
+                    .eq('pegawai_id', myPg.id);
+                (grRows || []).forEach(gr => {
+                    const rName = rombelById[String(gr.rombel_id)];
+                    if (rName) assignedSet.add(rName);
+                });
+            }
+
+            allowedGuruRombelNames = [...assignedSet];
+        }
+
         async function loadSiswa() {
             const tbody = document.getElementById('tabel-siswa');
             tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Menarik data dari Supabase...</td></tr>';
+
+            await resolveGuruAssignedRombels();
 
             let hasil = [];
             let from = 0;
@@ -1540,6 +1642,16 @@
                 hasil = hasil.concat(data);
                 if (data.length < step) break;
                 from += step;
+            }
+
+            if (currentRole === 'guru' && Array.isArray(allowedGuruRombelNames)) {
+                hasil = hasil.filter(s => allowedGuruRombelNames.includes(s.rombel_saat_ini));
+                const infoEl = document.getElementById('stat-role-info');
+                if (allowedGuruRombelNames.length > 0) {
+                    infoEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Tanggungan: ${escHtml(allowedGuruRombelNames.join(', '))}`;
+                } else {
+                    infoEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Belum ada rombel ditugaskan`;
+                }
             }
 
             allSiswa = hasil;
@@ -3552,6 +3664,82 @@
             }
 
             renderTargetRombelMigrasi();
+            await loadGuruRombelList(guruOpts);
+        };
+
+        async function loadGuruRombelList(guruOpts) {
+            const rSel = document.getElementById('gr-rombel-select');
+            const pSel = document.getElementById('gr-pegawai-select');
+            const tbody = document.getElementById('tabel-guru-rombel');
+            if (!rSel || !pSel || !tbody) return;
+
+            rSel.innerHTML = '<option value="">-- Pilih Rombel --</option>' +
+                currentRombelList.map(r => `<option value="${r.id}">${escHtml(r.nama_rombel)}</option>`).join('');
+            pSel.innerHTML = '<option value="">-- Pilih Guru --</option>' +
+                (guruOpts || []).map(g => `<option value="${g.id}">${escHtml(g.label)}</option>`).join('');
+
+            if (currentRombelList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">Belum ada rombel pada TA ini.</td></tr>';
+                return;
+            }
+
+            const { data: grData, error } = await db
+                .from('guru_rombel')
+                .select('*')
+                .in('rombel_id', currentRombelList.map(r => r.id));
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-amber-700">Tabel guru_rombel belum dibuat (jalankan setup_rbac_guru_rombel.sql di Supabase).</td></tr>`;
+                return;
+            }
+
+            if (!grData || grData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">Belum ada penugasan guru mapel / pendamping.</td></tr>';
+                return;
+            }
+
+            const rMap = Object.fromEntries(currentRombelList.map(r => [String(r.id), r.nama_rombel]));
+            const gMap = Object.fromEntries((guruOpts || []).map(g => [String(g.id), g.label]));
+
+            tbody.innerHTML = grData.map(item => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-2.5 font-bold text-blue-900">${escHtml(rMap[String(item.rombel_id)] || item.rombel_id)}</td>
+                    <td class="px-4 py-2.5 font-semibold text-slate-800">${escHtml(gMap[String(item.pegawai_id)] || item.pegawai_id)}</td>
+                    <td class="px-4 py-2.5 text-slate-600">${escHtml(item.mata_pelajaran) || '-'}</td>
+                    <td class="px-4 py-2.5 text-right">
+                        <button onclick="hapusGuruRombel(${item.id})" class="text-xs font-bold text-red-600 hover:bg-red-50 px-2 py-1 rounded">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.tambahGuruRombel = async function() {
+            const rombelId = document.getElementById('gr-rombel-select').value;
+            const pegawaiId = document.getElementById('gr-pegawai-select').value;
+            const mapel = document.getElementById('gr-mapel-input').value.trim();
+
+            if (!rombelId || !pegawaiId) {
+                alert('Pilih Rombel dan Guru terlebih dahulu!');
+                return;
+            }
+
+            const { error } = await db.from('guru_rombel').upsert([{
+                rombel_id: parseInt(rombelId, 10),
+                pegawai_id: parseInt(pegawaiId, 10),
+                mata_pelajaran: mapel || null
+            }], { onConflict: 'rombel_id,pegawai_id' });
+
+            if (error) alert('Gagal menugaskan guru: ' + error.message);
+            else {
+                document.getElementById('gr-mapel-input').value = '';
+                await loadRombelByTA();
+            }
+        };
+
+        window.hapusGuruRombel = async function(id) {
+            const { error } = await db.from('guru_rombel').delete().eq('id', id);
+            if (error) alert('Gagal menghapus penugasan: ' + error.message);
+            else await loadRombelByTA();
         };
 
         window.updateWaliKelasRombel = async function(rombelId, waliId) {

@@ -9,7 +9,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(180deg,#e8f0fb 0,#f6f8fc 340px) fixed; }
+        #login-view { background-image: radial-gradient(circle at 12% 18%, rgba(251,191,36,.2), transparent 38%), linear-gradient(135deg,#1e3a8a,#1e40af 55%,#312e81); }
+        nav { box-shadow: 0 10px 28px -20px rgba(15,23,42,.35); }
+        #stats-row > div { border-left: 4px solid #1d4ed8; }
+        #stats-row > div:nth-child(2) { border-left-color: #047857; }
+        #stats-row > div:nth-child(3) { border-left-color: #f59e0b; }
+        tbody tr:hover { background: #f8fafc; }
+        .pf-bar { height: 8px; border-radius: 99px; background: #e2e8f0; overflow: hidden; }
+        .pf-bar > span { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg,#1d4ed8,#10b981); }
         .edit-tab-btn.active {
             background-color: #1d4ed8;
             color: #ffffff;
@@ -192,6 +200,7 @@
         <!-- Konten Utama -->
         <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1">
 
+            <div id="welcome-hero" class="mb-6"></div>
             <!-- Menu Tab (Khusus Admin) -->
             <div id="admin-tabs" class="hidden flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-3">
                 <button id="tab-btn-siswa" onclick="switchTab('siswa')"
@@ -214,7 +223,7 @@
 
             <!-- SECTION 1: DATA SISWA -->
             <div id="section-siswa">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div id="stats-row" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                         <span class="text-xs font-bold text-slate-500 uppercase">Total Siswa Terdata</span>
                         <div id="stat-siswa" class="text-3xl font-extrabold text-blue-800 mt-1">0</div>
@@ -231,11 +240,12 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div id="siswa-profile-card" class="hidden space-y-5"></div>
+                <div id="siswa-list-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <span class="text-blue-700 font-bold text-[11px] uppercase tracking-wider">Permendikdasmen No. 13 Tahun 2025</span>
-                            <h2 id="judul-daftar-siswa" class="font-extrabold text-slate-900 text-lg">Buku Induk Siswa (Format S-4)</h2>
+                            <h2 id="judul-daftar-siswa" class="font-extrabold text-slate-900 text-lg">Buku Induk Siswa</h2>
                             <p id="filter-info" class="text-xs text-slate-500">Memuat data...</p>
                         </div>
                         <div id="toolbar-filter-siswa" class="flex flex-col sm:flex-row gap-2.5">
@@ -548,7 +558,8 @@
                     </button>
                 </div>
 
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div id="pg-summary" class="hidden"></div>
+                <div id="pg-edit-wrap" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <form id="pegawai-form" class="p-6 sm:p-8 space-y-6 text-sm">
                         <input type="hidden" id="pg-id">
                         <input type="hidden" id="pg-user-id">
@@ -680,7 +691,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button id="btn-detail-print" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition">
-                        Cetak S-4 (4 Hal.)
+                        Cetak Buku Induk (4 Hal.)
                     </button>
                     <button onclick="closeModal('detail-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
                 </div>
@@ -1508,6 +1519,12 @@
             const isSiswa = currentRole === 'siswa';
 
             document.getElementById('admin-tabs').classList.toggle('hidden', !isAdmin);
+            document.getElementById('stats-row').classList.toggle('hidden', isSiswa);
+            document.getElementById('siswa-list-card').classList.toggle('hidden', isSiswa);
+            document.getElementById('siswa-profile-card').classList.toggle('hidden', !isSiswa);
+            const heroName = (document.getElementById('user-name').textContent || '').trim().split(/\s+/)[0];
+            const heroMsg = { admin: 'Kelola seluruh data sekolah dari satu tempat.', guru: 'Isi nilai dan pantau data siswa di kelas Anda.', tendik: 'Kelola administrasi dan mutasi siswa.', siswa: 'Lihat dan lengkapi data diri Anda di sini.' }[currentRole] || '';
+            document.getElementById('welcome-hero').innerHTML = `<div class="rounded-2xl p-6 sm:p-7 text-white bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 shadow-md"><p class="text-blue-200 text-xs font-semibold">SDN Pluit 03 &bull; Penjaringan, Jakarta Utara</p><h2 class="text-2xl font-extrabold mt-1">Halo, ${escHtml(heroName)}</h2><p class="text-blue-100 text-sm mt-1">${heroMsg}</p></div>`;
             document.getElementById('toolbar-filter-siswa').classList.toggle('hidden', isSiswa);
             document.getElementById('btn-open-pegawai-profile').classList.toggle('hidden', isSiswa);
 
@@ -1524,13 +1541,13 @@
                 document.getElementById('judul-daftar-siswa').textContent = 'Profil & Nilai Rapor Siswa';
                 document.getElementById('stat-role-info').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Akses Siswa / Orang Tua';
             } else if (isGuru) {
-                document.getElementById('judul-daftar-siswa').textContent = 'Penilaian & Data Kelas (Format S-4)';
+                document.getElementById('judul-daftar-siswa').textContent = 'Penilaian & Data Kelas';
                 document.getElementById('stat-role-info').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Mode Guru Kelas';
             } else if (isTendik) {
-                document.getElementById('judul-daftar-siswa').textContent = 'Administrasi & Mutasi Siswa (Format S-4)';
+                document.getElementById('judul-daftar-siswa').textContent = 'Administrasi & Mutasi Siswa';
                 document.getElementById('stat-role-info').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Mode Tata Usaha (Tendik)';
             } else {
-                document.getElementById('judul-daftar-siswa').textContent = 'Buku Induk Siswa (Format S-4)';
+                document.getElementById('judul-daftar-siswa').textContent = 'Buku Induk Siswa';
                 document.getElementById('stat-role-info').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Supabase RLS Aktif';
             }
         }
@@ -1700,7 +1717,58 @@
             return 'Edit';
         }
 
+        function siswaCompleteness(s) {
+            const ex = getExtra(s), a = ex.bagian_a || {}, b = ex.bagian_b || {}, c = ex.bagian_c || {};
+            const anyFoto = [1, 2, 3, 4, 5, 6].map(k => getFotoUrlBySlot(s, k)).find(Boolean);
+            const f = [s.alamat_siswa, s.nomor_telepon_siswa, s.tempat_lahir_siswa, s.tanggal_lahir_siswa, s.nomor_induk_kependudukan_siswa, s.golongan_darah_siswa, s.berat_badan_siswa, s.tinggi_badan_siswa, a.agama, a.kelurahan, a.kecamatan, s.nama_ayah, s.nama_ibu, s.pekerjaan_ayah, s.pekerjaan_ibu, b.nik, c.nik, anyFoto];
+            const done = f.filter(v => String(v ?? '').trim() !== '').length;
+            return { pct: Math.round(done / f.length * 100), missing: f.length - done };
+        }
+
+        function renderSiswaProfileCards() {
+            const box = document.getElementById('siswa-profile-card');
+            if (!allSiswa.length) {
+                box.innerHTML = '<div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">Data siswa belum tertaut ke akun ini. Hubungi Tata Usaha sekolah.</div>';
+                return;
+            }
+            box.innerHTML = allSiswa.map(s => {
+                const a = getExtra(s).bagian_a || {};
+                const foto = [6, 5, 4, 3, 2, 1].map(k => getFotoUrlBySlot(s, k)).find(Boolean);
+                const cp = siswaCompleteness(s);
+                const it = (l, v) => `<div><dt class="text-[11px] font-semibold text-slate-500">${l}</dt><dd class="text-sm font-bold text-slate-900 mt-0.5 break-words">${escHtml(v) || '-'}</dd></div>`;
+                const alamat = [s.alamat_siswa, a.kelurahan, a.kecamatan].filter(Boolean).join(', ');
+                return `<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 sm:p-6 flex flex-col sm:flex-row gap-5">
+                        <div class="w-28 h-36 shrink-0 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center mx-auto sm:mx-0">
+                            ${foto ? `<img src="${escHtml(foto)}" alt="Pas foto" class="w-full h-full object-cover">` : '<span class="text-[11px] text-slate-400 text-center px-2">Belum ada foto</span>'}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-xl font-extrabold text-slate-900">${escHtml(s.nama_lengkap_siswa)}</h3>
+                            <p class="text-sm text-slate-500 mt-0.5">Kelas ${escHtml(s.rombel_saat_ini) || '-'}</p>
+                            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-4">
+                                ${it('NISN', s.nomor_induk_siswa_nasional)}${it('NIPD', s.nomor_induk_peserta_didik)}
+                                ${it('Tempat, tanggal lahir', [s.tempat_lahir_siswa, s.tanggal_lahir_siswa].filter(Boolean).join(', '))}${it('Nomor kontak', s.nomor_telepon_siswa)}
+                                ${it('Alamat', alamat)}${it('Orang tua', [s.nama_ayah, s.nama_ibu].filter(Boolean).join(' & '))}
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="px-5 sm:px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col md:flex-row md:items-center gap-4">
+                        <div class="flex-1">
+                            <div class="flex justify-between text-xs font-bold text-slate-600 mb-1.5"><span>Kelengkapan data</span><span>${cp.pct}%</span></div>
+                            <div class="pf-bar"><span style="width:${cp.pct}%"></span></div>
+                            <p class="text-xs text-slate-500 mt-1.5">${cp.missing > 0 ? `${cp.missing} isian belum lengkap. Tekan Ubah data untuk melengkapinya.` : 'Seluruh isian utama sudah terisi.'}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openDetail(${s.id})" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-sm font-bold px-4 py-2.5 rounded-xl transition">Lihat profil &amp; rapor</button>
+                            <button onclick="openEdit(${s.id})" class="bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition">Ubah data</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
         function renderTable() {
+            if (currentRole === 'siswa') { renderSiswaProfileCards(); return; }
             const tbody = document.getElementById('tabel-siswa');
             const totalPages = Math.max(1, Math.ceil(filteredSiswa.length / pageSize));
             const start = (currentPage - 1) * pageSize;
@@ -2173,7 +2241,7 @@
                 document.getElementById('edit-modal-title').textContent = 'Lengkapi Biodata Siswa & Orang Tua / Wali';
                 document.getElementById('edit-note').textContent = 'Mode Siswa/Ortu: Lengkapi alamat, kontak, data Ayah/Ibu/Wali, serta Pas Foto. Identitas utama dikunci sekolah; nilai rapor dapat dilihat di menu Lihat Profil & Rapor.';
             } else {
-                document.getElementById('edit-modal-title').textContent = 'Edit Buku Induk Siswa (Format S-4 Lengkap)';
+                document.getElementById('edit-modal-title').textContent = 'Edit Buku Induk Siswa (Lengkap)';
                 document.getElementById('edit-note').textContent = 'Mode Admin: Akses penuh ke seluruh bagian Buku Induk (A–K) dan Pas Foto.';
             }
 
@@ -3203,7 +3271,7 @@
         window.openPegawaiProfileModal = async function() {
             if (!currentAuthUser) return;
             document.getElementById('pegawai-page-title').textContent = 'Profil Pegawai Saya';
-            document.getElementById('pegawai-page-sub').textContent = 'Perbarui biodata kepegawaian dan foto profil Anda.';
+            document.getElementById('pegawai-page-sub').textContent = 'Ringkasan data kepegawaian Anda. Tekan Ubah data untuk memperbarui.';
 
             let found = null;
             const { data: rows } = await db.from('master_pegawai').select('*');
@@ -3217,6 +3285,41 @@
 
             populatePegawaiModalForm(found, true);
             showPegawaiFullPage();
+            renderPegawaiSummary(true);
+        };
+
+        window.togglePegawaiEdit = function(on) {
+            document.getElementById('pg-summary').classList.toggle('hidden', on);
+            document.getElementById('pg-edit-wrap').classList.toggle('hidden', !on);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.renderPegawaiSummary = function(isSelf) {
+            const box = document.getElementById('pg-summary');
+            if (!isSelf) { togglePegawaiEdit(true); return; }
+            const v = id => document.getElementById(id).value.trim();
+            const img = document.getElementById('pg-preview-foto');
+            const foto = (!img.classList.contains('hidden') && img.getAttribute('src')) ? img.getAttribute('src') : '';
+            const ini = escHtml(v('pg-nama').split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase());
+            const it = (l, x) => `<div><dt class="text-[11px] font-semibold text-slate-500">${l}</dt><dd class="text-sm font-bold text-slate-900 mt-0.5 break-words">${escHtml(x) || '-'}</dd></div>`;
+            box.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 sm:p-6 flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+                    <div class="w-24 h-32 shrink-0 rounded-xl border border-slate-200 bg-blue-50 overflow-hidden flex items-center justify-center text-2xl font-extrabold text-blue-700">${foto ? `<img src="${escHtml(foto)}" alt="Foto" class="w-full h-full object-cover">` : ini}</div>
+                    <div class="flex-1 min-w-0 w-full">
+                        <h3 class="text-xl font-extrabold text-slate-900">${escHtml(v('pg-nama'))}</h3>
+                        <p class="text-sm text-slate-500 mt-0.5">${escHtml([v('pg-jenis-ptk'), v('pg-status-peg')].filter(Boolean).join(' • ')) || 'Jabatan belum diisi'}</p>
+                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-4">
+                            ${it('NIP', v('pg-nip'))}${it('NUPTK', v('pg-nuptk'))}${it('Pangkat / golongan', v('pg-golongan'))}${it('Pendidikan terakhir', v('pg-pendidikan'))}
+                            ${it('Nomor HP', v('pg-hp'))}${it('Email', v('pg-email'))}${it('TMT pengangkatan', v('pg-tmt'))}${it('Alamat', v('pg-alamat'))}
+                        </dl>
+                    </div>
+                </div>
+                <div class="px-5 sm:px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+                    <button type="button" onclick="togglePegawaiEdit(true)" class="bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">Ubah data</button>
+                </div>
+            </div>`;
+            box.classList.remove('hidden');
+            document.getElementById('pg-edit-wrap').classList.add('hidden');
         };
 
         window.openEditPegawaiAdmin = async function(pgId) {
@@ -3230,6 +3333,7 @@
             document.getElementById('pegawai-page-sub').textContent = 'Kelola data kepegawaian guru, tendik, admin, dan kepala sekolah.';
             populatePegawaiModalForm(pg, false);
             showPegawaiFullPage();
+            renderPegawaiSummary(false);
         };
 
         window.openNewPegawaiModal = () => openEditPegawaiAdmin(null);

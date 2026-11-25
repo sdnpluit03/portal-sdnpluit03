@@ -14,6 +14,113 @@
             color: #ffffff;
             border-color: #1d4ed8;
         }
+
+        /* =========================================================
+           PRINT STYLES (BUKU INDUK FORMAT S-4 • KERTAS F4 / FOLIO)
+           ========================================================= */
+        #print-container { display: none; }
+
+        @media print {
+            @page {
+                size: 215mm 330mm;
+                margin: 10mm 12mm;
+            }
+            @page landscape_page {
+                size: 330mm 215mm;
+                margin: 9mm 10mm;
+            }
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-family: 'Times New Roman', Times, serif !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            #login-view, #dashboard-view, #detail-modal, #edit-modal, #pass-modal, .no-print {
+                display: none !important;
+            }
+            #print-container {
+                display: block !important;
+                width: 100%;
+            }
+            .s4-page {
+                page-break-after: always;
+                break-after: page;
+                position: relative;
+                width: 100%;
+                box-sizing: border-box;
+                font-size: 9.5pt;
+                line-height: 1.28;
+            }
+            .s4-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+            .s4-landscape {
+                page: landscape_page;
+                font-size: 8pt;
+                line-height: 1.18;
+            }
+            .s4-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 8.5pt;
+            }
+            .s4-table th, .s4-table td {
+                border: 1px solid #000000;
+                padding: 3px 4px;
+                vertical-align: middle;
+            }
+            .s4-landscape .s4-table {
+                font-size: 7.2pt;
+            }
+            .s4-landscape .s4-table th, .s4-landscape .s4-table td {
+                padding: 2px 2.5px;
+            }
+            .s4-box-group {
+                display: inline-flex;
+                vertical-align: middle;
+            }
+            .s4-box {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 14px;
+                height: 16px;
+                border: 1px solid #000000;
+                margin-right: -1px;
+                font-family: 'Courier New', monospace;
+                font-size: 8.5pt;
+                font-weight: bold;
+            }
+            .s4-photo-slot {
+                width: 28mm;
+                height: 36mm;
+                border: 1px solid #000000;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                font-size: 7pt;
+                overflow: hidden;
+                margin-bottom: 5mm;
+                position: relative;
+            }
+            .s4-photo-slot img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .s4-dotted {
+                border-bottom: 1px dotted #000000;
+                display: inline-block;
+                min-height: 13px;
+                padding: 0 3px;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
@@ -110,7 +217,7 @@
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <h2 class="font-extrabold text-slate-900 text-lg">Buku Induk Siswa</h2>
+                            <h2 class="font-extrabold text-slate-900 text-lg">Buku Induk Siswa (Format S-4)</h2>
                             <p id="filter-info" class="text-xs text-slate-500">Memuat data...</p>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-2.5">
@@ -191,223 +298,69 @@
 
     <!-- MODAL DETAIL SISWA -->
     <div id="detail-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl max-h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="bg-white w-full max-w-3xl max-h-[88vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div>
                     <h3 id="modal-nama" class="font-extrabold text-slate-900 text-lg">Detail Siswa</h3>
                     <p id="modal-sub" class="text-xs text-slate-500"></p>
                 </div>
-                <button onclick="closeModal('detail-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
+                <div class="flex items-center gap-2">
+                    <button id="btn-detail-print" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition">
+                        Cetak S-4 (4 Hal.)
+                    </button>
+                    <button onclick="closeModal('detail-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
+                </div>
             </div>
-            <div id="modal-body" class="p-6 overflow-y-auto space-y-5 text-sm"></div>
+            <div id="modal-body" class="p-6 overflow-y-auto space-y-6 text-sm"></div>
         </div>
     </div>
 
-    <!-- MODAL EDIT SISWA (FORMAT S-4 BAGIAN A: KETERANGAN SISWA + PAS FOTO) -->
+    <!-- MODAL EDIT BUKU INDUK LENGKAP (BAGIAN A - K + PAS FOTO) -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="bg-white w-full max-w-4xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div>
-                    <h3 class="font-extrabold text-slate-900 text-lg">Edit Buku Induk • Bagian A (Keterangan Siswa)</h3>
+                    <h3 class="font-extrabold text-slate-900 text-lg">Edit Buku Induk Siswa (Format S-4 Lengkap)</h3>
                     <p id="edit-note" class="text-xs text-slate-500"></p>
                 </div>
                 <button onclick="closeModal('edit-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
             </div>
 
-            <!-- Sub-tab Bagian A -->
-            <div class="px-6 pt-3 pb-2 border-b border-slate-200 bg-white flex flex-wrap gap-2">
-                <button type="button" id="etab-btn-identitas" onclick="switchEditTab('identitas')"
+            <!-- Sub-tab Lengkap S-4 -->
+            <div class="px-6 pt-3 pb-2.5 border-b border-slate-200 bg-white flex flex-wrap gap-1.5">
+                <button type="button" id="etab-btn-a" onclick="switchEditTab('a')"
                     class="edit-tab-btn active px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold transition">
-                    1. Identitas & Keluarga
+                    A. Keterangan Siswa & Foto
                 </button>
-                <button type="button" id="etab-btn-jasmani" onclick="switchEditTab('jasmani')"
+                <button type="button" id="etab-btn-bcd" onclick="switchEditTab('bcd')"
                     class="edit-tab-btn px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
-                    2. Jasmani & Alamat
+                    B–D. Ayah, Ibu & Wali
                 </button>
-                <button type="button" id="etab-btn-akses" onclick="switchEditTab('akses')"
+                <button type="button" id="etab-btn-efjk" onclick="switchEditTab('efjk')"
                     class="edit-tab-btn px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
-                    3. Akses, KJP/PIP & Foto
+                    E–F & J–K. Riwayat Kelas 1–6
+                </button>
+                <button type="button" id="etab-btn-g" onclick="switchEditTab('g')"
+                    class="edit-tab-btn px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                    G. Prestasi Belajar (SM 1–12)
+                </button>
+                <button type="button" id="etab-btn-hi" onclick="switchEditTab('hi')"
+                    class="edit-tab-btn px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                    H–I. Meninggalkan Sekolah & Catatan
                 </button>
             </div>
 
             <form id="edit-form" class="p-6 overflow-y-auto space-y-5 text-sm">
                 <input type="hidden" id="edit-id">
 
-                <!-- SUB-TAB 1: IDENTITAS & KELUARGA (A.1 - A.8) -->
-                <div id="etab-identitas" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.1a Nama Siswa Lengkap</label>
-                            <input type="text" id="f-nama" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.1b Nama Panggilan</label>
-                            <input type="text" id="f-panggilan" placeholder="Contoh: Zaq" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">Rombel Saat Ini</label>
-                            <input type="text" id="f-rombel" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.2 Jenis Kelamin (L / P)</label>
-                            <select id="f-jk" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 bg-white disabled:bg-slate-100 disabled:text-slate-500">
-                                <option value="">-</option>
-                                <option value="L">L (Laki-laki)</option>
-                                <option value="P">P (Perempuan)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">NIPD (Nomor Induk)</label>
-                            <input type="text" id="f-nipd" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">NISN</label>
-                            <input type="text" id="f-nisn" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.3a Tempat Lahir</label>
-                            <input type="text" id="f-tempat-lahir" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.3b Tanggal Lahir</label>
-                            <input type="text" id="f-tgl-lahir" placeholder="YYYY-MM-DD atau DD-MM-YYYY" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.4 Agama</label>
-                            <input type="text" id="f-agama" placeholder="Islam / Kristen / Katolik / Hindu / Buddha / Konghucu" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.5 NIK Siswa</label>
-                            <input type="text" id="f-nik" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100 disabled:text-slate-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.6 Kewarganegaraan</label>
-                            <input type="text" id="f-kewarganegaraan" placeholder="WNI" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.8 Bahasa Sehari-hari di Keluarga</label>
-                            <input type="text" id="f-bahasa" placeholder="Bahasa Indonesia" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                    </div>
-
-                    <div class="pt-3 border-t border-slate-100">
-                        <label class="block text-xs font-extrabold uppercase text-slate-700 mb-2">A.7 Jumlah Saudara</label>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">Kandung (Orang)</label>
-                                <input type="number" min="0" id="f-saudara-kandung" placeholder="0" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">Tiri (Orang)</label>
-                                <input type="number" min="0" id="f-saudara-tiri" placeholder="0" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">Angkat (Orang)</label>
-                                <input type="number" min="0" id="f-saudara-angkat" placeholder="0" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SUB-TAB 2: JASMANI & ALAMAT (A.9 - A.11) -->
-                <div id="etab-jasmani" class="hidden space-y-4">
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.9a Berat Badan (Kg)</label>
-                            <input type="text" id="f-berat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.9b Tinggi Badan (Cm)</label>
-                            <input type="text" id="f-tinggi" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.9c Golongan Darah</label>
-                            <input type="text" id="f-goldar" placeholder="A / B / AB / O" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.10 Penyakit Pernah Diderita</label>
-                            <input type="text" id="f-penyakit" placeholder="Tidak ada / Asma / dll." class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                    </div>
-
-                    <div class="pt-3 border-t border-slate-100 space-y-4">
-                        <h4 class="text-xs font-extrabold uppercase text-slate-700">A.11 Alamat Peserta Didik</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-6 gap-4">
-                            <div class="sm:col-span-4">
-                                <label class="block text-xs font-bold text-slate-600 mb-1">Jl. / Kampung</label>
-                                <input type="text" id="f-alamat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">RT</label>
-                                <input type="text" id="f-rt" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">RW</label>
-                                <input type="text" id="f-rw" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">Desa / Kelurahan</label>
-                                <input type="text" id="f-kelurahan" placeholder="Pluit" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">Kecamatan</label>
-                                <input type="text" id="f-kecamatan" placeholder="Penjaringan" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 mb-1">Kabupaten / Kota</label>
-                                <input type="text" id="f-kabupaten" placeholder="Jakarta Utara" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 mb-1">Provinsi</label>
-                                    <input type="text" id="f-provinsi" placeholder="DKI Jakarta" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 mb-1">Kode Pos</label>
-                                    <input type="text" id="f-kodepos" placeholder="14450" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SUB-TAB 3: AKSES, KJP/PIP & PAS FOTO (A.12 - A.16 + SLOT FOTO 1-6) -->
-                <div id="etab-akses" class="hidden space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.12 Bertempat Tinggal Pada</label>
-                            <input type="text" id="f-tinggal-pada" placeholder="Orang tua / Wali / Asrama" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.13 Alat Transportasi ke Sekolah</label>
-                            <input type="text" id="f-transportasi" placeholder="Jalan kaki / Sepeda motor / Angkot" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.14a Jarak ke Sekolah (Km)</label>
-                            <input type="text" id="f-jarak-km" placeholder="Contoh: 1.5" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.14b Waktu Tempuh (Menit)</label>
-                            <input type="text" id="f-waktu-tempuh" placeholder="Contoh: 15" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.15 No. KJP / PIP (Jika Ada)</label>
-                            <input type="text" id="f-kjp-pip" placeholder="Nomor kartu KJP / PIP" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">A.16 Nomor Kontak</label>
-                            <input type="text" id="f-telp" class="w-full px-3 py-2 rounded-lg border border-slate-300">
-                        </div>
-                    </div>
-
-                    <!-- BLOK PAS FOTO 3x4 PER KELAS (SLOT 1 - 6) -->
+                <!-- TAB A: KETERANGAN SISWA + PAS FOTO -->
+                <div id="etab-a" class="space-y-5">
+                    <!-- Pas Foto 3x4 -->
                     <div class="bg-blue-50/60 border border-blue-200 rounded-xl p-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                             <div>
-                                <label class="block text-xs font-extrabold uppercase text-blue-900">Pas Foto 3x4 (Buku Induk Format S-4)</label>
-                                <p class="text-[11px] text-slate-600">Pilih slot kelas (1–6), lalu pilih foto (otomatis dikompres ~30–80 KB).</p>
+                                <label class="block text-xs font-extrabold uppercase text-blue-900">Pas Foto 3x4 (Slot Kelas 1–6)</label>
+                                <p class="text-[11px] text-slate-600">Pilih slot kelas (1–6), lalu unggah foto (otomatis dikompres ~30–80 KB).</p>
                             </div>
                             <select id="foto-kelas-slot" onchange="renderFotoSlotPreview()"
                                 class="px-3 py-1.5 rounded-lg border border-blue-300 text-xs font-bold bg-white text-blue-900">
@@ -431,11 +384,604 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Identitas Utama -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Nomor Urut Buku Induk</label>
+                            <input type="text" id="f-nomor-urut" placeholder="0001" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">NIPD (Nomor Induk)</label>
+                            <input type="text" id="f-nipd" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">NISN</label>
+                            <input type="text" id="f-nisn" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">1. Nama Siswa Lengkap</label>
+                            <input type="text" id="f-nama" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">1b. Nama Panggilan</label>
+                            <input type="text" id="f-panggilan" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Rombel Saat Ini</label>
+                            <input type="text" id="f-rombel" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">2. Jenis Kelamin</label>
+                            <select id="f-jk" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 bg-white disabled:bg-slate-100">
+                                <option value="">-</option>
+                                <option value="L">L (Laki-laki)</option>
+                                <option value="P">P (Perempuan)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">5. NIK Siswa</label>
+                            <input type="text" id="f-nik" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">3. Tempat Lahir</label>
+                            <input type="text" id="f-tempat-lahir" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">3b. Tanggal Lahir</label>
+                            <input type="text" id="f-tgl-lahir" placeholder="YYYY-MM-DD" class="sacred-field w-full px-3 py-2 rounded-lg border border-slate-300 disabled:bg-slate-100">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">4. Agama</label>
+                            <input type="text" id="f-agama" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">6. Kewarganegaraan</label>
+                            <input type="text" id="f-kewarganegaraan" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">8. Bahasa Sehari-hari</label>
+                            <input type="text" id="f-bahasa" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">16. Nomor Kontak Siswa</label>
+                            <input type="text" id="f-telp" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                    </div>
+
+                    <!-- Saudara & Jasmani Awal -->
+                    <div class="grid grid-cols-2 sm:grid-cols-6 gap-3 pt-3 border-t border-slate-100">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">7. Sdr. Kandung</label>
+                            <input type="number" min="0" id="f-saudara-kandung" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">7b. Sdr. Tiri</label>
+                            <input type="number" min="0" id="f-saudara-tiri" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">7c. Sdr. Angkat</label>
+                            <input type="number" min="0" id="f-saudara-angkat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">9. Berat (Kg)</label>
+                            <input type="text" id="f-berat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">9b. Tinggi (Cm)</label>
+                            <input type="text" id="f-tinggi" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">9c. Gol. Darah</label>
+                            <input type="text" id="f-goldar" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                    </div>
+
+                    <!-- Penyakit, Alamat & Akses -->
+                    <div class="grid grid-cols-1 sm:grid-cols-6 gap-3 pt-3 border-t border-slate-100">
+                        <div class="sm:col-span-6">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">10. Penyakit yang Pernah Diderita</label>
+                            <input type="text" id="f-penyakit" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div class="sm:col-span-4">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">11. Alamat (Jl. / Kampung)</label>
+                            <input type="text" id="f-alamat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">RT</label>
+                            <input type="text" id="f-rt" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">RW</label>
+                            <input type="text" id="f-rw" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Desa / Kelurahan</label>
+                            <input type="text" id="f-kelurahan" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Kecamatan</label>
+                            <input type="text" id="f-kecamatan" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Kabupaten / Kota</label>
+                            <input type="text" id="f-kabupaten" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Provinsi</label>
+                            <input type="text" id="f-provinsi" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Kode Pos</label>
+                            <input type="text" id="f-kodepos" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">15. No. KJP / PIP (Jika Pemegang)</label>
+                            <input type="text" id="f-kjp-pip" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">12. Bertempat Tinggal Pada</label>
+                            <input type="text" id="f-tinggal-pada" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">13. Alat Transportasi</label>
+                            <input type="text" id="f-transportasi" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">14. Jarak (Km)</label>
+                            <input type="text" id="f-jarak-km" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">14b. Waktu (Mnt)</label>
+                            <input type="text" id="f-waktu-tempuh" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB B-D: KETERANGAN AYAH, IBU & WALI -->
+                <div id="etab-bcd" class="hidden space-y-6">
+                    <!-- B. AYAH KANDUNG -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="text-xs font-extrabold uppercase text-blue-800">B. Keterangan Ayah Kandung Siswa</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">1. Nama Ayah Kandung</label>
+                                <input type="text" id="b-nama" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">No. HP Ayah</label>
+                                <input type="text" id="b-hp" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">2. Tempat Lahir</label>
+                                <input type="text" id="b-tempat" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">2b. Tanggal Lahir</label>
+                                <input type="text" id="b-tgl" placeholder="DD-MM-YYYY" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">3. Agama</label>
+                                <input type="text" id="b-agama" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">4. NIK Ayah</label>
+                                <input type="text" id="b-nik" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">5. Pendidikan Terakhir</label>
+                                <input type="text" id="b-pendidikan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">6. Kebutuhan Khusus</label>
+                                <input type="text" id="b-khusus" placeholder="Tidak ada" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">7. Pekerjaan</label>
+                                <input type="text" id="b-pekerjaan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">8. Penghasilan Rata-rata Perbulan</label>
+                                <input type="text" id="b-penghasilan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- C. IBU KANDUNG -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="text-xs font-extrabold uppercase text-blue-800">C. Keterangan Ibu Kandung Siswa</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">1. Nama Ibu Kandung</label>
+                                <input type="text" id="c-nama" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">No. HP Ibu</label>
+                                <input type="text" id="c-hp" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">2. Tempat Lahir</label>
+                                <input type="text" id="c-tempat" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">2b. Tanggal Lahir</label>
+                                <input type="text" id="c-tgl" placeholder="DD-MM-YYYY" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">3. Agama</label>
+                                <input type="text" id="c-agama" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">4. NIK Ibu</label>
+                                <input type="text" id="c-nik" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">5. Pendidikan Terakhir</label>
+                                <input type="text" id="c-pendidikan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">6. Kebutuhan Khusus</label>
+                                <input type="text" id="c-khusus" placeholder="Tidak ada" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">7. Pekerjaan</label>
+                                <input type="text" id="c-pekerjaan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">8. Penghasilan Rata-rata Perbulan</label>
+                                <input type="text" id="c-penghasilan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- D. WALI SISWA -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="text-xs font-extrabold uppercase text-blue-800">D. Keterangan Wali Siswa (Jika Ada)</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">1. Nama Wali</label>
+                                <input type="text" id="d-nama" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">No. HP Wali</label>
+                                <input type="text" id="d-hp" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">2. Tempat Lahir</label>
+                                <input type="text" id="d-tempat" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">2b. Tanggal Lahir</label>
+                                <input type="text" id="d-tgl" placeholder="DD-MM-YYYY" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">3. Agama</label>
+                                <input type="text" id="d-agama" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">4. NIK Wali</label>
+                                <input type="text" id="d-nik" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">5. Pendidikan Terakhir</label>
+                                <input type="text" id="d-pendidikan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">6. Kebutuhan Khusus</label>
+                                <input type="text" id="d-khusus" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">7. Pekerjaan</label>
+                                <input type="text" id="d-pekerjaan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">8. Penghasilan Rata-rata Perbulan</label>
+                                <input type="text" id="d-penghasilan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB E-F & J-K: RIWAYAT TAHUNAN KELAS 1 - 6 -->
+                <div id="etab-efjk" class="hidden space-y-4">
+                    <div class="flex items-center justify-between bg-amber-50 border border-amber-200 px-4 py-3 rounded-xl">
+                        <div>
+                            <h4 class="text-xs font-extrabold uppercase text-amber-900">Data Tahunan per Tingkat Kelas</h4>
+                            <p class="text-[11px] text-amber-800">Pilih tingkat kelas (1–6) untuk mengisi Keadaan Jasmani, Beasiswa, Perilaku, dan Pengembangan Diri.</p>
+                        </div>
+                        <select id="riwayat-kelas-select" onchange="switchRiwayatKelas()"
+                            class="px-3 py-2 rounded-lg border border-amber-300 bg-white text-xs font-extrabold text-amber-900">
+                            <option value="1">Kelas 1</option>
+                            <option value="2">Kelas 2</option>
+                            <option value="3">Kelas 3</option>
+                            <option value="4">Kelas 4</option>
+                            <option value="5">Kelas 5</option>
+                            <option value="6">Kelas 6</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Tahun Pelajaran</label>
+                            <input type="text" id="rk-ta" placeholder="2025/2026" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">E. Berat Badan (Kg)</label>
+                            <input type="text" id="rk-bb" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">E. Tinggi Badan (Cm)</label>
+                            <input type="text" id="rk-tb" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">E. Penyakit yang Diderita</label>
+                            <input type="text" id="rk-penyakit" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">E. Kelainan Jasmani</label>
+                            <input type="text" id="rk-kelainan" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 space-y-3">
+                        <h4 class="text-xs font-extrabold uppercase text-blue-800">F. Beasiswa</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Beasiswa 1</label>
+                                <input type="text" id="rk-bea1" placeholder="KJP / PIP" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Beasiswa 2</label>
+                                <input type="text" id="rk-bea2" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Beasiswa 3</label>
+                                <input type="text" id="rk-bea3" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Jumlah (Rp)</label>
+                                <input type="text" id="rk-bea-jml" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 space-y-3">
+                        <div>
+                            <label class="block text-xs font-extrabold uppercase text-blue-800 mb-1">J. Uraian Tentang Perilaku Siswa</label>
+                            <textarea id="rk-perilaku" rows="2" class="w-full px-3 py-2 rounded-lg border border-slate-300"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-extrabold uppercase text-blue-800 mb-1">K. Uraian Tentang Pengembangan Diri Siswa</label>
+                            <textarea id="rk-pengembangan" rows="2" class="w-full px-3 py-2 rounded-lg border border-slate-300"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Nama Wali Rombel (Penandatangan J & K)</label>
+                            <input type="text" id="rk-wali-rombel" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB G: PRESTASI BELAJAR SISWA (SM 1 - 12) -->
+                <div id="etab-g" class="hidden space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Nomor Seri Rapor</label>
+                            <input type="text" id="g-seri-rapor" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">No. Peserta Ujian</label>
+                            <input type="text" id="g-no-ujian" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Pilih Semester Input</label>
+                            <select id="g-semester-select" onchange="switchSemesterG()"
+                                class="w-full px-3 py-1.5 rounded-lg border border-blue-300 bg-white font-extrabold text-blue-900">
+                                <option value="1">Kelas I • SM 1</option>
+                                <option value="2">Kelas I • SM 2</option>
+                                <option value="3">Kelas II • SM 3</option>
+                                <option value="4">Kelas II • SM 4</option>
+                                <option value="5">Kelas III • SM 5</option>
+                                <option value="6">Kelas III • SM 6</option>
+                                <option value="7">Kelas IV • SM 7</option>
+                                <option value="8">Kelas IV • SM 8</option>
+                                <option value="9">Kelas V • SM 9</option>
+                                <option value="10">Kelas V • SM 10</option>
+                                <option value="11">Kelas VI • SM 11</option>
+                                <option value="12">Kelas VI • SM 12</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Tahun Pelajaran</label>
+                            <input type="text" id="gs-ta" placeholder="2025/2026" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Titimangsa Rapor</label>
+                            <input type="text" id="gs-titimangsa" placeholder="Jakarta, 20 Desember 2025" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Naik Kls / Tidak Naik / Lulus</label>
+                            <input type="text" id="gs-naik" placeholder="Naik ke Kelas II" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                    </div>
+
+                    <!-- Tabel 10 Mata Pelajaran -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                        <table class="w-full text-xs">
+                            <thead class="bg-slate-100 text-slate-700 font-bold">
+                                <tr>
+                                    <th class="px-3 py-2 text-left w-10">No</th>
+                                    <th class="px-3 py-2 text-left">Mata Pelajaran</th>
+                                    <th class="px-3 py-2 text-center w-24">KKM</th>
+                                    <th class="px-3 py-2 text-center w-24">Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gs-mapel-tbody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Peringkat</label>
+                            <input type="text" id="gs-peringkat" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Absensi: Sakit</label>
+                            <input type="text" id="gs-sakit" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Absensi: Ijin</label>
+                            <input type="text" id="gs-ijin" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Absensi: Alfa</label>
+                            <input type="text" id="gs-alfa" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Ekskul 1</label>
+                            <input type="text" id="gs-ekskul1" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Ekskul 2</label>
+                            <input type="text" id="gs-ekskul2" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Ekskul 3</label>
+                            <input type="text" id="gs-ekskul3" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Kepribadian: Sikap</label>
+                            <input type="text" id="gs-sikap" placeholder="Baik" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Kepribadian: Kerajinan</label>
+                            <input type="text" id="gs-kerajinan" placeholder="Baik" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Kerapihan & Kebersihan</label>
+                            <input type="text" id="gs-kerapihan" placeholder="Baik" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Nama Wali Kelas</label>
+                            <input type="text" id="gs-guru" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">NIP Wali Kelas</label>
+                            <input type="text" id="gs-nip" class="w-full px-3 py-1.5 rounded-lg border border-slate-300">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB H-I: MENINGGALKAN SEKOLAH & CATATAN PENTING -->
+                <div id="etab-hi" class="hidden space-y-5">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="text-xs font-extrabold uppercase text-blue-800">H.1 Pindah Sekolah / Mutasi Keluar</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">a. Nomor Surat</label>
+                                <input type="text" id="h1-surat" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">b. Tanggal</label>
+                                <input type="text" id="h1-tgl" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">c. Kelas Ditinggalkan</label>
+                                <input type="text" id="h1-kelas" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">d. Alasan Pindah / Mutasi</label>
+                                <input type="text" id="h1-alasan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">e. NPSN Tujuan (8 digit)</label>
+                                <input type="text" maxlength="8" id="h1-npsn" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">e2. Nama Sekolah Tujuan</label>
+                                <input type="text" id="h1-sekolah" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">f. NSS Sekolah Tujuan</label>
+                                <input type="text" maxlength="12" id="h1-nss" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">g. Alamat Sekolah Tujuan</label>
+                                <input type="text" id="h1-alamat" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Kecamatan Tujuan</label>
+                                <input type="text" id="h1-kec" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Kabupaten / Provinsi Tujuan</label>
+                                <input type="text" id="h1-kabprov" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="text-xs font-extrabold uppercase text-blue-800">H.2 Tamat Belajar / Lulus Melanjutkan Ke Jenjang Berikutnya</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">a. Tanggal Tamat Belajar</label>
+                                <input type="text" id="h2-tgl" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">b. Nomor Seri Ijazah</label>
+                                <input type="text" id="h2-ijazah" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">c. Nomor Seri SKHUN</label>
+                                <input type="text" id="h2-skhun" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">d. Melanjutkan ke Sekolah</label>
+                                <input type="text" id="h2-sekolah" placeholder="SMPN ..." class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Kecamatan Sekolah</label>
+                                <input type="text" id="h2-kec" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Kabupaten / Kota</label>
+                                <input type="text" id="h2-kab" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">e. Alasan Tidak Melanjutkan (Jika Tidak)</label>
+                                <input type="text" id="h2-alasan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="text-xs font-extrabold uppercase text-blue-800">H.3 Putus Sekolah / Drop Out & I. Lain-lain</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">a. Tanggal DO</label>
+                                <input type="text" id="h3-tgl" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">b. Kelas</label>
+                                <input type="text" id="h3-kelas" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">c. Alasan DO</label>
+                                <input type="text" id="h3-alasan" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">I. Catatan Penting</label>
+                                <textarea id="i-catatan" rows="2" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white"></textarea>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="pt-4 border-t border-slate-200 flex justify-end gap-2">
                     <button type="button" onclick="closeModal('edit-modal')" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 font-bold text-xs">Batal</button>
-                    <button type="submit" id="btn-save-edit" class="px-5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs">Simpan Perubahan</button>
+                    <button type="submit" id="btn-save-edit" class="px-5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs">Simpan Semua Data</button>
                 </div>
             </form>
         </div>
@@ -465,6 +1011,9 @@
         </div>
     </div>
 
+    <!-- AREA CETAK FORMAT S-4 (4 HALAMAN OTOMATIS SAAT PRINT) -->
+    <div id="print-container"></div>
+
     <script>
         // ==========================================
         // TEMPEL KUNCI SUPABASE LO DI SINI
@@ -474,6 +1023,19 @@
 
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        const MAPEL_LIST = [
+            "Pendidikan Agama",
+            "Pendidikan Kewarganegaraan",
+            "Bahasa Indonesia",
+            "Matematika",
+            "Ilmu Pengetahuan Alam",
+            "Ilmu Pengetahuan Sosial",
+            "Seni Budaya & Keterampilan",
+            "Pend. Jasmani, Olahraga & Kes.",
+            "Muatan Lokal / PLBJ",
+            "Muatan Lokal Bahasa Inggris"
+        ];
+
         let currentRole = '';
         let allSiswa = [];
         let filteredSiswa = [];
@@ -482,6 +1044,9 @@
         const pageSize = 25;
 
         let activeEditSiswa = null;
+        let draftExtra = {};
+        let currentRiwayatKelas = '1';
+        let currentSemesterG = '1';
         let pendingCompressedBlob = null;
 
         const loginView = document.getElementById('login-view');
@@ -490,7 +1055,7 @@
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         window.switchEditTab = function(tabName) {
-            const tabs = ['identitas', 'jasmani', 'akses'];
+            const tabs = ['a', 'bcd', 'efjk', 'g', 'hi'];
             tabs.forEach(t => {
                 document.getElementById('etab-' + t).classList.toggle('hidden', t !== tabName);
                 document.getElementById('etab-btn-' + t).classList.toggle('active', t === tabName);
@@ -503,15 +1068,16 @@
                 : {};
         }
 
-        function getBagianA(siswa) {
-            const extra = getExtra(siswa);
-            return (extra.bagian_a && typeof extra.bagian_a === 'object') ? extra.bagian_a : {};
-        }
-
         function getFotoUrlBySlot(siswa, slot) {
             const extra = getExtra(siswa);
             const fotos = extra.pas_foto || {};
             return fotos[`kelas_${slot}`] || '';
+        }
+
+        function escHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
         }
 
         async function checkSession() {
@@ -681,18 +1247,29 @@
                     <td class="px-5 py-3 text-right space-x-1 whitespace-nowrap">
                         <button onclick="openDetail(${s.id})" class="text-xs font-bold text-blue-700 hover:bg-blue-100 bg-blue-50 px-2.5 py-1.5 rounded-lg transition">Detail</button>
                         <button onclick="openEdit(${s.id})" class="text-xs font-bold text-amber-700 hover:bg-amber-100 bg-amber-50 px-2.5 py-1.5 rounded-lg transition">Edit</button>
+                        <button onclick="printBukuInduk(${s.id})" class="text-xs font-bold text-emerald-700 hover:bg-emerald-100 bg-emerald-50 px-2.5 py-1.5 rounded-lg transition">Cetak</button>
                     </td>
                 </tr>
             `).join('');
         }
 
+        // ==========================================
+        // MODAL DETAIL LENGKAP (A - K)
+        // ==========================================
         window.openDetail = function(id) {
             const s = allSiswa.find(x => x.id === id);
             if (!s) return;
-            const a = getBagianA(s);
+            const ex = getExtra(s);
+            const a = ex.bagian_a || {};
+            const b = ex.bagian_b || {};
+            const c = ex.bagian_c || {};
+            const d = ex.bagian_d || {};
+            const h = ex.bagian_h || {};
+            const rk = ex.riwayat_kelas || {};
 
             document.getElementById('modal-nama').textContent = s.nama_lengkap_siswa || '-';
-            document.getElementById('modal-sub').textContent = `${s.rombel_saat_ini || '-'} • NIPD: ${s.nomor_induk_peserta_didik || '-'} • NISN: ${s.nomor_induk_siswa_nasional || '-'}`;
+            document.getElementById('modal-sub').textContent = `${s.rombel_saat_ini || '-'} • No. Urut: ${a.nomor_urut || '-'} • NIPD: ${s.nomor_induk_peserta_didik || '-'} • NISN: ${s.nomor_induk_siswa_nasional || '-'}`;
+            document.getElementById('btn-detail-print').onclick = () => printBukuInduk(s.id);
 
             const fotoGrid = [1, 2, 3, 4, 5, 6].map(k => {
                 const url = getFotoUrlBySlot(s, k);
@@ -709,7 +1286,7 @@
                 `;
             }).join('');
 
-            const row = (l, v) => `<div class="grid grid-cols-3 gap-2 py-1.5 border-b border-slate-100"><span class="text-slate-500 text-xs font-semibold">${l}</span><span class="col-span-2 text-slate-900 font-medium">${v || '-'}</span></div>`;
+            const row = (no, l, v) => `<div class="grid grid-cols-12 gap-2 py-1.5 border-b border-slate-100 items-baseline"><span class="col-span-1 text-slate-400 text-xs font-bold">${no}</span><span class="col-span-4 text-slate-600 text-xs font-semibold">${l}</span><span class="col-span-7 text-slate-900 font-medium">${escHtml(v) || '-'}</span></div>`;
 
             const saudaraText = `Kandung: ${a.saudara_kandung || '-'} • Tiri: ${a.saudara_tiri || '-'} • Angkat: ${a.saudara_angkat || '-'}`;
             const alamatLengkap = [
@@ -722,6 +1299,19 @@
                 a.kodepos ? `(${a.kodepos})` : ''
             ].filter(Boolean).join(', ');
 
+            const riwayatRows = [1, 2, 3, 4, 5, 6].map(k => {
+                const item = rk[String(k)] || {};
+                return `
+                    <tr class="border-b border-slate-100">
+                        <td class="px-2.5 py-2 font-bold">Kls ${k}</td>
+                        <td class="px-2.5 py-2">${escHtml(item.ta) || '-'}</td>
+                        <td class="px-2.5 py-2">${escHtml(item.bb) || '-'} kg / ${escHtml(item.tb) || '-'} cm</td>
+                        <td class="px-2.5 py-2">${[item.bea1, item.bea2, item.bea3].filter(Boolean).join(', ') || '-'}</td>
+                        <td class="px-2.5 py-2 text-xs">${escHtml(item.perilaku) || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+
             document.getElementById('modal-body').innerHTML = `
                 <div>
                     <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Pas Foto 3x4 per Jenjang</h4>
@@ -729,32 +1319,87 @@
                 </div>
                 <div>
                     <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">A. Keterangan Siswa</h4>
-                    ${row('A.1 Nama Lengkap', s.nama_lengkap_siswa)}
-                    ${row('A.1b Nama Panggilan', a.nama_panggilan)}
-                    ${row('A.2 Jenis Kelamin', s.jenis_kelamin_siswa)}
-                    ${row('A.3 Tempat, Tgl Lahir', (s.tempat_lahir_siswa || '-') + ', ' + (s.tanggal_lahir_siswa || '-'))}
-                    ${row('A.4 Agama', a.agama)}
-                    ${row('A.5 NIK Siswa', s.nomor_induk_kependudukan_siswa)}
-                    ${row('A.6 Kewarganegaraan', a.kewarganegaraan)}
-                    ${row('A.7 Jumlah Saudara', saudaraText)}
-                    ${row('A.8 Bahasa Sehari-hari', a.bahasa_sehari_hari)}
-                    ${row('A.9 Keadaan Jasmani', `BB: ${s.berat_badan_siswa || '-'} kg | TB: ${s.tinggi_badan_siswa || '-'} cm | Gol. Darah: ${s.golongan_darah_siswa || '-'}`)}
-                    ${row('A.10 Penyakit Diderita', a.penyakit_diderita)}
-                    ${row('A.11 Alamat', alamatLengkap)}
-                    ${row('A.12 Tinggal Pada', a.tinggal_pada)}
-                    ${row('A.13 Transportasi', a.transportasi)}
-                    ${row('A.14 Jarak & Waktu', `Jarak: ${a.jarak_km || '-'} km • Waktu: ${a.waktu_tempuh_menit || '-'} menit`)}
-                    ${row('A.15 No. KJP / PIP', a.no_kjp_pip)}
-                    ${row('A.16 Nomor Kontak', s.nomor_telepon_siswa)}
+                    ${row('1.', 'Nama Lengkap', s.nama_lengkap_siswa)}
+                    ${row('1b.', 'Nama Panggilan', a.nama_panggilan)}
+                    ${row('2.', 'Jenis Kelamin', s.jenis_kelamin_siswa)}
+                    ${row('3.', 'Tempat, Tgl Lahir', `${s.tempat_lahir_siswa || '-'}, ${s.tanggal_lahir_siswa || '-'}`)}
+                    ${row('4.', 'Agama', a.agama)}
+                    ${row('5.', 'NIK Siswa', s.nomor_induk_kependudukan_siswa)}
+                    ${row('6.', 'Kewarganegaraan', a.kewarganegaraan)}
+                    ${row('7.', 'Jumlah Saudara', saudaraText)}
+                    ${row('8.', 'Bahasa Sehari-hari', a.bahasa_sehari_hari)}
+                    ${row('9.', 'Keadaan Jasmani', `BB: ${s.berat_badan_siswa || '-'} kg | TB: ${s.tinggi_badan_siswa || '-'} cm | Gol. Darah: ${s.golongan_darah_siswa || '-'}`)}
+                    ${row('10.', 'Penyakit Diderita', a.penyakit_diderita)}
+                    ${row('11.', 'Alamat', alamatLengkap)}
+                    ${row('12.', 'Tinggal Pada', a.tinggal_pada)}
+                    ${row('13.', 'Transportasi', a.transportasi)}
+                    ${row('14.', 'Jarak & Waktu', `Jarak: ${a.jarak_km || '-'} km • Waktu: ${a.waktu_tempuh_menit || '-'} menit`)}
+                    ${row('15.', 'No. KJP / PIP', a.no_kjp_pip)}
+                    ${row('16.', 'Nomor Kontak', s.nomor_telepon_siswa)}
                 </div>
                 <div>
-                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Orang Tua (Ringkasan)</h4>
-                    ${row('Ayah', `${s.nama_ayah || '-'} (${s.pekerjaan_ayah || '-'}) • HP: ${s.nomor_telepon_ayah || '-'}`)}
-                    ${row('Ibu', `${s.nama_ibu || '-'} (${s.pekerjaan_ibu || '-'}) • HP: ${s.nomor_telepon_ibu || '-'}`)}
+                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">B. Keterangan Ayah Kandung</h4>
+                    ${row('1.', 'Nama Ayah', s.nama_ayah)}
+                    ${row('2.', 'Tempat, Tgl Lahir', `${b.tempat_lahir || '-'}, ${b.tanggal_lahir || '-'}`)}
+                    ${row('3.', 'Agama', b.agama)}
+                    ${row('4.', 'NIK Ayah', b.nik)}
+                    ${row('5.', 'Pendidikan', b.pendidikan)}
+                    ${row('6.', 'Kebutuhan Khusus', b.kebutuhan_khusus)}
+                    ${row('7.', 'Pekerjaan & HP', `${s.pekerjaan_ayah || '-'} • HP: ${s.nomor_telepon_ayah || '-'}`)}
+                    ${row('8.', 'Penghasilan/Bln', b.penghasilan)}
+                </div>
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">C. Keterangan Ibu Kandung</h4>
+                    ${row('1.', 'Nama Ibu', s.nama_ibu)}
+                    ${row('2.', 'Tempat, Tgl Lahir', `${c.tempat_lahir || '-'}, ${c.tanggal_lahir || '-'}`)}
+                    ${row('3.', 'Agama', c.agama)}
+                    ${row('4.', 'NIK Ibu', c.nik)}
+                    ${row('5.', 'Pendidikan', c.pendidikan)}
+                    ${row('6.', 'Kebutuhan Khusus', c.kebutuhan_khusus)}
+                    ${row('7.', 'Pekerjaan & HP', `${s.pekerjaan_ibu || '-'} • HP: ${s.nomor_telepon_ibu || '-'}`)}
+                    ${row('8.', 'Penghasilan/Bln', c.penghasilan)}
+                </div>
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">D. Keterangan Wali Siswa</h4>
+                    ${row('1.', 'Nama Wali', d.nama)}
+                    ${row('2.', 'Tempat, Tgl Lahir', `${d.tempat_lahir || '-'}, ${d.tanggal_lahir || '-'}`)}
+                    ${row('3.', 'Agama', d.agama)}
+                    ${row('4.', 'NIK Wali', d.nik)}
+                    ${row('5.', 'Pendidikan', d.pendidikan)}
+                    ${row('6.', 'Kebutuhan Khusus', d.kebutuhan_khusus)}
+                    ${row('7.', 'Pekerjaan & HP', `${d.pekerjaan || '-'} • HP: ${d.hp || '-'}`)}
+                    ${row('8.', 'Penghasilan/Bln', d.penghasilan)}
+                </div>
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">E, F, J, K. Ringkasan Riwayat Kelas 1–6</h4>
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="px-2.5 py-2">Kls</th>
+                                    <th class="px-2.5 py-2">TA</th>
+                                    <th class="px-2.5 py-2">BB / TB</th>
+                                    <th class="px-2.5 py-2">Beasiswa</th>
+                                    <th class="px-2.5 py-2">Perilaku</th>
+                                </tr>
+                            </thead>
+                            <tbody>${riwayatRows}</tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">H & I. Meninggalkan Sekolah & Catatan</h4>
+                    ${row('H.1', 'Mutasi Keluar', h.mutasi_sekolah ? `${h.mutasi_sekolah} (Surat: ${h.mutasi_surat || '-'}, Tgl: ${h.mutasi_tgl || '-'})` : '-')}
+                    ${row('H.2', 'Tamat / Lulus', h.lulus_ijazah ? `No. Ijazah: ${h.lulus_ijazah} • Lanjut: ${h.lulus_sekolah || '-'}` : '-')}
+                    ${row('H.3', 'Putus Sekolah', h.do_tgl ? `Tgl: ${h.do_tgl} (Kelas ${h.do_kelas || '-'})` : '-')}
+                    ${row('I.', 'Catatan Penting', ex.catatan_penting)}
                 </div>`;
             document.getElementById('detail-modal').classList.remove('hidden');
         };
 
+        // ==========================================
+        // KOMPRESI & UPLOAD PAS FOTO
+        // ==========================================
         window.renderFotoSlotPreview = function() {
             pendingCompressedBlob = null;
             document.getElementById('input-foto-siswa').value = '';
@@ -833,26 +1478,153 @@
 
                 const origKB = (file.size / 1024).toFixed(0);
                 const compKB = (blob.size / 1024).toFixed(0);
-                statusEl.textContent = `Siap diunggah (${width}x${height}px): ${origKB} KB → ${compKB} KB. Klik "Simpan Perubahan".`;
+                statusEl.textContent = `Siap diunggah (${width}x${height}px): ${origKB} KB → ${compKB} KB. Klik "Simpan Semua Data".`;
             } catch (err) {
                 statusEl.textContent = err.message;
                 e.target.value = '';
             }
         });
 
+        // ==========================================
+        // HELPER SUB-FORM RIWAYAT KELAS (E,F,J,K) & PRESTASI (G)
+        // ==========================================
+        function saveCurrentRiwayatKelasToDraft() {
+            if (!draftExtra.riwayat_kelas) draftExtra.riwayat_kelas = {};
+            draftExtra.riwayat_kelas[currentRiwayatKelas] = {
+                ta: document.getElementById('rk-ta').value.trim(),
+                bb: document.getElementById('rk-bb').value.trim(),
+                tb: document.getElementById('rk-tb').value.trim(),
+                penyakit: document.getElementById('rk-penyakit').value.trim(),
+                kelainan: document.getElementById('rk-kelainan').value.trim(),
+                bea1: document.getElementById('rk-bea1').value.trim(),
+                bea2: document.getElementById('rk-bea2').value.trim(),
+                bea3: document.getElementById('rk-bea3').value.trim(),
+                bea_jml: document.getElementById('rk-bea-jml').value.trim(),
+                perilaku: document.getElementById('rk-perilaku').value.trim(),
+                pengembangan: document.getElementById('rk-pengembangan').value.trim(),
+                wali_rombel: document.getElementById('rk-wali-rombel').value.trim()
+            };
+        }
+
+        function loadRiwayatKelasFromDraft(kls) {
+            currentRiwayatKelas = String(kls);
+            const item = (draftExtra.riwayat_kelas && draftExtra.riwayat_kelas[currentRiwayatKelas]) || {};
+            document.getElementById('rk-ta').value = item.ta || '';
+            document.getElementById('rk-bb').value = item.bb || '';
+            document.getElementById('rk-tb').value = item.tb || '';
+            document.getElementById('rk-penyakit').value = item.penyakit || '';
+            document.getElementById('rk-kelainan').value = item.kelainan || '';
+            document.getElementById('rk-bea1').value = item.bea1 || '';
+            document.getElementById('rk-bea2').value = item.bea2 || '';
+            document.getElementById('rk-bea3').value = item.bea3 || '';
+            document.getElementById('rk-bea-jml').value = item.bea_jml || '';
+            document.getElementById('rk-perilaku').value = item.perilaku || '';
+            document.getElementById('rk-pengembangan').value = item.pengembangan || '';
+            document.getElementById('rk-wali-rombel').value = item.wali_rombel || '';
+        }
+
+        window.switchRiwayatKelas = function() {
+            saveCurrentRiwayatKelasToDraft();
+            loadRiwayatKelasFromDraft(document.getElementById('riwayat-kelas-select').value);
+        };
+
+        function saveCurrentSemesterGToDraft() {
+            if (!draftExtra.bagian_g) draftExtra.bagian_g = {};
+            if (!draftExtra.bagian_g.semester) draftExtra.bagian_g.semester = {};
+            const mapelArr = MAPEL_LIST.map((_, idx) => ({
+                kkm: document.getElementById(`gs-kkm-${idx}`).value.trim(),
+                nilai: document.getElementById(`gs-val-${idx}`).value.trim()
+            }));
+            draftExtra.bagian_g.semester[currentSemesterG] = {
+                ta: document.getElementById('gs-ta').value.trim(),
+                titimangsa: document.getElementById('gs-titimangsa').value.trim(),
+                naik: document.getElementById('gs-naik').value.trim(),
+                mapel: mapelArr,
+                peringkat: document.getElementById('gs-peringkat').value.trim(),
+                sakit: document.getElementById('gs-sakit').value.trim(),
+                ijin: document.getElementById('gs-ijin').value.trim(),
+                alfa: document.getElementById('gs-alfa').value.trim(),
+                ekskul1: document.getElementById('gs-ekskul1').value.trim(),
+                ekskul2: document.getElementById('gs-ekskul2').value.trim(),
+                ekskul3: document.getElementById('gs-ekskul3').value.trim(),
+                sikap: document.getElementById('gs-sikap').value.trim(),
+                kerajinan: document.getElementById('gs-kerajinan').value.trim(),
+                kerapihan: document.getElementById('gs-kerapihan').value.trim(),
+                guru: document.getElementById('gs-guru').value.trim(),
+                nip: document.getElementById('gs-nip').value.trim()
+            };
+        }
+
+        function loadSemesterGFromDraft(sm) {
+            currentSemesterG = String(sm);
+            const smObj = (draftExtra.bagian_g && draftExtra.bagian_g.semester && draftExtra.bagian_g.semester[currentSemesterG]) || {};
+            document.getElementById('gs-ta').value = smObj.ta || '';
+            document.getElementById('gs-titimangsa').value = smObj.titimangsa || '';
+            document.getElementById('gs-naik').value = smObj.naik || '';
+            document.getElementById('gs-peringkat').value = smObj.peringkat || '';
+            document.getElementById('gs-sakit').value = smObj.sakit || '';
+            document.getElementById('gs-ijin').value = smObj.ijin || '';
+            document.getElementById('gs-alfa').value = smObj.alfa || '';
+            document.getElementById('gs-ekskul1').value = smObj.ekskul1 || '';
+            document.getElementById('gs-ekskul2').value = smObj.ekskul2 || '';
+            document.getElementById('gs-ekskul3').value = smObj.ekskul3 || '';
+            document.getElementById('gs-sikap').value = smObj.sikap || '';
+            document.getElementById('gs-kerajinan').value = smObj.kerajinan || '';
+            document.getElementById('gs-kerapihan').value = smObj.kerapihan || '';
+            document.getElementById('gs-guru').value = smObj.guru || '';
+            document.getElementById('gs-nip').value = smObj.nip || '';
+
+            const tbody = document.getElementById('gs-mapel-tbody');
+            tbody.innerHTML = MAPEL_LIST.map((m, idx) => {
+                const mVal = (smObj.mapel && smObj.mapel[idx]) || {};
+                return `
+                    <tr>
+                        <td class="px-3 py-1.5 text-slate-500 font-semibold">${idx + 1}</td>
+                        <td class="px-3 py-1.5 font-medium text-slate-800">${m}</td>
+                        <td class="px-2 py-1 text-center">
+                            <input type="text" id="gs-kkm-${idx}" value="${escHtml(mVal.kkm || '')}" placeholder="75"
+                                class="w-16 text-center px-2 py-1 rounded border border-slate-300">
+                        </td>
+                        <td class="px-2 py-1 text-center">
+                            <input type="text" id="gs-val-${idx}" value="${escHtml(mVal.nilai || '')}" placeholder="0-100"
+                                class="w-16 text-center px-2 py-1 rounded border border-slate-300 font-bold">
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.switchSemesterG = function() {
+            saveCurrentSemesterGToDraft();
+            loadSemesterGFromDraft(document.getElementById('g-semester-select').value);
+        };
+
+        // ==========================================
+        // OPEN EDIT & SUBMIT SEMUA DATA (A - K)
+        // ==========================================
         window.openEdit = function(id) {
             const s = allSiswa.find(x => x.id === id);
             if (!s) return;
             activeEditSiswa = s;
-            const a = getBagianA(s);
+            draftExtra = JSON.parse(JSON.stringify(getExtra(s)));
 
-            switchEditTab('identitas');
+            const a = draftExtra.bagian_a || {};
+            const b = draftExtra.bagian_b || {};
+            const c = draftExtra.bagian_c || {};
+            const d = draftExtra.bagian_d || {};
+            const g = draftExtra.bagian_g || {};
+            const h = draftExtra.bagian_h || {};
+
+            switchEditTab('a');
 
             const matchKelas = (s.rombel_saat_ini || '').match(/[1-6]/);
-            document.getElementById('foto-kelas-slot').value = matchKelas ? matchKelas[0] : '1';
+            const defaultKls = matchKelas ? matchKelas[0] : '1';
+            document.getElementById('foto-kelas-slot').value = defaultKls;
             renderFotoSlotPreview();
 
+            // Tab A
             document.getElementById('edit-id').value = s.id;
+            document.getElementById('f-nomor-urut').value = a.nomor_urut || '';
             document.getElementById('f-nama').value = s.nama_lengkap_siswa || '';
             document.getElementById('f-panggilan').value = a.nama_panggilan || '';
             document.getElementById('f-rombel').value = s.rombel_saat_ini || '';
@@ -868,7 +1640,6 @@
             document.getElementById('f-saudara-kandung').value = a.saudara_kandung ?? '';
             document.getElementById('f-saudara-tiri').value = a.saudara_tiri ?? '';
             document.getElementById('f-saudara-angkat').value = a.saudara_angkat ?? '';
-
             document.getElementById('f-berat').value = s.berat_badan_siswa || '';
             document.getElementById('f-tinggi').value = s.tinggi_badan_siswa || '';
             document.getElementById('f-goldar').value = s.golongan_darah_siswa || '';
@@ -881,7 +1652,6 @@
             document.getElementById('f-kabupaten').value = a.kabupaten || '';
             document.getElementById('f-provinsi').value = a.provinsi || '';
             document.getElementById('f-kodepos').value = a.kodepos || '';
-
             document.getElementById('f-tinggal-pada').value = a.tinggal_pada || '';
             document.getElementById('f-transportasi').value = a.transportasi || '';
             document.getElementById('f-jarak-km').value = a.jarak_km || '';
@@ -889,11 +1659,81 @@
             document.getElementById('f-kjp-pip').value = a.no_kjp_pip || '';
             document.getElementById('f-telp').value = s.nomor_telepon_siswa || '';
 
+            // Tab B-D (Ayah, Ibu, Wali)
+            document.getElementById('b-nama').value = s.nama_ayah || '';
+            document.getElementById('b-hp').value = s.nomor_telepon_ayah || '';
+            document.getElementById('b-tempat').value = b.tempat_lahir || '';
+            document.getElementById('b-tgl').value = b.tanggal_lahir || '';
+            document.getElementById('b-agama').value = b.agama || '';
+            document.getElementById('b-nik').value = b.nik || '';
+            document.getElementById('b-pendidikan').value = b.pendidikan || '';
+            document.getElementById('b-khusus').value = b.kebutuhan_khusus || '';
+            document.getElementById('b-pekerjaan').value = s.pekerjaan_ayah || '';
+            document.getElementById('b-penghasilan').value = b.penghasilan || '';
+
+            document.getElementById('c-nama').value = s.nama_ibu || '';
+            document.getElementById('c-hp').value = s.nomor_telepon_ibu || '';
+            document.getElementById('c-tempat').value = c.tempat_lahir || '';
+            document.getElementById('c-tgl').value = c.tanggal_lahir || '';
+            document.getElementById('c-agama').value = c.agama || '';
+            document.getElementById('c-nik').value = c.nik || '';
+            document.getElementById('c-pendidikan').value = c.pendidikan || '';
+            document.getElementById('c-khusus').value = c.kebutuhan_khusus || '';
+            document.getElementById('c-pekerjaan').value = s.pekerjaan_ibu || '';
+            document.getElementById('c-penghasilan').value = c.penghasilan || '';
+
+            document.getElementById('d-nama').value = d.nama || '';
+            document.getElementById('d-hp').value = d.hp || '';
+            document.getElementById('d-tempat').value = d.tempat_lahir || '';
+            document.getElementById('d-tgl').value = d.tanggal_lahir || '';
+            document.getElementById('d-agama').value = d.agama || '';
+            document.getElementById('d-nik').value = d.nik || '';
+            document.getElementById('d-pendidikan').value = d.pendidikan || '';
+            document.getElementById('d-khusus').value = d.kebutuhan_khusus || '';
+            document.getElementById('d-pekerjaan').value = d.pekerjaan || '';
+            document.getElementById('d-penghasilan').value = d.penghasilan || '';
+
+            // Tab E,F,J,K
+            document.getElementById('riwayat-kelas-select').value = defaultKls;
+            loadRiwayatKelasFromDraft(defaultKls);
+
+            // Tab G
+            document.getElementById('g-seri-rapor').value = g.no_seri_rapor || '';
+            document.getElementById('g-no-ujian').value = g.no_peserta_ujian || '';
+            const defaultSm = String((parseInt(defaultKls, 10) - 1) * 2 + 1);
+            document.getElementById('g-semester-select').value = defaultSm;
+            loadSemesterGFromDraft(defaultSm);
+
+            // Tab H-I
+            document.getElementById('h1-surat').value = h.mutasi_surat || '';
+            document.getElementById('h1-tgl').value = h.mutasi_tgl || '';
+            document.getElementById('h1-kelas').value = h.mutasi_kelas || '';
+            document.getElementById('h1-alasan').value = h.mutasi_alasan || '';
+            document.getElementById('h1-npsn').value = h.mutasi_npsn || '';
+            document.getElementById('h1-sekolah').value = h.mutasi_sekolah || '';
+            document.getElementById('h1-nss').value = h.mutasi_nss || '';
+            document.getElementById('h1-alamat').value = h.mutasi_alamat || '';
+            document.getElementById('h1-kec').value = h.mutasi_kec || '';
+            document.getElementById('h1-kabprov').value = h.mutasi_kabprov || '';
+
+            document.getElementById('h2-tgl').value = h.lulus_tgl || '';
+            document.getElementById('h2-ijazah').value = h.lulus_ijazah || '';
+            document.getElementById('h2-skhun').value = h.lulus_skhun || '';
+            document.getElementById('h2-sekolah').value = h.lulus_sekolah || '';
+            document.getElementById('h2-kec').value = h.lulus_kec || '';
+            document.getElementById('h2-kab').value = h.lulus_kab || '';
+            document.getElementById('h2-alasan').value = h.lulus_alasan || '';
+
+            document.getElementById('h3-tgl').value = h.do_tgl || '';
+            document.getElementById('h3-kelas').value = h.do_kelas || '';
+            document.getElementById('h3-alasan').value = h.do_alasan || '';
+            document.getElementById('i-catatan').value = draftExtra.catatan_penting || '';
+
             const isSiswa = currentRole === 'siswa';
             document.querySelectorAll('.sacred-field').forEach(el => el.disabled = isSiswa);
             document.getElementById('edit-note').textContent = isSiswa
-                ? 'Field berlatar abu-abu dikunci sekolah. Anda dapat melengkapi bagian A lainnya serta pas foto.'
-                : 'Lengkapi data Bagian A (Keterangan Siswa) dan pas foto per kelas.';
+                ? 'Field berlatar abu-abu dikunci sekolah. Anda dapat melengkapi biodata pelengkap dan pas foto.'
+                : 'Lengkapi seluruh bagian Buku Induk (A–K) dan pas foto per kelas.';
 
             document.getElementById('edit-modal').classList.remove('hidden');
         };
@@ -906,7 +1746,9 @@
 
             const id = document.getElementById('edit-id').value;
             const slot = document.getElementById('foto-kelas-slot').value;
-            const existingExtra = JSON.parse(JSON.stringify(getExtra(activeEditSiswa)));
+
+            saveCurrentRiwayatKelasToDraft();
+            saveCurrentSemesterGToDraft();
 
             if (pendingCompressedBlob) {
                 const filePath = `${id}/kelas_${slot}.jpg`;
@@ -919,17 +1761,18 @@
 
                 if (uploadErr) {
                     alert('Gagal mengunggah pas foto: ' + uploadErr.message);
-                    btn.textContent = 'Simpan Perubahan';
+                    btn.textContent = 'Simpan Semua Data';
                     btn.disabled = false;
                     return;
                 }
 
                 const { data: pub } = db.storage.from('foto-siswa').getPublicUrl(filePath);
-                if (!existingExtra.pas_foto) existingExtra.pas_foto = {};
-                existingExtra.pas_foto[`kelas_${slot}`] = pub.publicUrl;
+                if (!draftExtra.pas_foto) draftExtra.pas_foto = {};
+                draftExtra.pas_foto[`kelas_${slot}`] = pub.publicUrl;
             }
 
-            existingExtra.bagian_a = {
+            draftExtra.bagian_a = {
+                nomor_urut: document.getElementById('f-nomor-urut').value.trim(),
                 nama_panggilan: document.getElementById('f-panggilan').value.trim(),
                 agama: document.getElementById('f-agama').value.trim(),
                 kewarganegaraan: document.getElementById('f-kewarganegaraan').value.trim(),
@@ -950,6 +1793,68 @@
                 no_kjp_pip: document.getElementById('f-kjp-pip').value.trim()
             };
 
+            draftExtra.bagian_b = {
+                tempat_lahir: document.getElementById('b-tempat').value.trim(),
+                tanggal_lahir: document.getElementById('b-tgl').value.trim(),
+                agama: document.getElementById('b-agama').value.trim(),
+                nik: document.getElementById('b-nik').value.trim(),
+                pendidikan: document.getElementById('b-pendidikan').value.trim(),
+                kebutuhan_khusus: document.getElementById('b-khusus').value.trim(),
+                penghasilan: document.getElementById('b-penghasilan').value.trim()
+            };
+
+            draftExtra.bagian_c = {
+                tempat_lahir: document.getElementById('c-tempat').value.trim(),
+                tanggal_lahir: document.getElementById('c-tgl').value.trim(),
+                agama: document.getElementById('c-agama').value.trim(),
+                nik: document.getElementById('c-nik').value.trim(),
+                pendidikan: document.getElementById('c-pendidikan').value.trim(),
+                kebutuhan_khusus: document.getElementById('c-khusus').value.trim(),
+                penghasilan: document.getElementById('c-penghasilan').value.trim()
+            };
+
+            draftExtra.bagian_d = {
+                nama: document.getElementById('d-nama').value.trim(),
+                hp: document.getElementById('d-hp').value.trim(),
+                tempat_lahir: document.getElementById('d-tempat').value.trim(),
+                tanggal_lahir: document.getElementById('d-tgl').value.trim(),
+                agama: document.getElementById('d-agama').value.trim(),
+                nik: document.getElementById('d-nik').value.trim(),
+                pendidikan: document.getElementById('d-pendidikan').value.trim(),
+                kebutuhan_khusus: document.getElementById('d-khusus').value.trim(),
+                pekerjaan: document.getElementById('d-pekerjaan').value.trim(),
+                penghasilan: document.getElementById('d-penghasilan').value.trim()
+            };
+
+            if (!draftExtra.bagian_g) draftExtra.bagian_g = {};
+            draftExtra.bagian_g.no_seri_rapor = document.getElementById('g-seri-rapor').value.trim();
+            draftExtra.bagian_g.no_peserta_ujian = document.getElementById('g-no-ujian').value.trim();
+
+            draftExtra.bagian_h = {
+                mutasi_surat: document.getElementById('h1-surat').value.trim(),
+                mutasi_tgl: document.getElementById('h1-tgl').value.trim(),
+                mutasi_kelas: document.getElementById('h1-kelas').value.trim(),
+                mutasi_alasan: document.getElementById('h1-alasan').value.trim(),
+                mutasi_npsn: document.getElementById('h1-npsn').value.trim(),
+                mutasi_sekolah: document.getElementById('h1-sekolah').value.trim(),
+                mutasi_nss: document.getElementById('h1-nss').value.trim(),
+                mutasi_alamat: document.getElementById('h1-alamat').value.trim(),
+                mutasi_kec: document.getElementById('h1-kec').value.trim(),
+                mutasi_kabprov: document.getElementById('h1-kabprov').value.trim(),
+                lulus_tgl: document.getElementById('h2-tgl').value.trim(),
+                lulus_ijazah: document.getElementById('h2-ijazah').value.trim(),
+                lulus_skhun: document.getElementById('h2-skhun').value.trim(),
+                lulus_sekolah: document.getElementById('h2-sekolah').value.trim(),
+                lulus_kec: document.getElementById('h2-kec').value.trim(),
+                lulus_kab: document.getElementById('h2-kab').value.trim(),
+                lulus_alasan: document.getElementById('h2-alasan').value.trim(),
+                do_tgl: document.getElementById('h3-tgl').value.trim(),
+                do_kelas: document.getElementById('h3-kelas').value.trim(),
+                do_alasan: document.getElementById('h3-alasan').value.trim()
+            };
+
+            draftExtra.catatan_penting = document.getElementById('i-catatan').value.trim();
+
             const payload = {
                 nomor_telepon_siswa: document.getElementById('f-telp').value.trim(),
                 alamat_siswa: document.getElementById('f-alamat').value.trim(),
@@ -958,7 +1863,13 @@
                 golongan_darah_siswa: document.getElementById('f-goldar').value.trim(),
                 tinggi_badan_siswa: document.getElementById('f-tinggi').value.trim(),
                 berat_badan_siswa: document.getElementById('f-berat').value.trim(),
-                data_tambahan: existingExtra
+                nama_ayah: document.getElementById('b-nama').value.trim(),
+                pekerjaan_ayah: document.getElementById('b-pekerjaan').value.trim(),
+                nomor_telepon_ayah: document.getElementById('b-hp').value.trim(),
+                nama_ibu: document.getElementById('c-nama').value.trim(),
+                pekerjaan_ibu: document.getElementById('c-pekerjaan').value.trim(),
+                nomor_telepon_ibu: document.getElementById('c-hp').value.trim(),
+                data_tambahan: draftExtra
             };
 
             if (currentRole !== 'siswa') {
@@ -973,7 +1884,7 @@
             }
 
             const { error } = await db.from('master_siswa').update(payload).eq('id', id);
-            btn.textContent = 'Simpan Perubahan';
+            btn.textContent = 'Simpan Semua Data';
             btn.disabled = false;
 
             if (error) {
@@ -985,6 +1896,482 @@
             }
         });
 
+        // ==========================================
+        // CETAK BUKU INDUK FORMAT S-4 (4 HALAMAN)
+        // ==========================================
+        function makeBoxes(val, count) {
+            const clean = String(val ?? '').replace(/[^A-Za-z0-9]/g, '');
+            let html = '<span class="s4-box-group">';
+            for (let i = 0; i < count; i++) {
+                html += `<span class="s4-box">${escHtml(clean[i] || '')}</span>`;
+            }
+            html += '</span>';
+            return html;
+        }
+
+        function splitDateBoxes(tglStr) {
+            const clean = String(tglStr ?? '').trim();
+            let dd = '', mm = '', yyyy = '';
+            if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
+                yyyy = clean.slice(0, 4);
+                mm = clean.slice(5, 7);
+                dd = clean.slice(8, 10);
+            } else if (/^\d{2}[-/]\d{2}[-/]\d{4}/.test(clean)) {
+                dd = clean.slice(0, 2);
+                mm = clean.slice(3, 5);
+                yyyy = clean.slice(6, 10);
+            }
+            return `${makeBoxes(dd, 2)} - ${makeBoxes(mm, 2)} - ${makeBoxes(yyyy, 4)}`;
+        }
+
+        function renderPhotoSlotHtml(siswa, slotNum) {
+            const url = getFotoUrlBySlot(siswa, slotNum);
+            if (url) {
+                return `<div class="s4-photo-slot"><img src="${url}?t=${Date.now()}" alt="Foto ${slotNum}"></div>`;
+            }
+            return `
+                <div class="s4-photo-slot">
+                    <div style="font-weight:bold;font-size:10pt;margin-bottom:3px;">${slotNum}</div>
+                    <div>Pasang Pas Foto<br>&amp; Cap Tiga Jari<br>Siswa</div>
+                </div>
+            `;
+        }
+
+        window.printBukuInduk = function(id) {
+            const s = allSiswa.find(x => x.id === id);
+            if (!s) return;
+            const ex = getExtra(s);
+            const a = ex.bagian_a || {};
+            const b = ex.bagian_b || {};
+            const c = ex.bagian_c || {};
+            const d = ex.bagian_d || {};
+            const g = ex.bagian_g || {};
+            const sem = g.semester || {};
+            const h = ex.bagian_h || {};
+            const rk = ex.riwayat_kelas || {};
+
+            const abjad = (s.nama_lengkap_siswa || '').trim().charAt(0).toUpperCase();
+
+            // ---------- HALAMAN 1 (POTRAIT: A, B, C, D + FOTO 1-5) ----------
+            const page1 = `
+            <div class="s4-page">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+                    <div>
+                        <div style="font-size:16pt;font-weight:bold;letter-spacing:0.5px;">BUKU INDUK SISWA</div>
+                        <div style="font-size:8.5pt;font-weight:bold;">SDN PLUIT 03 • KECAMATAN PENJARINGAN • JAKARTA UTARA</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="border:1.5px solid #000;padding:2px 8px;font-weight:bold;font-size:10pt;margin-bottom:3px;">format : S-4</div>
+                        <div style="font-size:8.5pt;font-weight:bold;">Nomor Urut ${makeBoxes(a.nomor_urut, 4)}</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:8.5pt;font-weight:bold;">
+                    <div>NOMOR INDUK ${makeBoxes(s.nomor_induk_peserta_didik, 10)}</div>
+                    <div>NISN ${makeBoxes(s.nomor_induk_siswa_nasional, 10)}</div>
+                    <div>ABJAD ${makeBoxes(abjad, 1)}</div>
+                </div>
+
+                <div style="display:flex;gap:8px;align-items:flex-start;">
+                    <!-- Kolom Kiri: Bagian A - D -->
+                    <div style="flex:1;">
+                        <div style="font-weight:bold;font-size:9.5pt;margin:3px 0 2px;">A. KETERANGAN SISWA</div>
+                        <table style="width:100%;border-collapse:collapse;font-size:8.5pt;">
+                            <tr><td style="width:165px;">1. Nama Siswa Lengkap *)</td><td style="width:8px;">:</td><td style="font-weight:bold;">${escHtml(s.nama_lengkap_siswa)}</td></tr>
+                            <tr><td style="padding-left:14px;">Nama Panggilan</td><td>:</td><td>${escHtml(a.nama_panggilan)} <span style="float:right;font-size:7pt;font-style:italic;">*) Lihat Akta Lahir</span></td></tr>
+                            <tr><td>2. Jenis Kelamin</td><td>:</td><td>${escHtml(s.jenis_kelamin_siswa)}</td></tr>
+                            <tr><td>3. Kelahiran Tempat, Tgl Lahir</td><td>:</td><td>${escHtml(s.tempat_lahir_siswa)}, ${splitDateBoxes(s.tanggal_lahir_siswa)}</td></tr>
+                            <tr><td>4. Agama</td><td>:</td><td>${escHtml(a.agama)}</td></tr>
+                            <tr><td>5. Nomor Induk Kependudukan</td><td>:</td><td>)* ${makeBoxes(s.nomor_induk_kependudukan_siswa, 16)}<div style="font-size:6.8pt;font-style:italic;text-align:right;">)* Lihat NIK dari Kartu Keluarga (KK)</div></td></tr>
+                            <tr><td>6. Kewarganegaraan</td><td>:</td><td>${escHtml(a.kewarganegaraan)}</td></tr>
+                            <tr><td>7. Jumlah Saudara</td><td>:</td><td>Kandung: <b>${escHtml(a.saudara_kandung || '0')}</b> Org &nbsp;|&nbsp; Tiri: <b>${escHtml(a.saudara_tiri || '0')}</b> Org &nbsp;|&nbsp; Angkat: <b>${escHtml(a.saudara_angkat || '0')}</b> Org</td></tr>
+                            <tr><td>8. Bahasa sehari-hari dikeluarga</td><td>:</td><td>${escHtml(a.bahasa_sehari_hari)}</td></tr>
+                            <tr><td>9. Keadaan Jasmani</td><td>:</td><td>Berat Badan: <b>${escHtml(s.berat_badan_siswa)}</b> Kg &nbsp;&nbsp; Tinggi Badan: <b>${escHtml(s.tinggi_badan_siswa)}</b> Cm &nbsp;&nbsp; Gol. Darah: <b>${escHtml(s.golongan_darah_siswa)}</b></td></tr>
+                            <tr><td>10. Penyakit yang pernah diderita</td><td>:</td><td>${escHtml(a.penyakit_diderita)}</td></tr>
+                            <tr><td>11. Alamat Jl/Kampung</td><td>:</td><td>${escHtml(s.alamat_siswa)} &nbsp;&nbsp; RT: <b>${escHtml(s.rt_siswa)}</b> &nbsp; RW: <b>${escHtml(s.rw_siswa)}</b></td></tr>
+                            <tr><td style="padding-left:16px;">Desa/Kelurahan</td><td>:</td><td>${escHtml(a.kelurahan)}</td></tr>
+                            <tr><td style="padding-left:16px;">Kecamatan</td><td>:</td><td>${escHtml(a.kecamatan)} &nbsp;&nbsp; Kode Pos: ${makeBoxes(a.kodepos, 5)}</td></tr>
+                            <tr><td style="padding-left:16px;">Kabupaten / Provinsi</td><td>:</td><td>${escHtml(a.kabupaten)} / ${escHtml(a.provinsi)}</td></tr>
+                            <tr><td>12. Bertempat tinggal pada</td><td>:</td><td>${escHtml(a.tinggal_pada)}</td></tr>
+                            <tr><td>13. Alat transportasi ke sekolah</td><td>:</td><td>${escHtml(a.transportasi)}</td></tr>
+                            <tr><td>14. Jarak tempat tinggal ke sekolah</td><td>:</td><td><b>${escHtml(a.jarak_km)}</b> Km &nbsp;&nbsp;&nbsp; Waktu Tempuh: <b>${escHtml(a.waktu_tempuh_menit)}</b> Menit</td></tr>
+                            <tr><td>15. Pemegang KJP / PIP, No.</td><td>:</td><td>${escHtml(a.no_kjp_pip)}</td></tr>
+                            <tr><td>16. Nomor Kontak</td><td>:</td><td>${escHtml(s.nomor_telepon_siswa)}</td></tr>
+                        </table>
+
+                        <div style="font-weight:bold;font-size:9.5pt;margin:6px 0 2px;">B. KETERANGAN AYAH KANDUNG SISWA</div>
+                        <table style="width:100%;border-collapse:collapse;font-size:8.5pt;">
+                            <tr><td style="width:165px;">1. Nama Ayah Kandung</td><td style="width:8px;">:</td><td style="font-weight:bold;">${escHtml(s.nama_ayah)}</td></tr>
+                            <tr><td>2. Kelahiran Tempat, Tgl Lahir</td><td>:</td><td>${escHtml(b.tempat_lahir)}, ${splitDateBoxes(b.tanggal_lahir)}</td></tr>
+                            <tr><td>3. Agama</td><td>:</td><td>${escHtml(b.agama)}</td></tr>
+                            <tr><td>4. Nomor Induk Kependudukan</td><td>:</td><td>)* ${makeBoxes(b.nik, 16)}</td></tr>
+                            <tr><td>5. Pendidikan Terakhir</td><td>:</td><td>${escHtml(b.pendidikan)} &nbsp;|&nbsp; Keb. Khusus: ${escHtml(b.kebutuhan_khusus)}</td></tr>
+                            <tr><td>6. Pekerjaan / No. HP</td><td>:</td><td>${escHtml(s.pekerjaan_ayah)} / ${escHtml(s.nomor_telepon_ayah)}</td></tr>
+                            <tr><td>7. Penghasilan Rata-rata Perbulan</td><td>:</td><td>${escHtml(b.penghasilan)}</td></tr>
+                        </table>
+
+                        <div style="font-weight:bold;font-size:9.5pt;margin:6px 0 2px;">C. KETERANGAN IBU KANDUNG SISWA</div>
+                        <table style="width:100%;border-collapse:collapse;font-size:8.5pt;">
+                            <tr><td style="width:165px;">1. Nama Ibu Kandung</td><td style="width:8px;">:</td><td style="font-weight:bold;">${escHtml(s.nama_ibu)}</td></tr>
+                            <tr><td>2. Kelahiran Tempat, Tgl Lahir</td><td>:</td><td>${escHtml(c.tempat_lahir)}, ${splitDateBoxes(c.tanggal_lahir)}</td></tr>
+                            <tr><td>3. Agama</td><td>:</td><td>${escHtml(c.agama)}</td></tr>
+                            <tr><td>4. Nomor Induk Kependudukan</td><td>:</td><td>)* ${makeBoxes(c.nik, 16)}</td></tr>
+                            <tr><td>5. Pendidikan Terakhir</td><td>:</td><td>${escHtml(c.pendidikan)} &nbsp;|&nbsp; Keb. Khusus: ${escHtml(c.kebutuhan_khusus)}</td></tr>
+                            <tr><td>6. Pekerjaan / No. HP</td><td>:</td><td>${escHtml(s.pekerjaan_ibu)} / ${escHtml(s.nomor_telepon_ibu)}</td></tr>
+                            <tr><td>7. Penghasilan Rata-rata Perbulan</td><td>:</td><td>${escHtml(c.penghasilan)}</td></tr>
+                        </table>
+
+                        <div style="font-weight:bold;font-size:9.5pt;margin:6px 0 2px;">D. KETERANGAN WALI SISWA</div>
+                        <table style="width:100%;border-collapse:collapse;font-size:8.5pt;">
+                            <tr><td style="width:165px;">1. Nama Wali</td><td style="width:8px;">:</td><td style="font-weight:bold;">${escHtml(d.nama)}</td></tr>
+                            <tr><td>2. Kelahiran Tempat, Tgl Lahir</td><td>:</td><td>${escHtml(d.tempat_lahir)}, ${splitDateBoxes(d.tanggal_lahir)}</td></tr>
+                            <tr><td>3. Agama</td><td>:</td><td>${escHtml(d.agama)}</td></tr>
+                            <tr><td>4. Nomor Induk Kependudukan</td><td>:</td><td>)* ${makeBoxes(d.nik, 16)}</td></tr>
+                            <tr><td>5. Pendidikan Terakhir</td><td>:</td><td>${escHtml(d.pendidikan)} &nbsp;|&nbsp; Keb. Khusus: ${escHtml(d.kebutuhan_khusus)}</td></tr>
+                            <tr><td>6. Pekerjaan / No. HP</td><td>:</td><td>${escHtml(d.pekerjaan)} / ${escHtml(d.hp)}</td></tr>
+                            <tr><td>7. Penghasilan Rata-rata Perbulan</td><td>:</td><td>${escHtml(d.penghasilan)}</td></tr>
+                        </table>
+                    </div>
+
+                    <!-- Kolom Kanan: Pas Foto 3x4 Slot 1 - 5 -->
+                    <div style="width:29mm;flex-shrink:0;">
+                        <div style="text-align:center;font-weight:bold;font-size:8pt;margin-bottom:3px;">PAS FOTO : 3x4</div>
+                        ${[1, 2, 3, 4, 5].map(n => renderPhotoSlotHtml(s, n)).join('')}
+                    </div>
+                </div>
+            </div>`;
+
+            // ---------- HALAMAN 2 (POTRAIT: E, F, G-ref, H, I) ----------
+            const cols1to6 = [1, 2, 3, 4, 5, 6];
+            const page2 = `
+            <div class="s4-page">
+                <div style="font-weight:bold;font-size:9.5pt;margin-bottom:3px;">E. KEADAAN JASMANI</div>
+                <table class="s4-table" style="margin-bottom:10px;">
+                    <tr>
+                        <th style="width:120px;">TAHUN PELAJARAN</th>
+                        ${cols1to6.map(k => `<th style="width:13%;">${escHtml((rk[k] || {}).ta)}</th>`).join('')}
+                    </tr>
+                    <tr>
+                        <th>KELAS</th>
+                        ${cols1to6.map(k => `<th>${k}</th>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>Berat Badan</td>
+                        ${cols1to6.map(k => `<td style="text-align:right;">${escHtml((rk[k] || {}).bb)} <b>Kg</b></td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>Tinggi Badan</td>
+                        ${cols1to6.map(k => `<td style="text-align:right;">${escHtml((rk[k] || {}).tb)} <b>Cm</b></td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td style="height:34px;">Penyakit yang diderita</td>
+                        ${cols1to6.map(k => `<td>${escHtml((rk[k] || {}).penyakit)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td style="height:34px;">Kelainan Jasmani</td>
+                        ${cols1to6.map(k => `<td>${escHtml((rk[k] || {}).kelainan)}</td>`).join('')}
+                    </tr>
+                </table>
+
+                <div style="font-weight:bold;font-size:9.5pt;margin-bottom:3px;">F. BEASISWA</div>
+                <table class="s4-table" style="margin-bottom:10px;">
+                    <tr>
+                        <th style="width:120px;">TAHUN PELAJARAN</th>
+                        ${cols1to6.map(k => `<th style="width:13%;">${escHtml((rk[k] || {}).ta)}</th>`).join('')}
+                    </tr>
+                    <tr>
+                        <th>KELAS</th>
+                        ${cols1to6.map(k => `<th>${k}</th>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>Jenis Beasiswa 1</td>
+                        ${cols1to6.map(k => `<td>${escHtml((rk[k] || {}).bea1)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>Jenis Beasiswa 2</td>
+                        ${cols1to6.map(k => `<td>${escHtml((rk[k] || {}).bea2)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>Jenis Beasiswa 3</td>
+                        ${cols1to6.map(k => `<td>${escHtml((rk[k] || {}).bea3)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <th>JUMLAH</th>
+                        ${cols1to6.map(k => `<td>${escHtml((rk[k] || {}).bea_jml)}</td>`).join('')}
+                    </tr>
+                </table>
+
+                <div style="font-weight:bold;font-size:9.5pt;margin-bottom:2px;">G. PRESTASI BELAJAR SISWA</div>
+                <div style="font-style:italic;font-size:8.5pt;margin-bottom:10px;padding-left:14px;">( Prestasi Belajar Siswa Di Halaman Berikutnya )</div>
+
+                <div style="font-weight:bold;font-size:9.5pt;margin-bottom:3px;">H. MENINGGALKAN SEKOLAH</div>
+                <div style="padding-left:10px;font-size:8.5pt;">
+                    <div style="font-weight:bold;margin-bottom:2px;">1. PINDAH SEKOLAH / MUTASI KELUAR</div>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:6px;">
+                        <tr><td style="width:165px;padding-left:12px;">a. Nomor Surat</td><td style="width:10px;">:</td><td>${escHtml(h.mutasi_surat)}</td></tr>
+                        <tr><td style="padding-left:12px;">b. Tanggal</td><td>:</td><td>${escHtml(h.mutasi_tgl)}</td></tr>
+                        <tr><td style="padding-left:12px;">c. Kelas Yang Ditinggalkan</td><td>:</td><td>${escHtml(h.mutasi_kelas)}</td></tr>
+                        <tr><td style="padding-left:12px;">d. Alasan Pindah / Mutasi</td><td>:</td><td>${escHtml(h.mutasi_alasan)}</td></tr>
+                        <tr><td style="padding-left:12px;">e. NPSN - Nama Sekolah Tujuan</td><td>:</td><td>${makeBoxes(h.mutasi_npsn, 8)} - ${escHtml(h.mutasi_sekolah)}</td></tr>
+                        <tr><td style="padding-left:12px;">f. NSS Sekolah Tujuan</td><td>:</td><td>${makeBoxes(h.mutasi_nss, 12)}</td></tr>
+                        <tr><td style="padding-left:12px;">g. Alamat Sekolah</td><td>:</td><td>${escHtml(h.mutasi_alamat)}</td></tr>
+                        <tr><td style="padding-left:26px;">Kecamatan</td><td>:</td><td>${escHtml(h.mutasi_kec)}</td></tr>
+                        <tr><td style="padding-left:26px;">Kabupaten / Provinsi</td><td>:</td><td>${escHtml(h.mutasi_kabprov)}</td></tr>
+                    </table>
+
+                    <div style="font-weight:bold;margin-bottom:2px;">2. TAMAT BELAJAR / LULUS MELANJUTKAN SEKOLAH KE JENJANG BERIKUTNYA</div>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:6px;">
+                        <tr><td style="width:165px;padding-left:12px;">a. Tanggal Tamat Belajar</td><td style="width:10px;">:</td><td>${escHtml(h.lulus_tgl)}</td></tr>
+                        <tr><td style="padding-left:12px;">b. Nomor Seri Ijazah</td><td>:</td><td>${escHtml(h.lulus_ijazah)}</td></tr>
+                        <tr><td style="padding-left:12px;">c. Nomor Seri SKHUN</td><td>:</td><td>${escHtml(h.lulus_skhun)}</td></tr>
+                        <tr><td style="padding-left:12px;">d. Melanjutkan ke sekolah</td><td>:</td><td></td></tr>
+                        <tr><td style="padding-left:26px;">Nama Sekolah</td><td>:</td><td>${escHtml(h.lulus_sekolah)}</td></tr>
+                        <tr><td style="padding-left:26px;">Kecamatan</td><td>:</td><td>${escHtml(h.lulus_kec)}</td></tr>
+                        <tr><td style="padding-left:26px;">Kabupaten</td><td>:</td><td>${escHtml(h.lulus_kab)}</td></tr>
+                        <tr><td style="padding-left:12px;">e. Alasan Tidak Melanjutkan</td><td>:</td><td>${escHtml(h.lulus_alasan)}</td></tr>
+                    </table>
+
+                    <div style="font-weight:bold;margin-bottom:2px;">3. PUTUS SEKOLAH / DROP OUT</div>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
+                        <tr><td style="width:165px;padding-left:12px;">a. Tanggal</td><td style="width:10px;">:</td><td>${escHtml(h.do_tgl)}</td></tr>
+                        <tr><td style="padding-left:12px;">b. Kelas</td><td>:</td><td>${escHtml(h.do_kelas)}</td></tr>
+                        <tr><td style="padding-left:12px;">c. Alasan</td><td>:</td><td>${escHtml(h.do_alasan)}</td></tr>
+                    </table>
+                </div>
+
+                <div style="font-weight:bold;font-size:9.5pt;margin-bottom:3px;">I. LAIN-LAIN</div>
+                <div style="padding-left:10px;font-size:8.5pt;">
+                    Catatan Penting : <span class="s4-dotted" style="width:78%;">${escHtml(ex.catatan_penting)}</span>
+                    <div class="s4-dotted" style="width:98%;margin-top:8px;"></div>
+                </div>
+            </div>`;
+
+            // ---------- HALAMAN 3 (LANDSCAPE: G. PRESTASI BELAJAR SM 1-12 + FOTO 6) ----------
+            const sems = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            const kelasPairs = [
+                { label: 'KELAS I', s1: 1, s2: 2 },
+                { label: 'KELAS II', s1: 3, s2: 4 },
+                { label: 'KELAS III', s1: 5, s2: 6 },
+                { label: 'KELAS IV', s1: 7, s2: 8 },
+                { label: 'KELAS V', s1: 9, s2: 10 },
+                { label: 'KELAS VI', s1: 11, s2: 12 }
+            ];
+
+            // Hitung jumlah & rata-rata tiap semester
+            const semTotals = {};
+            const semAvgs = {};
+            sems.forEach(sm => {
+                const mArr = (sem[sm] && sem[sm].mapel) || [];
+                let sum = 0, cnt = 0;
+                mArr.forEach(m => {
+                    const num = parseFloat(m?.nilai);
+                    if (!isNaN(num)) { sum += num; cnt++; }
+                });
+                semTotals[sm] = cnt > 0 ? sum : '';
+                semAvgs[sm] = cnt > 0 ? (sum / cnt).toFixed(1) : '';
+            });
+
+            const foto6Url = getFotoUrlBySlot(s, 6);
+            const foto6CellHtml = foto6Url
+                ? `<img src="${foto6Url}?t=${Date.now()}" alt="Foto 6" style="width:26mm;height:34mm;object-fit:cover;margin:0 auto;">`
+                : `<div style="font-weight:bold;font-size:11pt;margin-bottom:4px;">6</div><div>Pasang Pas Foto<br>&amp; Cap Tiga Jari<br>Siswa</div>`;
+
+            const page3 = `
+            <div class="s4-page s4-landscape">
+                <div style="font-weight:bold;font-size:9.5pt;margin-bottom:3px;">G. PRESTASI BELAJAR SISWA</div>
+                <table class="s4-table">
+                    <tr>
+                        <td colspan="2" style="font-weight:bold;">NAMA SISWA</td>
+                        <td colspan="12" style="font-weight:bold;">${escHtml(s.nama_lengkap_siswa)}</td>
+                        <td colspan="6" style="font-weight:bold;">Nomor Induk Sekolah / NISN</td>
+                        <td colspan="6">${escHtml(s.nomor_induk_peserta_didik)} / ${escHtml(s.nomor_induk_siswa_nasional)}</td>
+                        <td colspan="2" style="text-align:center;font-weight:bold;">No. Peserta Ujian</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="font-weight:bold;">JENIS KELAMIN</td>
+                        <td colspan="12">${escHtml(s.jenis_kelamin_siswa)}</td>
+                        <td colspan="6" style="font-weight:bold;">Nomor Seri Rapor</td>
+                        <td colspan="6">${escHtml(g.no_seri_rapor)}</td>
+                        <td colspan="2" style="text-align:center;">${escHtml(g.no_peserta_ujian)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="font-weight:bold;">TEMPAT TGL LAHIR</td>
+                        <td colspan="12">${escHtml(s.tempat_lahir_siswa)}, ${escHtml(s.tanggal_lahir_siswa)}</td>
+                        <td colspan="6" style="font-weight:bold;">Nomor Seri Ijazah</td>
+                        <td colspan="6">${escHtml(h.lulus_ijazah)}</td>
+                        <td colspan="2" style="text-align:center;font-weight:bold;">L U L U S</td>
+                    </tr>
+
+                    <tr>
+                        <th rowspan="4" style="width:20px;">No</th>
+                        <th style="text-align:right;">TAHUN PELAJARAN</th>
+                        ${kelasPairs.map(kp => `<th colspan="4">${escHtml((sem[kp.s1] || {}).ta || (sem[kp.s2] || {}).ta)}</th>`).join('')}
+                        <th colspan="2" rowspan="3">US / AKHIR</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:right;">KELAS</th>
+                        ${kelasPairs.map(kp => `<th colspan="4">${kp.label}</th>`).join('')}
+                    </tr>
+                    <tr>
+                        <th style="text-align:right;">SEMESTER</th>
+                        ${sems.map(sm => `<th colspan="2">SM ${sm}</th>`).join('')}
+                    </tr>
+                    <tr>
+                        <th>MATA PELAJARAN</th>
+                        ${sems.map(() => `<th>KKM</th><th>Nilai</th>`).join('')}
+                        <th>Nilai</th><th>Nilai</th>
+                    </tr>
+
+                    ${MAPEL_LIST.map((mName, idx) => `
+                        <tr>
+                            <td style="text-align:center;">${idx + 1}</td>
+                            <td>${escHtml(mName)}</td>
+                            ${sems.map(sm => {
+                                const mv = ((sem[sm] && sem[sm].mapel && sem[sm].mapel[idx]) || {});
+                                return `<td style="text-align:center;">${escHtml(mv.kkm)}</td><td style="text-align:center;font-weight:bold;">${escHtml(mv.nilai)}</td>`;
+                            }).join('')}
+                            <td></td><td></td>
+                        </tr>
+                    `).join('')}
+
+                    <tr>
+                        <th colspan="2" style="text-align:right;">Jumlah</th>
+                        ${sems.map(sm => `<td style="background:#eee;"></td><td style="text-align:center;font-weight:bold;">${semTotals[sm]}</td>`).join('')}
+                        <td></td><td></td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="text-align:right;">Rata-Rata</th>
+                        ${sems.map(sm => `<td style="background:#eee;"></td><td style="text-align:center;font-weight:bold;">${semAvgs[sm]}</td>`).join('')}
+                        <td></td><td></td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="text-align:right;">Peringkat</th>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).peringkat)}</td>`).join('')}
+                        <td></td><td></td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="text-align:right;">Naik Kls / Tidak Naik</th>
+                        ${kelasPairs.map(kp => `<td colspan="4" style="text-align:center;">${escHtml((sem[kp.s2] || {}).naik || (sem[kp.s1] || {}).naik)}</td>`).join('')}
+                        <td colspan="2" rowspan="11" style="text-align:center;vertical-align:middle;">${foto6CellHtml}</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="text-align:right;">Titimangsa Rapor</th>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;font-size:6.3pt;">${escHtml((sem[sm] || {}).titimangsa)}</td>`).join('')}
+                    </tr>
+
+                    <tr>
+                        <th rowspan="3" style="writing-mode:vertical-rl;transform:rotate(180deg);">Absensi</th>
+                        <td>Sakit</td>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).sakit)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>Ijin</td>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).ijin)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>Alfa</td>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).alfa)}</td>`).join('')}
+                    </tr>
+
+                    <tr>
+                        <th rowspan="3" style="writing-mode:vertical-rl;transform:rotate(180deg);">Ekskul</th>
+                        <td>1.</td>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).ekskul1)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>2.</td>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).ekskul2)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>3.</td>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).ekskul3)}</td>`).join('')}
+                    </tr>
+
+                    <tr>
+                        <th rowspan="3" style="writing-mode:vertical-rl;transform:rotate(180deg);">Kepribadian</th>
+                        <td>Sikap</td>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).sikap)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>Kerajinan</td>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).kerajinan)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td>Kerapihan &amp; Kebersihan</td>
+                        ${sems.map(sm => `<td colspan="2" style="text-align:center;">${escHtml((sem[sm] || {}).kerapihan)}</td>`).join('')}
+                    </tr>
+
+                    <tr>
+                        <th colspan="2" style="text-align:right;">Nama Guru</th>
+                        ${kelasPairs.map(kp => `<td colspan="4" style="text-align:center;font-weight:bold;">${escHtml((sem[kp.s2] || {}).guru || (sem[kp.s1] || {}).guru)}</td>`).join('')}
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="text-align:right;">NIP</th>
+                        ${kelasPairs.map(kp => `<td colspan="4" style="text-align:center;">${escHtml((sem[kp.s2] || {}).nip || (sem[kp.s1] || {}).nip)}</td>`).join('')}
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="text-align:right;height:28px;">Tanda Tangan</th>
+                        ${kelasPairs.map(() => `<td colspan="4"></td>`).join('')}
+                        <td colspan="2"></td>
+                    </tr>
+                </table>
+            </div>`;
+
+            // ---------- HALAMAN 4 (POTRAIT: J. PRILAKU SISWA & K. PENGEMBANGAN DIRI) ----------
+            const page4 = `
+            <div class="s4-page">
+                <div style="font-weight:bold;font-size:9.5pt;margin-bottom:3px;">J. PRILAKU SISWA</div>
+                <table class="s4-table" style="margin-bottom:14px;">
+                    <tr>
+                        <th style="width:45px;">KELAS</th>
+                        <th style="width:85px;">TAHUN PELAJARAN</th>
+                        <th>URAIAN TENTANG PRILAKU SISWA</th>
+                        <th style="width:125px;">TANDA TANGAN WALI ROMBEL</th>
+                    </tr>
+                    ${cols1to6.map(k => {
+                        const item = rk[k] || {};
+                        return `
+                            <tr>
+                                <td style="text-align:center;font-weight:bold;height:44px;">${k}</td>
+                                <td style="text-align:center;">${escHtml(item.ta)}</td>
+                                <td style="vertical-align:top;padding:4px 6px;">${escHtml(item.perilaku)}</td>
+                                <td style="vertical-align:bottom;text-align:center;font-size:7.5pt;padding-bottom:3px;">${escHtml(item.wali_rombel)}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </table>
+
+                <div style="font-weight:bold;font-size:9.5pt;margin-bottom:3px;">K. PENGEMBANGAN DIRI</div>
+                <table class="s4-table">
+                    <tr>
+                        <th style="width:45px;">KELAS</th>
+                        <th style="width:85px;">TAHUN PELAJARAN</th>
+                        <th>URAIAN TENTANG PENGEMBANGAN DIRI SISWA</th>
+                        <th style="width:125px;">TANDA TANGAN WALI ROMBEL</th>
+                    </tr>
+                    ${cols1to6.map(k => {
+                        const item = rk[k] || {};
+                        return `
+                            <tr>
+                                <td style="text-align:center;font-weight:bold;height:44px;">${k}</td>
+                                <td style="text-align:center;">${escHtml(item.ta)}</td>
+                                <td style="vertical-align:top;padding:4px 6px;">${escHtml(item.pengembangan)}</td>
+                                <td style="vertical-align:bottom;text-align:center;font-size:7.5pt;padding-bottom:3px;">${escHtml(item.wali_rombel)}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </table>
+            </div>`;
+
+            document.getElementById('print-container').innerHTML = page1 + page2 + page3 + page4;
+            setTimeout(() => window.print(), 250);
+        };
+
+        // ==========================================
+        // MANAJEMEN USER & RESET PASSWORD (ADMIN)
+        // ==========================================
         window.loadUsers = async function() {
             const tbody = document.getElementById('tabel-users');
             tbody.innerHTML = '<tr><td colspan="3" class="px-5 py-8 text-center text-slate-400">Memuat daftar user...</td></tr>';
@@ -1048,6 +2435,7 @@
             else alert(`Berhasil! Password untuk ${nama} sudah diganti menjadi: ${newPass.trim()}`);
         };
 
+        // Ganti Password Mandiri
         document.getElementById('btn-open-pass').addEventListener('click', () => {
             document.getElementById('pass-form').reset();
             document.getElementById('pass-msg').classList.add('hidden');
@@ -1084,6 +2472,7 @@
             }
         });
 
+        // Event Listeners
         document.getElementById('search-input').addEventListener('input', applyFilter);
         document.getElementById('filter-rombel').addEventListener('change', applyFilter);
         document.getElementById('search-user').addEventListener('input', renderUsers);

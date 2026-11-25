@@ -1326,18 +1326,28 @@
 
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Daftar Mata Pelajaran SD sesuai Permendikdasmen No. 13 Tahun 2025
+        // minKelas: jenjang minimal mapel berlaku (IPAS & B.Inggris mulai Kelas 3; Koding & KA mulai Kelas 5)
         const MAPEL_LIST = [
-            "Pendidikan Agama",
-            "Pendidikan Kewarganegaraan",
-            "Bahasa Indonesia",
-            "Matematika",
-            "Ilmu Pengetahuan Alam",
-            "Ilmu Pengetahuan Sosial",
-            "Seni Budaya & Keterampilan",
-            "Pend. Jasmani, Olahraga & Kes.",
-            "Muatan Lokal / PLBJ",
-            "Muatan Lokal Bahasa Inggris"
+            { name: "Pendidikan Agama dan Budi Pekerti", minKelas: 1, status: "Wajib" },
+            { name: "Pendidikan Pancasila", minKelas: 1, status: "Wajib" },
+            { name: "Bahasa Indonesia", minKelas: 1, status: "Wajib" },
+            { name: "Matematika", minKelas: 1, status: "Wajib" },
+            { name: "Ilmu Pengetahuan Alam dan Sosial", minKelas: 3, status: "Wajib" },
+            { name: "Pendidikan Jasmani Olahraga dan Kesehatan", minKelas: 1, status: "Wajib" },
+            { name: "Seni dan Budaya", minKelas: 1, status: "Wajib" },
+            { name: "Bahasa Inggris", minKelas: 3, status: "Wajib" },
+            { name: "Koding dan Kecerdasan Artifisial", minKelas: 5, status: "Pilihan" },
+            { name: "Muatan Lokal", minKelas: 1, status: "Mulok" }
         ];
+
+        function getKelasFromSemester(sm) {
+            return Math.ceil(parseInt(sm, 10) / 2);
+        }
+
+        function isMapelActiveInSemester(mapelObj, sm) {
+            return getKelasFromSemester(sm) >= mapelObj.minKelas;
+        }
 
         // Konfigurasi tab yang diizinkan per role
         const ROLE_ALLOWED_TABS = {
@@ -1682,17 +1692,19 @@
                 `;
             }).join('');
 
-            // Ringkasan Nilai Rapor per Semester (SM 1 - 12) agar ortu/siswa bisa melihat nilai dengan jelas
+            // Ringkasan Nilai Rapor per Semester (SM 1 - 12) sesuai Permendikdasmen 13/2025
             const raporCards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(sm => {
                 const smObj = sem[String(sm)] || {};
                 const mArr = smObj.mapel || [];
                 let sum = 0, cnt = 0;
-                const mapelItems = MAPEL_LIST.map((mName, idx) => {
+                const mapelItems = MAPEL_LIST.map((mObj, idx) => {
+                    const active = isMapelActiveInSemester(mObj, sm);
+                    if (!active) return '';
                     const mv = mArr[idx] || {};
                     const num = parseFloat(mv.nilai);
                     if (!isNaN(num)) { sum += num; cnt++; }
                     return `<div class="flex justify-between py-0.5 border-b border-slate-100 text-xs">
-                        <span class="text-slate-600 truncate pr-2">${mName}</span>
+                        <span class="text-slate-600 truncate pr-2">${mObj.name}</span>
                         <span class="font-bold text-slate-900 shrink-0">${escHtml(mv.nilai) || '-'}</span>
                     </div>`;
                 }).join('');
@@ -1986,19 +1998,26 @@
             document.getElementById('gs-nip').value = smObj.nip || '';
 
             const tbody = document.getElementById('gs-mapel-tbody');
-            tbody.innerHTML = MAPEL_LIST.map((m, idx) => {
+            tbody.innerHTML = MAPEL_LIST.map((mObj, idx) => {
+                const active = isMapelActiveInSemester(mObj, sm);
                 const mVal = (smObj.mapel && smObj.mapel[idx]) || {};
+                const badge = mObj.status === 'Pilihan'
+                    ? `<span class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700">Pilihan (Kls 5–6)</span>`
+                    : (mObj.minKelas > 1 ? `<span class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">Mulai Kls ${mObj.minKelas}</span>` : '');
                 return `
-                    <tr>
+                    <tr class="${active ? '' : 'bg-slate-50/80 opacity-55'}">
                         <td class="px-3 py-1.5 text-slate-500 font-semibold">${idx + 1}</td>
-                        <td class="px-3 py-1.5 font-medium text-slate-800">${m}</td>
-                        <td class="px-2 py-1 text-center">
-                            <input type="text" id="gs-kkm-${idx}" value="${escHtml(mVal.kkm || '')}" placeholder="75"
-                                class="w-16 text-center px-2 py-1 rounded border border-slate-300">
+                        <td class="px-3 py-1.5 font-medium text-slate-800">
+                            ${mObj.name}${badge}
+                            ${!active ? `<span class="block text-[10px] text-slate-400 italic">Tidak diajarkan di Kelas ${getKelasFromSemester(sm)}</span>` : ''}
                         </td>
                         <td class="px-2 py-1 text-center">
-                            <input type="text" id="gs-val-${idx}" value="${escHtml(mVal.nilai || '')}" placeholder="0-100"
-                                class="w-16 text-center px-2 py-1 rounded border border-slate-300 font-bold">
+                            <input type="text" id="gs-kkm-${idx}" value="${active ? escHtml(mVal.kkm || '') : ''}" placeholder="${active ? '75' : '-'}" ${active ? '' : 'disabled'}
+                                class="w-16 text-center px-2 py-1 rounded border border-slate-300 disabled:bg-slate-100">
+                        </td>
+                        <td class="px-2 py-1 text-center">
+                            <input type="text" id="gs-val-${idx}" value="${active ? escHtml(mVal.nilai || '') : ''}" placeholder="${active ? '0-100' : '-'}" ${active ? '' : 'disabled'}
+                                class="w-16 text-center px-2 py-1 rounded border border-slate-300 font-bold disabled:bg-slate-100">
                         </td>
                     </tr>
                 `;
@@ -2622,8 +2641,9 @@
             sems.forEach(sm => {
                 const mArr = (sem[sm] && sem[sm].mapel) || [];
                 let sum = 0, cnt = 0;
-                mArr.forEach(m => {
-                    const num = parseFloat(m?.nilai);
+                MAPEL_LIST.forEach((mObj, idx) => {
+                    if (!isMapelActiveInSemester(mObj, sm)) return;
+                    const num = parseFloat(mArr[idx]?.nilai);
                     if (!isNaN(num)) { sum += num; cnt++; }
                 });
                 semTotals[sm] = cnt > 0 ? sum : '';
@@ -2681,11 +2701,14 @@
                         <th>Nilai</th><th>Nilai</th>
                     </tr>
 
-                    ${MAPEL_LIST.map((mName, idx) => `
+                    ${MAPEL_LIST.map((mObj, idx) => `
                         <tr>
                             <td style="text-align:center;">${idx + 1}</td>
-                            <td>${escHtml(mName)}</td>
+                            <td>${escHtml(mObj.name)}${mObj.status === 'Pilihan' ? ' *)' : ''}</td>
                             ${sems.map(sm => {
+                                if (!isMapelActiveInSemester(mObj, sm)) {
+                                    return `<td style="background:#e5e7eb;"></td><td style="background:#e5e7eb;"></td>`;
+                                }
                                 const mv = ((sem[sm] && sem[sm].mapel && sem[sm].mapel[idx]) || {});
                                 return `<td style="text-align:center;">${escHtml(mv.kkm)}</td><td style="text-align:center;font-weight:bold;">${escHtml(mv.nilai)}</td>`;
                             }).join('')}
@@ -2776,6 +2799,9 @@
                         <td colspan="2"></td>
                     </tr>
                 </table>
+                <div style="font-size:6.5pt;margin-top:3px;font-style:italic;">
+                    *) Mata pelajaran pilihan (Koding dan Kecerdasan Artifisial) sesuai Permendikdasmen Nomor 13 Tahun 2025 untuk Kelas V dan VI.
+                </div>
             </div>`;
 
             const page4 = `
@@ -3314,10 +3340,20 @@
                 const { data } = await db.from('master_pegawai').select('*');
                 allPegawai = data || [];
             }
-            // Utamakan user dengan role guru/admin dari profiles, dilengkapi nama dari master_pegawai
+            // Jika master_pegawai ada, pakai id pegawai (int4/text) agar cocok dengan foreign key wali_kelas_id di tabel rombel
+            if (allPegawai.length > 0) {
+                return allPegawai.map(p => {
+                    const nama = p.nama_lengkap || p.nama || `Pegawai #${p.id}`;
+                    const jbt = p.jenis_ptk || p.jabatan || '';
+                    return {
+                        id: String(p.id),
+                        label: jbt ? `${nama} (${jbt})` : nama
+                    };
+                });
+            }
             const guruUsers = allUsers.filter(u => ['guru', 'admin'].includes((u.role || '').toLowerCase()));
             return guruUsers.map(u => ({
-                id: u.id,
+                id: String(u.id),
                 label: `${u.nama_lengkap || 'Tanpa Nama'} (${(u.role || '').toUpperCase()})`
             }));
         }
@@ -3414,12 +3450,23 @@
                 return;
             }
 
-            const { error } = await db.from('rombel').insert([{
-                tahun_ajaran_id: taId,
-                tingkat: tingkat,
+            const parsedTaId = /^\d+$/.test(String(taId)) ? parseInt(taId, 10) : taId;
+            const parsedWaliId = waliId && /^\d+$/.test(String(waliId)) ? parseInt(waliId, 10) : (waliId || null);
+
+            const insertObj = {
+                tahun_ajaran_id: parsedTaId,
                 nama_rombel: namaRombel,
-                wali_kelas_id: waliId
-            }]);
+                wali_kelas_id: parsedWaliId
+            };
+            if (currentRombelList.length === 0 || Object.prototype.hasOwnProperty.call(currentRombelList[0], 'tingkat')) {
+                insertObj.tingkat = tingkat;
+            }
+
+            let { error } = await db.from('rombel').insert([insertObj]);
+            if (error && error.message && error.message.includes("column") && error.message.includes("tingkat")) {
+                delete insertObj.tingkat;
+                ({ error } = await db.from('rombel').insert([insertObj]));
+            }
 
             if (error) {
                 alert('Gagal menambah rombel: ' + error.message);
@@ -3440,11 +3487,10 @@
 
             tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">Memuat daftar rombel...</td></tr>';
 
-            const { data: rombels, error } = await db
+            let { data: rombels, error } = await db
                 .from('rombel')
                 .select('*')
                 .eq('tahun_ajaran_id', taId)
-                .order('tingkat', { ascending: true })
                 .order('nama_rombel', { ascending: true });
 
             if (error) {
@@ -3452,7 +3498,16 @@
                 return;
             }
 
-            currentRombelList = rombels || [];
+            const deriveTingkat = (r) => {
+                if (r.tingkat !== undefined && r.tingkat !== null && r.tingkat !== '') return parseInt(r.tingkat, 10) || 99;
+                const m = (r.nama_rombel || '').match(/\b([1-6])\b/) || (r.nama_rombel || '').match(/[1-6]/);
+                return m ? parseInt(m[1], 10) : 99;
+            };
+
+            currentRombelList = (rombels || []).map(r => ({
+                ...r,
+                _tingkat: deriveTingkat(r)
+            })).sort((a, b) => a._tingkat - b._tingkat || (a.nama_rombel || '').localeCompare(b.nama_rombel || ''));
             const guruOpts = await getGuruOptionsList();
 
             // Hitung anggota rombel jika tabel anggota_rombel tersedia
@@ -3473,7 +3528,7 @@
                     const jml = countMap[r.id] ?? allSiswa.filter(s => s.rombel_saat_ini === r.nama_rombel).length;
                     return `
                         <tr class="hover:bg-slate-50">
-                            <td class="px-5 py-3 font-bold text-slate-700">Kelas ${r.tingkat || '-'}</td>
+                            <td class="px-5 py-3 font-bold text-slate-700">Kelas ${r._tingkat !== 99 ? r._tingkat : '-'}</td>
                             <td class="px-5 py-3 font-extrabold text-blue-900">${escHtml(r.nama_rombel)}</td>
                             <td class="px-5 py-3">
                                 <select onchange="updateWaliKelasRombel('${r.id}', this.value)"
@@ -3500,10 +3555,12 @@
         };
 
         window.updateWaliKelasRombel = async function(rombelId, waliId) {
+            const parsedWaliId = waliId && /^\d+$/.test(String(waliId)) ? parseInt(waliId, 10) : (waliId || null);
+            const parsedRombelId = /^\d+$/.test(String(rombelId)) ? parseInt(rombelId, 10) : rombelId;
             const { error } = await db
                 .from('rombel')
-                .update({ wali_kelas_id: waliId || null })
-                .eq('id', rombelId);
+                .update({ wali_kelas_id: parsedWaliId })
+                .eq('id', parsedRombelId);
             if (error) alert('Gagal menyimpan wali kelas: ' + error.message);
         };
 
@@ -3547,7 +3604,7 @@
                 descEl.textContent = 'Memindahkan seluruh siswa rombel asal ke 1 rombel tujuan.';
                 box.innerHTML = `
                     <select id="mig-single-target" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs font-bold">
-                        ${currentRombelList.map(r => `<option value="${r.id}">${escHtml(r.nama_rombel)} (Tingkat ${r.tingkat})</option>`).join('')}
+                        ${currentRombelList.map(r => `<option value="${r.id}">${escHtml(r.nama_rombel)} ${r._tingkat !== 99 ? `(Kls ${r._tingkat})` : ''}</option>`).join('')}
                     </select>
                 `;
             } else {
@@ -3556,7 +3613,7 @@
                     <label class="flex items-center gap-2 py-1 px-2 rounded hover:bg-white cursor-pointer">
                         <input type="checkbox" class="mig-multi-target rounded border-slate-300 text-blue-700" value="${r.id}">
                         <span class="font-semibold text-slate-800">${escHtml(r.nama_rombel)}</span>
-                        <span class="text-slate-400">(Kls ${r.tingkat})</span>
+                        ${r._tingkat !== 99 ? `<span class="text-slate-400">(Kls ${r._tingkat})</span>` : ''}
                     </label>
                 `).join('');
             }

@@ -157,7 +157,7 @@
                     <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h2 class="font-extrabold text-slate-900 text-lg">Manajemen User & Role</h2>
-                            <p class="text-xs text-slate-500">Ubah hak akses (Admin / Guru / Tendik / Siswa) langsung dari sini.</p>
+                            <p class="text-xs text-slate-500">Ubah hak akses (Admin / Guru / Tendik / Siswa) atau reset password user.</p>
                         </div>
                         <div class="flex gap-2">
                             <input type="text" id="search-user" placeholder="Cari nama user..."
@@ -173,7 +173,7 @@
                                 <tr>
                                     <th class="px-5 py-3">Nama Lengkap</th>
                                     <th class="px-5 py-3">Role Saat Ini</th>
-                                    <th class="px-5 py-3 text-right">Ubah Role</th>
+                                    <th class="px-5 py-3 text-right">Ubah Role & Password</th>
                                 </tr>
                             </thead>
                             <tbody id="tabel-users" class="divide-y divide-slate-100">
@@ -200,18 +200,50 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT SISWA -->
+    <!-- MODAL EDIT SISWA & UPLOAD PAS FOTO -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl max-h-[88vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div>
-                    <h3 class="font-extrabold text-slate-900 text-lg">Edit Data Siswa</h3>
+                    <h3 class="font-extrabold text-slate-900 text-lg">Edit Data & Pas Foto Siswa</h3>
                     <p id="edit-note" class="text-xs text-slate-500"></p>
                 </div>
                 <button onclick="closeModal('edit-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
             </div>
             <form id="edit-form" class="p-6 overflow-y-auto space-y-4 text-sm">
                 <input type="hidden" id="edit-id">
+
+                <!-- BLOK PAS FOTO 3x4 PER KELAS (SLOT 1 - 6) -->
+                <div class="bg-blue-50/60 border border-blue-200 rounded-xl p-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                        <div>
+                            <label class="block text-xs font-extrabold uppercase text-blue-900">Pas Foto 3x4 (Buku Induk Format S-4)</label>
+                            <p class="text-[11px] text-slate-600">Pilih jenjang kelas, lalu pilih foto (otomatis dikompres ~70 KB).</p>
+                        </div>
+                        <select id="foto-kelas-slot" onchange="renderFotoSlotPreview()"
+                            class="px-3 py-1.5 rounded-lg border border-blue-300 text-xs font-bold bg-white text-blue-900">
+                            <option value="1">Slot Kelas 1</option>
+                            <option value="2">Slot Kelas 2</option>
+                            <option value="3">Slot Kelas 3</option>
+                            <option value="4">Slot Kelas 4</option>
+                            <option value="5">Slot Kelas 5</option>
+                            <option value="6">Slot Kelas 6</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-24 rounded-lg border border-slate-300 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
+                            <img id="preview-foto-siswa" src="" alt="Pas Foto" class="hidden w-full h-full object-cover">
+                            <span id="placeholder-foto-siswa" class="text-[10px] text-slate-400 font-semibold text-center px-1.5">Belum ada foto</span>
+                        </div>
+                        <div class="space-y-1.5 flex-1">
+                            <input type="file" id="input-foto-siswa" accept="image/jpeg,image/png,image/webp"
+                                class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-700 file:text-white hover:file:bg-blue-800 cursor-pointer">
+                            <p id="foto-status-text" class="text-[11px] text-slate-600 font-medium"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BIODATA UTAMA -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap</label>
@@ -336,10 +368,20 @@
         let currentPage = 1;
         const pageSize = 25;
 
+        let activeEditSiswa = null;
+        let pendingCompressedBlob = null;
+
         const loginView = document.getElementById('login-view');
         const dashboardView = document.getElementById('dashboard-view');
 
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        // Helper ambil URL foto per slot kelas (1 - 6)
+        function getFotoUrlBySlot(siswa, slot) {
+            const extra = siswa?.data_tambahan || {};
+            const fotos = extra.pas_foto || {};
+            return fotos[`kelas_${slot}`] || '';
+        }
 
         // 1. Cek Session
         async function checkSession() {
@@ -510,7 +552,7 @@
                     <td class="px-5 py-3">
                         <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">${s.status_siswa || 'Aktif'}</span>
                     </td>
-                    <td class="px-5 py-3 text-right space-x-1">
+                    <td class="px-5 py-3 text-right space-x-1 whitespace-nowrap">
                         <button onclick="openDetail(${s.id})" class="text-xs font-bold text-blue-700 hover:bg-blue-100 bg-blue-50 px-2.5 py-1.5 rounded-lg transition">Detail</button>
                         <button onclick="openEdit(${s.id})" class="text-xs font-bold text-amber-700 hover:bg-amber-100 bg-amber-50 px-2.5 py-1.5 rounded-lg transition">Edit</button>
                     </td>
@@ -518,14 +560,34 @@
             `).join('');
         }
 
-        // 5. Detail Siswa
+        // 5. Detail Siswa (termasuk Galeri 6 Slot Pas Foto)
         window.openDetail = function(id) {
             const s = allSiswa.find(x => x.id === id);
             if (!s) return;
             document.getElementById('modal-nama').textContent = s.nama_lengkap_siswa || '-';
             document.getElementById('modal-sub').textContent = `${s.rombel_saat_ini || '-'} • NIPD: ${s.nomor_induk_peserta_didik || '-'} • NISN: ${s.nomor_induk_siswa_nasional || '-'}`;
+
+            const fotoGrid = [1, 2, 3, 4, 5, 6].map(k => {
+                const url = getFotoUrlBySlot(s, k);
+                return `
+                    <div class="border border-slate-200 rounded-xl p-2 bg-slate-50 text-center">
+                        <div class="w-full aspect-[3/4] rounded-lg bg-white border border-slate-200 overflow-hidden flex items-center justify-center mb-1.5">
+                            ${url
+                                ? `<img src="${url}?t=${Date.now()}" alt="Kelas ${k}" class="w-full h-full object-cover">`
+                                : `<span class="text-[10px] text-slate-400">Kosong</span>`
+                            }
+                        </div>
+                        <span class="text-[11px] font-bold text-slate-600">Kelas ${k}</span>
+                    </div>
+                `;
+            }).join('');
+
             const row = (l, v) => `<div class="grid grid-cols-3 gap-2 py-1.5 border-b border-slate-100"><span class="text-slate-500 text-xs font-semibold">${l}</span><span class="col-span-2 text-slate-900 font-medium">${v || '-'}</span></div>`;
             document.getElementById('modal-body').innerHTML = `
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Pas Foto 3x4 per Jenjang</h4>
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">${fotoGrid}</div>
+                </div>
                 <div>
                     <h4 class="text-xs font-extrabold uppercase text-blue-700 mb-2">Biodata Siswa</h4>
                     ${row('NIK', s.nomor_induk_kependudukan_siswa)}
@@ -543,10 +605,104 @@
             document.getElementById('detail-modal').classList.remove('hidden');
         };
 
-        // 6. Edit Siswa
+        // 6. Preview & Auto-Compress Pas Foto
+        window.renderFotoSlotPreview = function() {
+            pendingCompressedBlob = null;
+            document.getElementById('input-foto-siswa').value = '';
+            const slot = document.getElementById('foto-kelas-slot').value;
+            const url = getFotoUrlBySlot(activeEditSiswa, slot);
+            const img = document.getElementById('preview-foto-siswa');
+            const ph = document.getElementById('placeholder-foto-siswa');
+            const statusEl = document.getElementById('foto-status-text');
+
+            if (url) {
+                img.src = url + '?t=' + Date.now();
+                img.classList.remove('hidden');
+                ph.classList.add('hidden');
+                statusEl.textContent = `Foto Slot Kelas ${slot} sudah tersimpan. Pilih file baru jika ingin mengganti.`;
+            } else {
+                img.src = '';
+                img.classList.add('hidden');
+                ph.classList.remove('hidden');
+                statusEl.textContent = `Belum ada foto untuk Slot Kelas ${slot}.`;
+            }
+        };
+
+        function compressImageToPasFoto(file, maxW = 450, maxH = 600, quality = 0.78) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const image = new Image();
+                    image.onload = () => {
+                        let { width, height } = image;
+                        const ratio = Math.min(maxW / width, maxH / height, 1);
+                        width = Math.round(width * ratio);
+                        height = Math.round(height * ratio);
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, width, height);
+                        ctx.drawImage(image, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            if (!blob) return reject(new Error('Gagal mengompres gambar.'));
+                            resolve({ blob, width, height });
+                        }, 'image/jpeg', quality);
+                    };
+                    image.onerror = () => reject(new Error('File bukan gambar yang valid.'));
+                    image.src = ev.target.result;
+                };
+                reader.onerror = () => reject(new Error('Gagal membaca file.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        document.getElementById('input-foto-siswa').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('foto-status-text');
+
+            // Batasi file asal maksimal 10 MB
+            if (file.size > 10 * 1024 * 1024) {
+                statusEl.textContent = 'Ukuran file terlalu besar (maksimal 10 MB). Pilih foto lain.';
+                e.target.value = '';
+                return;
+            }
+
+            statusEl.textContent = 'Mengompres foto...';
+            try {
+                const { blob, width, height } = await compressImageToPasFoto(file);
+                pendingCompressedBlob = blob;
+
+                const previewUrl = URL.createObjectURL(blob);
+                const img = document.getElementById('preview-foto-siswa');
+                img.src = previewUrl;
+                img.classList.remove('hidden');
+                document.getElementById('placeholder-foto-siswa').classList.add('hidden');
+
+                const origKB = (file.size / 1024).toFixed(0);
+                const compKB = (blob.size / 1024).toFixed(0);
+                statusEl.textContent = `Siap diunggah (${width}x${height}px): ${origKB} KB → ${compKB} KB. Klik "Simpan Perubahan".`;
+            } catch (err) {
+                statusEl.textContent = err.message;
+                e.target.value = '';
+            }
+        });
+
+        // 7. Edit Siswa & Upload Foto
         window.openEdit = function(id) {
             const s = allSiswa.find(x => x.id === id);
             if (!s) return;
+            activeEditSiswa = s;
+
+            // Otomatis pilih slot kelas sesuai angka rombel saat ini (1 - 6)
+            const matchKelas = (s.rombel_saat_ini || '').match(/[1-6]/);
+            document.getElementById('foto-kelas-slot').value = matchKelas ? matchKelas[0] : '1';
+            renderFotoSlotPreview();
+
             document.getElementById('edit-id').value = s.id;
             document.getElementById('f-nama').value = s.nama_lengkap_siswa || '';
             document.getElementById('f-rombel').value = s.rombel_saat_ini || '';
@@ -565,12 +721,11 @@
             document.getElementById('f-pek-ibu').value = s.pekerjaan_ibu || '';
             document.getElementById('f-hp-ibu').value = s.nomor_telepon_ibu || '';
 
-            // Kunci kolom sakral jika yang login adalah siswa/ortu
             const isSiswa = currentRole === 'siswa';
             document.querySelectorAll('.sacred-field').forEach(el => el.disabled = isSiswa);
             document.getElementById('edit-note').textContent = isSiswa
-                ? 'Kolom berwarna abu-abu dikunci oleh sekolah. Hubungi Wali Kelas/TU jika ada kesalahan.'
-                : 'Anda dapat memperbarui data siswa ini.';
+                ? 'Kolom abu-abu dikunci sekolah. Anda dapat memperbarui alamat, kontak, dan pas foto.'
+                : 'Anda dapat memperbarui biodata dan pas foto siswa ini.';
 
             document.getElementById('edit-modal').classList.remove('hidden');
         };
@@ -582,6 +737,31 @@
             btn.disabled = true;
 
             const id = document.getElementById('edit-id').value;
+            const slot = document.getElementById('foto-kelas-slot').value;
+            const existingExtra = JSON.parse(JSON.stringify(activeEditSiswa?.data_tambahan || {}));
+
+            // Upload foto jika ada file baru yang sudah dikompres
+            if (pendingCompressedBlob) {
+                const filePath = `${id}/kelas_${slot}.jpg`;
+                const { error: uploadErr } = await db.storage
+                    .from('foto-siswa')
+                    .upload(filePath, pendingCompressedBlob, {
+                        contentType: 'image/jpeg',
+                        upsert: true
+                    });
+
+                if (uploadErr) {
+                    alert('Gagal mengunggah pas foto: ' + uploadErr.message);
+                    btn.textContent = 'Simpan Perubahan';
+                    btn.disabled = false;
+                    return;
+                }
+
+                const { data: pub } = db.storage.from('foto-siswa').getPublicUrl(filePath);
+                if (!existingExtra.pas_foto) existingExtra.pas_foto = {};
+                existingExtra.pas_foto[`kelas_${slot}`] = pub.publicUrl;
+            }
+
             const payload = {
                 nomor_telepon_siswa: document.getElementById('f-telp').value.trim(),
                 alamat_siswa: document.getElementById('f-alamat').value.trim(),
@@ -593,7 +773,8 @@
                 pekerjaan_ayah: document.getElementById('f-pek-ayah').value.trim(),
                 nomor_telepon_ayah: document.getElementById('f-hp-ayah').value.trim(),
                 pekerjaan_ibu: document.getElementById('f-pek-ibu').value.trim(),
-                nomor_telepon_ibu: document.getElementById('f-hp-ibu').value.trim()
+                nomor_telepon_ibu: document.getElementById('f-hp-ibu').value.trim(),
+                data_tambahan: existingExtra
             };
 
             if (currentRole !== 'siswa') {
@@ -609,14 +790,15 @@
             btn.disabled = false;
 
             if (error) {
-                alert('Gagal menyimpan: ' + error.message);
+                alert('Gagal menyimpan data: ' + error.message);
             } else {
+                pendingCompressedBlob = null;
                 closeModal('edit-modal');
                 loadSiswa();
             }
         });
 
-        // 7. Manajemen User (Khusus Admin)
+        // 8. Manajemen User & Reset Password (Khusus Admin)
         window.loadUsers = async function() {
             const tbody = document.getElementById('tabel-users');
             tbody.innerHTML = '<tr><td colspan="3" class="px-5 py-8 text-center text-slate-400">Memuat daftar user...</td></tr>';
@@ -680,7 +862,7 @@
             else alert(`Berhasil! Password untuk ${nama} sudah diganti menjadi: ${newPass.trim()}`);
         };
 
-        // 8. Ganti Password Mandiri
+        // 9. Ganti Password Mandiri
         document.getElementById('btn-open-pass').addEventListener('click', () => {
             document.getElementById('pass-form').reset();
             document.getElementById('pass-msg').classList.add('hidden');

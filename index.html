@@ -1,4 +1,4 @@
-html_rbac = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -170,6 +170,10 @@ html_rbac = """<!DOCTYPE html>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3">
                     <span id="user-name" class="hidden md:block text-sm font-semibold text-slate-700 mr-1"></span>
+                    <button id="btn-open-pegawai-profile" onclick="openPegawaiProfileModal()"
+                        class="hidden bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-2 rounded-lg transition">
+                        Profil Pegawai
+                    </button>
                     <button id="btn-open-pass" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-lg transition">
                         Ganti Password
                     </button>
@@ -184,14 +188,22 @@ html_rbac = """<!DOCTYPE html>
         <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1">
 
             <!-- Menu Tab (Khusus Admin) -->
-            <div id="admin-tabs" class="hidden flex gap-2 mb-6 border-b border-slate-200 pb-3">
+            <div id="admin-tabs" class="hidden flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-3">
                 <button id="tab-btn-siswa" onclick="switchTab('siswa')"
                     class="px-4 py-2 rounded-xl text-sm font-bold bg-blue-700 text-white transition">
                     Buku Induk Siswa
                 </button>
+                <button id="tab-btn-rombel" onclick="switchTab('rombel')"
+                    class="px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
+                    Setting Kelas &amp; Wali Kelas
+                </button>
+                <button id="tab-btn-pegawai" onclick="switchTab('pegawai')"
+                    class="px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
+                    Data Pegawai (PTK)
+                </button>
                 <button id="tab-btn-users" onclick="switchTab('users')"
                     class="px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">
-                    Manajemen User & Role
+                    Manajemen User &amp; Role
                 </button>
             </div>
 
@@ -288,6 +300,181 @@ html_rbac = """<!DOCTYPE html>
                             </thead>
                             <tbody id="tabel-users" class="divide-y divide-slate-100">
                                 <tr><td colspan="3" class="px-5 py-10 text-center text-slate-400">Memuat daftar user...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: SETTING KELAS, WALI KELAS & MIGRASI / ACAK SISWA (KHUSUS ADMIN) -->
+            <div id="section-rombel" class="hidden space-y-6">
+                <!-- Panel Tahun Ajaran & Buat Rombel Baru -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-4 border-b border-slate-200">
+                        <div>
+                            <h2 class="font-extrabold text-slate-900 text-lg">Setting Rombel, Wali Kelas &amp; Penempatan Siswa</h2>
+                            <p class="text-xs text-slate-500">Pilih tahun ajaran, atur wali kelas tiap rombel, lalu migrasi langsung atau acak siswa secara merata (gender-balanced).</p>
+                        </div>
+                        <div class="flex flex-wrap items-end gap-2.5">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Tahun Ajaran</label>
+                                <select id="select-tahun-ajaran" onchange="onChangeTahunAjaran()"
+                                    class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-bold bg-white text-blue-900">
+                                    <option value="">Memuat TA...</option>
+                                </select>
+                            </div>
+                            <button onclick="tambahTahunAjaranBaru()"
+                                class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2.5 rounded-xl transition">
+                                + Tahun Ajaran
+                            </button>
+                            <button onclick="setTahunAjaranAktif()"
+                                class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold px-3.5 py-2.5 rounded-xl transition">
+                                Jadikan TA Aktif
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tambah Rombel di Tahun Ajaran Terpilih -->
+                    <div class="pt-4 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Tingkat Kelas (1–6)</label>
+                            <select id="new-rombel-tingkat" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                                <option value="1">Kelas 1</option>
+                                <option value="2">Kelas 2</option>
+                                <option value="3">Kelas 3</option>
+                                <option value="4">Kelas 4</option>
+                                <option value="5">Kelas 5</option>
+                                <option value="6">Kelas 6</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Nama Rombel</label>
+                            <input type="text" id="new-rombel-nama" placeholder="Contoh: Kelas 1 A"
+                                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Wali Kelas</label>
+                            <select id="new-rombel-wali" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                                <option value="">-- Pilih Guru / Wali Kelas --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button onclick="tambahRombelBaru()"
+                                class="w-full bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition">
+                                + Tambah Rombel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Daftar Rombel & Wali Kelas pada TA Terpilih -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+                        <div>
+                            <h3 class="font-extrabold text-slate-900">Daftar Rombel &amp; Wali Kelas</h3>
+                            <p id="rombel-ta-subtitle" class="text-xs text-slate-500">Pilih tahun ajaran di atas.</p>
+                        </div>
+                        <button onclick="loadRombelByTA()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl">
+                            Refresh Rombel
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                <tr>
+                                    <th class="px-5 py-3">Tingkat</th>
+                                    <th class="px-5 py-3">Nama Rombel</th>
+                                    <th class="px-5 py-3">Wali Kelas</th>
+                                    <th class="px-5 py-3 text-center">Jml Siswa</th>
+                                    <th class="px-5 py-3 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabel-rombel-ta" class="divide-y divide-slate-100">
+                                <tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">Memuat data rombel...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Panel Migrasi Langsung vs Acak Siswa per Tingkat -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+                    <div>
+                        <h3 class="font-extrabold text-slate-900 text-base">Penempatan Siswa: Migrasi Langsung atau Acak Rombel</h3>
+                        <p class="text-xs text-slate-500">Pilih kelompok siswa asal (berdasarkan rombel aktif saat ini), lalu pilih mode <b>Migrasi Langsung</b> ke 1 rombel tujuan atau <b>Acak Merata (L/P Seimbang)</b> ke beberapa rombel tujuan di tahun ajaran terpilih.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2.5">
+                            <label class="block text-xs font-extrabold uppercase text-slate-700">1. Sumber Siswa (Rombel Saat Ini)</label>
+                            <select id="mig-source-rombel" onchange="previewSumberMigrasi()"
+                                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold">
+                                <option value="">-- Pilih Rombel Asal --</option>
+                            </select>
+                            <p id="mig-source-info" class="text-xs text-slate-600">Pilih rombel asal untuk melihat jumlah siswa aktif.</p>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2.5">
+                            <label class="block text-xs font-extrabold uppercase text-slate-700">2. Mode Penempatan</label>
+                            <select id="mig-mode" onchange="renderTargetRombelMigrasi()"
+                                class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold">
+                                <option value="direct">Migrasi Langsung (1 Rombel Tujuan)</option>
+                                <option value="shuffle">Acak Merata (Bagi ke Beberapa Rombel)</option>
+                                <option value="graduate">Luluskan Siswa (Set Status: Lulus)</option>
+                            </select>
+                            <p id="mig-mode-desc" class="text-xs text-slate-500">Memindahkan seluruh siswa rombel asal ke 1 rombel tujuan.</p>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2.5">
+                            <label class="block text-xs font-extrabold uppercase text-slate-700">3. Rombel Tujuan (di TA Terpilih)</label>
+                            <div id="mig-target-container" class="max-h-36 overflow-y-auto space-y-1.5 text-xs">
+                                <p class="text-slate-400">Pilih tahun ajaran terlebih dahulu.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                        <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700">
+                            <input type="checkbox" id="mig-sync-master" checked class="rounded border-slate-300 text-blue-700">
+                            Sekaligus perbarui kolom <code>rombel_saat_ini</code> pada data utama siswa (disarankan untuk Tahun Ajaran Aktif)
+                        </label>
+                        <button onclick="eksekusiPenempatanSiswa()" id="btn-eksekusi-migrasi"
+                            class="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-sm transition">
+                            Jalankan Penempatan Siswa
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: DATA PEGAWAI / PTK (KHUSUS ADMIN) -->
+            <div id="section-pegawai" class="hidden">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="font-extrabold text-slate-900 text-lg">Data Pegawai (Guru, Tendik, Admin &amp; Kepsek)</h2>
+                            <p class="text-xs text-slate-500">Kelola profil lengkap PTK SDN Pluit 03 beserta foto profil terkompresi.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="search-pegawai" placeholder="Cari nama / NIP / jabatan..."
+                                class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+                            <button onclick="openNewPegawaiModal()" class="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+                                + Tambah Pegawai
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                <tr>
+                                    <th class="px-5 py-3">Foto</th>
+                                    <th class="px-5 py-3">Nama Lengkap</th>
+                                    <th class="px-5 py-3">NIP / NUPTK</th>
+                                    <th class="px-5 py-3">Jabatan / Status</th>
+                                    <th class="px-5 py-3">Akun Login</th>
+                                    <th class="px-5 py-3 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabel-pegawai" class="divide-y divide-slate-100">
+                                <tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Memuat data pegawai...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -979,6 +1166,130 @@ html_rbac = """<!DOCTYPE html>
         </div>
     </div>
 
+    <!-- MODAL PROFIL PEGAWAI (GURU, TENDIK, ADMIN & KEPSEK) -->
+    <div id="pegawai-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-3xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <div>
+                    <h3 id="pegawai-modal-title" class="font-extrabold text-slate-900 text-lg">Profil Pegawai (PTK)</h3>
+                    <p id="pegawai-modal-sub" class="text-xs text-slate-500">Lengkapi biodata kepegawaian dan foto profil Anda.</p>
+                </div>
+                <button onclick="closeModal('pegawai-modal')" class="text-slate-400 hover:text-slate-700 font-bold text-2xl px-2">&times;</button>
+            </div>
+            <form id="pegawai-form" class="p-6 overflow-y-auto space-y-5 text-sm">
+                <input type="hidden" id="pg-id">
+                <input type="hidden" id="pg-user-id">
+
+                <!-- Foto Profil Pegawai (Auto-Compress) -->
+                <div class="bg-blue-50/60 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-20 h-24 rounded-xl border border-slate-300 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
+                        <img id="pg-preview-foto" src="" alt="Foto Pegawai" class="hidden w-full h-full object-cover">
+                        <span id="pg-placeholder-foto" class="text-[10px] text-slate-400 font-semibold text-center px-1.5">Belum ada foto</span>
+                    </div>
+                    <div class="space-y-1.5 flex-1 w-full">
+                        <label class="block text-xs font-extrabold uppercase text-blue-900">Foto Profil Pegawai (Otomatis Dikompres ~40–80 KB)</label>
+                        <input type="file" id="pg-input-foto" accept="image/jpeg,image/png,image/webp"
+                            class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-700 file:text-white hover:file:bg-blue-800 cursor-pointer">
+                        <p id="pg-foto-status" class="text-[11px] text-slate-600 font-medium"></p>
+                    </div>
+                </div>
+
+                <!-- Field Utama master_pegawai -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap (dengan Gelar) *</label>
+                        <input type="text" id="pg-nama" required class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Kelamin</label>
+                        <select id="pg-jk" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            <option value="">-</option>
+                            <option value="L">L (Laki-laki)</option>
+                            <option value="P">P (Perempuan)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">NIP</label>
+                        <input type="text" id="pg-nip" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">NUPTK</label>
+                        <input type="text" id="pg-nuptk" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">NIK</label>
+                        <input type="text" id="pg-nik" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Tempat Lahir</label>
+                        <input type="text" id="pg-tempat-lahir" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Tanggal Lahir</label>
+                        <input type="text" id="pg-tgl-lahir" placeholder="YYYY-MM-DD" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Agama</label>
+                        <input type="text" id="pg-agama" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Status Kepegawaian</label>
+                        <input type="text" id="pg-status-peg" placeholder="PNS / PPPK / KKI / Honorer" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Jenis PTK / Jabatan</label>
+                        <input type="text" id="pg-jenis-ptk" placeholder="Kepala Sekolah / Guru Kelas / Pengelola TU" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Pangkat / Golongan</label>
+                        <input type="text" id="pg-golongan" placeholder="Penata Muda / III/a" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Pendidikan Terakhir</label>
+                        <input type="text" id="pg-pendidikan" placeholder="S1 / S.Pd / S.Kom" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">No. HP / WhatsApp</label>
+                        <input type="text" id="pg-hp" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Email Aktif</label>
+                        <input type="email" id="pg-email" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Alamat Domisili</label>
+                        <input type="text" id="pg-alamat" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">TMT Pengangkatan</label>
+                        <input type="text" id="pg-tmt" placeholder="YYYY-MM-DD" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">No. SK Pengangkatan</label>
+                        <input type="text" id="pg-sk" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div id="pg-link-user-wrap" class="hidden">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Tautkan Akun Login (Admin)</label>
+                        <select id="pg-select-user" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs">
+                            <option value="">-- Belum ditautkan --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Field Tambahan Dinamis dari Tabel master_pegawai (jika ada kolom ekstra di DB) -->
+                <div id="pg-extra-fields-container" class="hidden pt-3 border-t border-slate-100 space-y-3">
+                    <h4 class="text-xs font-extrabold uppercase text-slate-700">Data Kepegawaian Tambahan</h4>
+                    <div id="pg-extra-fields-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('pegawai-modal')" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 font-bold text-xs">Batal</button>
+                    <button type="submit" id="btn-save-pegawai" class="px-5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs">Simpan Profil Pegawai</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL GANTI PASSWORD -->
     <div id="pass-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden">
@@ -1037,9 +1348,13 @@ html_rbac = """<!DOCTYPE html>
         };
 
         let currentRole = 'siswa';
+        let currentAuthUser = null;
         let allSiswa = [];
         let filteredSiswa = [];
         let allUsers = [];
+        let allPegawai = [];
+        let allTahunAjaran = [];
+        let currentRombelList = [];
         let currentPage = 1;
         const pageSize = 25;
 
@@ -1048,6 +1363,8 @@ html_rbac = """<!DOCTYPE html>
         let currentRiwayatKelas = '1';
         let currentSemesterG = '1';
         let pendingCompressedBlob = null;
+        let pendingPegawaiFotoBlob = null;
+        let activePegawaiRecord = null;
 
         const loginView = document.getElementById('login-view');
         const dashboardView = document.getElementById('dashboard-view');
@@ -1123,6 +1440,7 @@ html_rbac = """<!DOCTYPE html>
 
             document.getElementById('admin-tabs').classList.toggle('hidden', !isAdmin);
             document.getElementById('toolbar-filter-siswa').classList.toggle('hidden', isSiswa);
+            document.getElementById('btn-open-pegawai-profile').classList.toggle('hidden', isSiswa);
 
             const badgeText = {
                 admin: 'Role: ADMIN (Super Akses)',
@@ -1149,6 +1467,7 @@ html_rbac = """<!DOCTYPE html>
         }
 
         async function showDashboard(user) {
+            currentAuthUser = user;
             loginView.classList.add('hidden');
             dashboardView.classList.remove('hidden');
 
@@ -1172,20 +1491,20 @@ html_rbac = """<!DOCTYPE html>
 
         window.switchTab = function(tab) {
             if (currentRole !== 'admin') return;
-            const btnSiswa = document.getElementById('tab-btn-siswa');
-            const btnUsers = document.getElementById('tab-btn-users');
-            if (tab === 'siswa') {
-                document.getElementById('section-siswa').classList.remove('hidden');
-                document.getElementById('section-users').classList.add('hidden');
-                btnSiswa.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-blue-700 text-white transition';
-                btnUsers.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition';
-            } else {
-                document.getElementById('section-siswa').classList.add('hidden');
-                document.getElementById('section-users').classList.remove('hidden');
-                btnUsers.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-blue-700 text-white transition';
-                btnSiswa.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition';
-                loadUsers();
-            }
+            const tabs = ['siswa', 'rombel', 'pegawai', 'users'];
+            tabs.forEach(t => {
+                const sec = document.getElementById('section-' + t);
+                const btn = document.getElementById('tab-btn-' + t);
+                if (sec) sec.classList.toggle('hidden', t !== tab);
+                if (btn) {
+                    btn.className = (t === tab)
+                        ? 'px-4 py-2 rounded-xl text-sm font-bold bg-blue-700 text-white transition'
+                        : 'px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition';
+                }
+            });
+            if (tab === 'users') loadUsers();
+            if (tab === 'pegawai') loadPegawai();
+            if (tab === 'rombel') initRombelManagement();
         };
 
         async function loadSiswa() {
@@ -2543,7 +2862,7 @@ html_rbac = """<!DOCTYPE html>
                             <option value="tendik" ${u.role === 'tendik' ? 'selected' : ''}>TENDIK</option>
                             <option value="siswa" ${u.role === 'siswa' ? 'selected' : ''}>SISWA</option>
                         </select>
-                        <button onclick="resetUserPassword('${u.id}', '${(u.nama_lengkap || '').replace(/'/g, "\'")}')"
+                        <button onclick="resetUserPassword('${u.id}', '${(u.nama_lengkap || '').replace(/'/g, "'")}')"
                             class="ml-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition">
                             Reset PW
                         </button>
@@ -2613,9 +2932,760 @@ html_rbac = """<!DOCTYPE html>
             }
         });
 
+        // ==========================================
+        // PROFIL PEGAWAI (GURU, TENDIK, ADMIN & KEPSEK)
+        // ==========================================
+        const KNOWN_PEGAWAI_KEYS = new Set([
+            'id', 'user_id', 'profile_id', 'created_at', 'updated_at',
+            'nama_lengkap', 'nama', 'nip', 'nuptk', 'nik', 'jenis_kelamin',
+            'tempat_lahir', 'tanggal_lahir', 'agama', 'status_kepegawaian',
+            'jenis_ptk', 'jabatan', 'pangkat_golongan', 'golongan',
+            'pendidikan_terakhir', 'pendidikan', 'no_hp', 'telepon', 'nomor_hp',
+            'email', 'alamat', 'tmt_pengangkatan', 'tmt', 'no_sk', 'sk_pengangkatan',
+            'foto_url', 'foto', 'avatar_url', 'data_tambahan'
+        ]);
+
+        function getPegawaiFoto(pg) {
+            if (!pg) return '';
+            const extra = (pg.data_tambahan && typeof pg.data_tambahan === 'object') ? pg.data_tambahan : {};
+            return pg.foto_url || pg.foto || pg.avatar_url || extra.foto_url || '';
+        }
+
+        function setPegawaiPhotoPreview(url) {
+            const img = document.getElementById('pg-preview-foto');
+            const ph = document.getElementById('pg-placeholder-foto');
+            const st = document.getElementById('pg-foto-status');
+            pendingPegawaiFotoBlob = null;
+            document.getElementById('pg-input-foto').value = '';
+            if (url) {
+                img.src = url + '?t=' + Date.now();
+                img.classList.remove('hidden');
+                ph.classList.add('hidden');
+                st.textContent = 'Foto profil tersimpan. Pilih file baru jika ingin mengganti.';
+            } else {
+                img.src = '';
+                img.classList.add('hidden');
+                ph.classList.remove('hidden');
+                st.textContent = 'Belum ada foto profil.';
+            }
+        }
+
+        document.getElementById('pg-input-foto').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const st = document.getElementById('pg-foto-status');
+            if (file.size > 10 * 1024 * 1024) {
+                st.textContent = 'Ukuran file maksimal 10 MB.';
+                e.target.value = '';
+                return;
+            }
+            st.textContent = 'Mengompres foto profil...';
+            try {
+                const { blob, width, height } = await compressImageToPasFoto(file, 450, 600, 0.78);
+                pendingPegawaiFotoBlob = blob;
+                const previewUrl = URL.createObjectURL(blob);
+                const img = document.getElementById('pg-preview-foto');
+                img.src = previewUrl;
+                img.classList.remove('hidden');
+                document.getElementById('pg-placeholder-foto').classList.add('hidden');
+                st.textContent = `Siap diunggah (${width}x${height}px): ${(file.size / 1024).toFixed(0)} KB → ${(blob.size / 1024).toFixed(0)} KB.`;
+            } catch (err) {
+                st.textContent = err.message;
+                e.target.value = '';
+            }
+        });
+
+        function populatePegawaiModalForm(pg, isSelfMode) {
+            activePegawaiRecord = pg || null;
+            const extra = (pg && pg.data_tambahan && typeof pg.data_tambahan === 'object') ? pg.data_tambahan : {};
+
+            document.getElementById('pg-id').value = pg?.id || '';
+            document.getElementById('pg-user-id').value = pg?.user_id || pg?.profile_id || (isSelfMode && currentAuthUser ? currentAuthUser.id : '');
+            document.getElementById('pg-nama').value = pg?.nama_lengkap || pg?.nama || (isSelfMode ? document.getElementById('user-name').textContent : '');
+            document.getElementById('pg-jk').value = pg?.jenis_kelamin || extra.jenis_kelamin || '';
+            document.getElementById('pg-nip').value = pg?.nip || extra.nip || '';
+            document.getElementById('pg-nuptk').value = pg?.nuptk || extra.nuptk || '';
+            document.getElementById('pg-nik').value = pg?.nik || extra.nik || '';
+            document.getElementById('pg-tempat-lahir').value = pg?.tempat_lahir || extra.tempat_lahir || '';
+            document.getElementById('pg-tgl-lahir').value = pg?.tanggal_lahir || extra.tanggal_lahir || '';
+            document.getElementById('pg-agama').value = pg?.agama || extra.agama || '';
+            document.getElementById('pg-status-peg').value = pg?.status_kepegawaian || extra.status_kepegawaian || '';
+            document.getElementById('pg-jenis-ptk').value = pg?.jenis_ptk || pg?.jabatan || extra.jenis_ptk || '';
+            document.getElementById('pg-golongan').value = pg?.pangkat_golongan || pg?.golongan || extra.pangkat_golongan || '';
+            document.getElementById('pg-pendidikan').value = pg?.pendidikan_terakhir || pg?.pendidikan || extra.pendidikan_terakhir || '';
+            document.getElementById('pg-hp').value = pg?.no_hp || pg?.nomor_hp || pg?.telepon || extra.no_hp || '';
+            document.getElementById('pg-email').value = pg?.email || (isSelfMode && currentAuthUser ? currentAuthUser.email : '') || '';
+            document.getElementById('pg-alamat').value = pg?.alamat || extra.alamat || '';
+            document.getElementById('pg-tmt').value = pg?.tmt_pengangkatan || pg?.tmt || extra.tmt_pengangkatan || '';
+            document.getElementById('pg-sk').value = pg?.no_sk || pg?.sk_pengangkatan || extra.no_sk || '';
+
+            setPegawaiPhotoPreview(getPegawaiFoto(pg));
+
+            // Render kolom ekstra dinamis jika tabel master_pegawai punya kolom tambahan di DB
+            const extraWrap = document.getElementById('pg-extra-fields-container');
+            const extraGrid = document.getElementById('pg-extra-fields-grid');
+            const dynamicKeys = pg ? Object.keys(pg).filter(k => !KNOWN_PEGAWAI_KEYS.has(k)) : [];
+            if (dynamicKeys.length > 0) {
+                extraWrap.classList.remove('hidden');
+                extraGrid.innerHTML = dynamicKeys.map(k => `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">${escHtml(k.replace(/_/g, ' '))}</label>
+                        <input type="text" data-pg-dyn-key="${escHtml(k)}" value="${escHtml(pg[k] ?? '')}"
+                            class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                `).join('');
+            } else {
+                extraWrap.classList.add('hidden');
+                extraGrid.innerHTML = '';
+            }
+
+            // Dropdown tautkan user (khusus Admin saat edit data pegawai)
+            const linkWrap = document.getElementById('pg-link-user-wrap');
+            if (currentRole === 'admin' && !isSelfMode) {
+                linkWrap.classList.remove('hidden');
+                const sel = document.getElementById('pg-select-user');
+                const linkedUid = pg?.user_id || pg?.profile_id || '';
+                sel.innerHTML = '<option value="">-- Belum ditautkan --</option>' +
+                    allUsers.map(u => `<option value="${u.id}" ${u.id === linkedUid ? 'selected' : ''}>${escHtml(u.nama_lengkap)} (${u.role})</option>`).join('');
+            } else {
+                linkWrap.classList.add('hidden');
+            }
+        }
+
+        window.openPegawaiProfileModal = async function() {
+            if (!currentAuthUser) return;
+            document.getElementById('pegawai-modal-title').textContent = 'Profil Pegawai Saya';
+            document.getElementById('pegawai-modal-sub').textContent = 'Perbarui biodata kepegawaian dan foto profil Anda.';
+
+            // Cari record di master_pegawai berdasarkan user_id, email, atau nama
+            let found = null;
+            const { data: rows } = await db.from('master_pegawai').select('*');
+            if (rows && rows.length > 0) {
+                const myName = (document.getElementById('user-name').textContent || '').toLowerCase().trim();
+                const myEmail = (currentAuthUser.email || '').toLowerCase().trim();
+                found = rows.find(r => r.user_id === currentAuthUser.id || r.profile_id === currentAuthUser.id)
+                    || rows.find(r => (r.email || '').toLowerCase().trim() === myEmail)
+                    || rows.find(r => (r.nama_lengkap || r.nama || '').toLowerCase().trim() === myName);
+            }
+
+            populatePegawaiModalForm(found, true);
+            document.getElementById('pegawai-modal').classList.remove('hidden');
+        };
+
+        window.openEditPegawaiAdmin = async function(pgId) {
+            if (currentRole !== 'admin') return;
+            if (allUsers.length === 0) {
+                const { data } = await db.from('profiles').select('*').order('nama_lengkap', { ascending: true });
+                allUsers = data || [];
+            }
+            const pg = allPegawai.find(x => String(x.id) === String(pgId));
+            document.getElementById('pegawai-modal-title').textContent = pg ? 'Edit Data Pegawai (PTK)' : 'Tambah Pegawai Baru (PTK)';
+            document.getElementById('pegawai-modal-sub').textContent = 'Kelola data kepegawaian guru, tendik, admin, dan kepala sekolah.';
+            populatePegawaiModalForm(pg, false);
+            document.getElementById('pegawai-modal').classList.remove('hidden');
+        };
+
+        window.openNewPegawaiModal = () => openEditPegawaiAdmin(null);
+
+        window.loadPegawai = async function() {
+            const tbody = document.getElementById('tabel-pegawai');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">Memuat data pegawai...</td></tr>';
+            const { data, error } = await db.from('master_pegawai').select('*');
+            if (error) {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-8 text-center text-red-500">Error: ${error.message}</td></tr>`;
+                return;
+            }
+            allPegawai = (data || []).sort((a, b) =>
+                (a.nama_lengkap || a.nama || '').localeCompare(b.nama_lengkap || b.nama || '')
+            );
+            renderPegawaiTable();
+        };
+
+        function renderPegawaiTable() {
+            const tbody = document.getElementById('tabel-pegawai');
+            if (!tbody) return;
+            const kw = (document.getElementById('search-pegawai')?.value || '').toLowerCase().trim();
+            const list = allPegawai.filter(p =>
+                (p.nama_lengkap || p.nama || '').toLowerCase().includes(kw) ||
+                (p.nip || '').toLowerCase().includes(kw) ||
+                (p.jenis_ptk || p.jabatan || '').toLowerCase().includes(kw)
+            );
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">Data pegawai belum tersedia.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(p => {
+                const foto = getPegawaiFoto(p);
+                const nama = p.nama_lengkap || p.nama || '-';
+                const isLinked = Boolean(p.user_id || p.profile_id);
+                return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-5 py-3">
+                            <div class="w-10 h-12 rounded-lg border border-slate-200 bg-slate-100 overflow-hidden flex items-center justify-center">
+                                ${foto ? `<img src="${foto}?t=${Date.now()}" class="w-full h-full object-cover">` : `<span class="text-[10px] text-slate-400">PTK</span>`}
+                            </div>
+                        </td>
+                        <td class="px-5 py-3 font-bold text-slate-900">${escHtml(nama)}</td>
+                        <td class="px-5 py-3 text-xs text-slate-600">
+                            <div>NIP: ${escHtml(p.nip) || '-'}</div>
+                            <div class="text-slate-400">NUPTK: ${escHtml(p.nuptk) || '-'}</div>
+                        </td>
+                        <td class="px-5 py-3 text-xs">
+                            <div class="font-bold text-blue-800">${escHtml(p.jenis_ptk || p.jabatan) || '-'}</div>
+                            <div class="text-slate-500">${escHtml(p.status_kepegawaian) || '-'} ${p.pangkat_golongan || p.golongan ? `(${escHtml(p.pangkat_golongan || p.golongan)})` : ''}</div>
+                        </td>
+                        <td class="px-5 py-3">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${isLinked ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}">
+                                ${isLinked ? 'Terhubung' : 'Belum Taut'}
+                            </span>
+                        </td>
+                        <td class="px-5 py-3 text-right">
+                            <button onclick="openEditPegawaiAdmin('${p.id}')" class="text-xs font-bold text-amber-700 hover:bg-amber-100 bg-amber-50 px-3 py-1.5 rounded-lg transition">
+                                Edit Profil
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('pegawai-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-pegawai');
+            btn.textContent = 'Menyimpan...';
+            btn.disabled = true;
+
+            const pgId = document.getElementById('pg-id').value;
+            const linkWrapHidden = document.getElementById('pg-link-user-wrap').classList.contains('hidden');
+            const targetUserId = !linkWrapHidden
+                ? document.getElementById('pg-select-user').value
+                : document.getElementById('pg-user-id').value;
+
+            const prevExtra = (activePegawaiRecord && typeof activePegawaiRecord.data_tambahan === 'object' && activePegawaiRecord.data_tambahan !== null)
+                ? JSON.parse(JSON.stringify(activePegawaiRecord.data_tambahan))
+                : {};
+
+            let uploadedFotoUrl = getPegawaiFoto(activePegawaiRecord);
+            if (pendingPegawaiFotoBlob) {
+                const ownerKey = targetUserId || pgId || ('ptk_' + Date.now());
+                const filePath = `pegawai/${ownerKey}.jpg`;
+                const { error: upErr } = await db.storage
+                    .from('foto-siswa')
+                    .upload(filePath, pendingPegawaiFotoBlob, {
+                        contentType: 'image/jpeg',
+                        upsert: true
+                    });
+
+                if (upErr) {
+                    alert('Gagal mengunggah foto profil pegawai: ' + upErr.message);
+                    btn.textContent = 'Simpan Profil Pegawai';
+                    btn.disabled = false;
+                    return;
+                }
+                const { data: pub } = db.storage.from('foto-siswa').getPublicUrl(filePath);
+                uploadedFotoUrl = pub.publicUrl;
+            }
+
+            const formValues = {
+                nama_lengkap: document.getElementById('pg-nama').value.trim(),
+                jenis_kelamin: document.getElementById('pg-jk').value,
+                nip: document.getElementById('pg-nip').value.trim(),
+                nuptk: document.getElementById('pg-nuptk').value.trim(),
+                nik: document.getElementById('pg-nik').value.trim(),
+                tempat_lahir: document.getElementById('pg-tempat-lahir').value.trim(),
+                tanggal_lahir: document.getElementById('pg-tgl-lahir').value.trim(),
+                agama: document.getElementById('pg-agama').value.trim(),
+                status_kepegawaian: document.getElementById('pg-status-peg').value.trim(),
+                jenis_ptk: document.getElementById('pg-jenis-ptk').value.trim(),
+                pangkat_golongan: document.getElementById('pg-golongan').value.trim(),
+                pendidikan_terakhir: document.getElementById('pg-pendidikan').value.trim(),
+                no_hp: document.getElementById('pg-hp').value.trim(),
+                email: document.getElementById('pg-email').value.trim(),
+                alamat: document.getElementById('pg-alamat').value.trim(),
+                tmt_pengangkatan: document.getElementById('pg-tmt').value.trim(),
+                no_sk: document.getElementById('pg-sk').value.trim(),
+                foto_url: uploadedFotoUrl
+            };
+
+            // Simpan salinan lengkap di data_tambahan agar aman meski nama kolom fisik bervariasi
+            prevExtra.profil_ptk = formValues;
+            if (uploadedFotoUrl) prevExtra.foto_url = uploadedFotoUrl;
+
+            // Bangun payload menyesuaikan kolom yang benar-benar ada di activePegawaiRecord (atau kolom standar)
+            const payload = {};
+            const sampleCols = activePegawaiRecord ? Object.keys(activePegawaiRecord) : (allPegawai[0] ? Object.keys(allPegawai[0]) : null);
+
+            if (sampleCols) {
+                const mapIfExists = (colCandidates, val) => {
+                    for (const col of colCandidates) {
+                        if (sampleCols.includes(col)) {
+                            payload[col] = val;
+                            return;
+                        }
+                    }
+                };
+                mapIfExists(['nama_lengkap', 'nama'], formValues.nama_lengkap);
+                mapIfExists(['jenis_kelamin'], formValues.jenis_kelamin);
+                mapIfExists(['nip'], formValues.nip);
+                mapIfExists(['nuptk'], formValues.nuptk);
+                mapIfExists(['nik'], formValues.nik);
+                mapIfExists(['tempat_lahir'], formValues.tempat_lahir);
+                mapIfExists(['tanggal_lahir'], formValues.tanggal_lahir || null);
+                mapIfExists(['agama'], formValues.agama);
+                mapIfExists(['status_kepegawaian'], formValues.status_kepegawaian);
+                mapIfExists(['jenis_ptk', 'jabatan'], formValues.jenis_ptk);
+                mapIfExists(['pangkat_golongan', 'golongan'], formValues.pangkat_golongan);
+                mapIfExists(['pendidikan_terakhir', 'pendidikan'], formValues.pendidikan_terakhir);
+                mapIfExists(['no_hp', 'nomor_hp', 'telepon'], formValues.no_hp);
+                mapIfExists(['email'], formValues.email);
+                mapIfExists(['alamat'], formValues.alamat);
+                mapIfExists(['tmt_pengangkatan', 'tmt'], formValues.tmt_pengangkatan || null);
+                mapIfExists(['no_sk', 'sk_pengangkatan'], formValues.no_sk);
+                mapIfExists(['foto_url', 'foto', 'avatar_url'], uploadedFotoUrl);
+                if (sampleCols.includes('user_id') && targetUserId) payload.user_id = targetUserId;
+                if (sampleCols.includes('profile_id') && targetUserId) payload.profile_id = targetUserId;
+                if (sampleCols.includes('data_tambahan')) payload.data_tambahan = prevExtra;
+
+                document.querySelectorAll('[data-pg-dyn-key]').forEach(inp => {
+                    const k = inp.getAttribute('data-pg-dyn-key');
+                    if (sampleCols.includes(k)) payload[k] = inp.value.trim();
+                });
+            } else {
+                Object.assign(payload, {
+                    nama_lengkap: formValues.nama_lengkap,
+                    nip: formValues.nip,
+                    nuptk: formValues.nuptk,
+                    nik: formValues.nik,
+                    jenis_kelamin: formValues.jenis_kelamin,
+                    tempat_lahir: formValues.tempat_lahir,
+                    agama: formValues.agama,
+                    status_kepegawaian: formValues.status_kepegawaian,
+                    jenis_ptk: formValues.jenis_ptk,
+                    pangkat_golongan: formValues.pangkat_golongan,
+                    pendidikan_terakhir: formValues.pendidikan_terakhir,
+                    no_hp: formValues.no_hp,
+                    email: formValues.email,
+                    alamat: formValues.alamat,
+                    foto_url: uploadedFotoUrl
+                });
+                if (targetUserId) payload.user_id = targetUserId;
+            }
+
+            let res;
+            if (pgId) {
+                res = await db.from('master_pegawai').update(payload).eq('id', pgId);
+            } else {
+                res = await db.from('master_pegawai').insert([payload]);
+            }
+
+            // Sinkronkan nama_lengkap ke profiles jika ditautkan
+            if (!res.error && targetUserId && formValues.nama_lengkap) {
+                await db.from('profiles').update({ nama_lengkap: formValues.nama_lengkap }).eq('id', targetUserId);
+                if (currentAuthUser && targetUserId === currentAuthUser.id) {
+                    document.getElementById('user-name').textContent = formValues.nama_lengkap;
+                }
+            }
+
+            btn.textContent = 'Simpan Profil Pegawai';
+            btn.disabled = false;
+
+            if (res.error) {
+                alert('Gagal menyimpan profil pegawai: ' + res.error.message);
+            } else {
+                pendingPegawaiFotoBlob = null;
+                closeModal('pegawai-modal');
+                if (currentRole === 'admin' && !document.getElementById('section-pegawai').classList.contains('hidden')) {
+                    loadPegawai();
+                } else {
+                    alert('Profil pegawai berhasil disimpan!');
+                }
+            }
+        });
+
+        // ==========================================
+        // SETTING KELAS, WALI KELAS & MIGRASI / ACAK SISWA (ADMIN)
+        // ==========================================
+        async function getGuruOptionsList() {
+            if (allUsers.length === 0) {
+                const { data } = await db.from('profiles').select('*').order('nama_lengkap', { ascending: true });
+                allUsers = data || [];
+            }
+            if (allPegawai.length === 0) {
+                const { data } = await db.from('master_pegawai').select('*');
+                allPegawai = data || [];
+            }
+            // Utamakan user dengan role guru/admin dari profiles, dilengkapi nama dari master_pegawai
+            const guruUsers = allUsers.filter(u => ['guru', 'admin'].includes((u.role || '').toLowerCase()));
+            return guruUsers.map(u => ({
+                id: u.id,
+                label: `${u.nama_lengkap || 'Tanpa Nama'} (${(u.role || '').toUpperCase()})`
+            }));
+        }
+
+        window.initRombelManagement = async function() {
+            if (currentRole !== 'admin') return;
+            const guruOpts = await getGuruOptionsList();
+            const waliSel = document.getElementById('new-rombel-wali');
+            waliSel.innerHTML = '<option value="">-- Pilih Wali Kelas --</option>' +
+                guruOpts.map(g => `<option value="${g.id}">${escHtml(g.label)}</option>`).join('');
+
+            // Isi sumber rombel dari allSiswa saat ini
+            const rombelSet = [...new Set(allSiswa.map(s => s.rombel_saat_ini).filter(Boolean))].sort();
+            const srcSel = document.getElementById('mig-source-rombel');
+            srcSel.innerHTML = '<option value="">-- Pilih Rombel Asal --</option>' +
+                rombelSet.map(r => {
+                    const cnt = allSiswa.filter(s => s.rombel_saat_ini === r && (s.status_siswa || 'Aktif') === 'Aktif').length;
+                    return `<option value="${escHtml(r)}">${escHtml(r)} (${cnt} siswa aktif)</option>`;
+                }).join('');
+
+            await loadTahunAjaranList();
+        };
+
+        async function loadTahunAjaranList() {
+            const sel = document.getElementById('select-tahun-ajaran');
+            const { data, error } = await db.from('tahun_ajaran').select('*').order('id', { ascending: false });
+            if (error) {
+                sel.innerHTML = `<option value="">Error: ${escHtml(error.message)}</option>`;
+                return;
+            }
+            allTahunAjaran = data || [];
+            if (allTahunAjaran.length === 0) {
+                sel.innerHTML = '<option value="">-- Belum ada Tahun Ajaran --</option>';
+                document.getElementById('tabel-rombel-ta').innerHTML =
+                    '<tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">Klik "+ Tahun Ajaran" di kanan atas untuk membuat periode baru.</td></tr>';
+                return;
+            }
+
+            const prevVal = sel.value;
+            sel.innerHTML = allTahunAjaran.map(ta => {
+                const label = ta.nama || ta.tahun_ajaran || ta.kode || `TA #${ta.id}`;
+                const activeTag = ta.is_aktif ? ' ★ (AKTIF)' : '';
+                return `<option value="${ta.id}">${escHtml(label)}${activeTag}</option>`;
+            }).join('');
+
+            if (prevVal && allTahunAjaran.some(t => String(t.id) === String(prevVal))) {
+                sel.value = prevVal;
+            } else {
+                const activeTA = allTahunAjaran.find(t => t.is_aktif) || allTahunAjaran[0];
+                sel.value = activeTA.id;
+            }
+            await loadRombelByTA();
+        }
+
+        window.onChangeTahunAjaran = () => loadRombelByTA();
+
+        window.tambahTahunAjaranBaru = async function() {
+            const namaTA = prompt('Masukkan nama Tahun Ajaran baru (contoh: 2026/2027):', '2026/2027');
+            if (!namaTA || !namaTA.trim()) return;
+
+            const { error } = await db.from('tahun_ajaran').insert([{
+                nama: namaTA.trim(),
+                is_aktif: allTahunAjaran.length === 0
+            }]);
+
+            if (error) alert('Gagal membuat Tahun Ajaran: ' + error.message);
+            else await loadTahunAjaranList();
+        };
+
+        window.setTahunAjaranAktif = async function() {
+            const taId = document.getElementById('select-tahun-ajaran').value;
+            if (!taId) return;
+            await db.from('tahun_ajaran').update({ is_aktif: false }).neq('id', taId);
+            const { error } = await db.from('tahun_ajaran').update({ is_aktif: true }).eq('id', taId);
+            if (error) alert('Gagal mengaktifkan TA: ' + error.message);
+            else {
+                alert('Tahun Ajaran berhasil dijadikan Aktif!');
+                await loadTahunAjaranList();
+            }
+        };
+
+        window.tambahRombelBaru = async function() {
+            const taId = document.getElementById('select-tahun-ajaran').value;
+            if (!taId) {
+                alert('Pilih atau buat Tahun Ajaran terlebih dahulu!');
+                return;
+            }
+            const tingkat = parseInt(document.getElementById('new-rombel-tingkat').value, 10);
+            const namaRombel = document.getElementById('new-rombel-nama').value.trim();
+            const waliId = document.getElementById('new-rombel-wali').value || null;
+
+            if (!namaRombel) {
+                alert('Nama rombel wajib diisi (contoh: Kelas 1 A).');
+                return;
+            }
+
+            const { error } = await db.from('rombel').insert([{
+                tahun_ajaran_id: taId,
+                tingkat: tingkat,
+                nama_rombel: namaRombel,
+                wali_kelas_id: waliId
+            }]);
+
+            if (error) {
+                alert('Gagal menambah rombel: ' + error.message);
+            } else {
+                document.getElementById('new-rombel-nama').value = '';
+                await loadRombelByTA();
+            }
+        };
+
+        window.loadRombelByTA = async function() {
+            const taId = document.getElementById('select-tahun-ajaran').value;
+            const tbody = document.getElementById('tabel-rombel-ta');
+            if (!taId) return;
+
+            const taObj = allTahunAjaran.find(t => String(t.id) === String(taId));
+            document.getElementById('rombel-ta-subtitle').textContent =
+                `Periode: ${taObj ? (taObj.nama || taObj.tahun_ajaran || taId) : taId}`;
+
+            tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">Memuat daftar rombel...</td></tr>';
+
+            const { data: rombels, error } = await db
+                .from('rombel')
+                .select('*')
+                .eq('tahun_ajaran_id', taId)
+                .order('tingkat', { ascending: true })
+                .order('nama_rombel', { ascending: true });
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-5 py-8 text-center text-red-500">Error: ${error.message}</td></tr>`;
+                return;
+            }
+
+            currentRombelList = rombels || [];
+            const guruOpts = await getGuruOptionsList();
+
+            // Hitung anggota rombel jika tabel anggota_rombel tersedia
+            const { data: anggotaList } = await db
+                .from('anggota_rombel')
+                .select('rombel_id, siswa_id')
+                .in('rombel_id', currentRombelList.map(r => r.id));
+
+            const countMap = {};
+            (anggotaList || []).forEach(a => {
+                countMap[a.rombel_id] = (countMap[a.rombel_id] || 0) + 1;
+            });
+
+            if (currentRombelList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">Belum ada rombel di Tahun Ajaran ini. Tambahkan melalui form di atas.</td></tr>';
+            } else {
+                tbody.innerHTML = currentRombelList.map(r => {
+                    const jml = countMap[r.id] ?? allSiswa.filter(s => s.rombel_saat_ini === r.nama_rombel).length;
+                    return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-5 py-3 font-bold text-slate-700">Kelas ${r.tingkat || '-'}</td>
+                            <td class="px-5 py-3 font-extrabold text-blue-900">${escHtml(r.nama_rombel)}</td>
+                            <td class="px-5 py-3">
+                                <select onchange="updateWaliKelasRombel('${r.id}', this.value)"
+                                    class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold bg-white max-w-xs">
+                                    <option value="">-- Belum ditentukan --</option>
+                                    ${guruOpts.map(g => `<option value="${g.id}" ${String(g.id) === String(r.wali_kelas_id) ? 'selected' : ''}>${escHtml(g.label)}</option>`).join('')}
+                                </select>
+                            </td>
+                            <td class="px-5 py-3 text-center">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">${jml} siswa</span>
+                            </td>
+                            <td class="px-5 py-3 text-right">
+                                <button onclick="hapusRombel('${r.id}', '${escHtml(r.nama_rombel).replace(/'/g, "\'")}')"
+                                    class="text-xs font-bold text-red-600 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition">
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            renderTargetRombelMigrasi();
+        };
+
+        window.updateWaliKelasRombel = async function(rombelId, waliId) {
+            const { error } = await db
+                .from('rombel')
+                .update({ wali_kelas_id: waliId || null })
+                .eq('id', rombelId);
+            if (error) alert('Gagal menyimpan wali kelas: ' + error.message);
+        };
+
+        window.hapusRombel = async function(rombelId, nama) {
+            if (!confirm(`Hapus rombel "${nama}" dari Tahun Ajaran ini?`)) return;
+            const { error } = await db.from('rombel').delete().eq('id', rombelId);
+            if (error) alert('Gagal menghapus rombel: ' + error.message);
+            else loadRombelByTA();
+        };
+
+        window.previewSumberMigrasi = function() {
+            const srcRombel = document.getElementById('mig-source-rombel').value;
+            const infoEl = document.getElementById('mig-source-info');
+            if (!srcRombel) {
+                infoEl.textContent = 'Pilih rombel asal untuk melihat jumlah siswa aktif.';
+                return;
+            }
+            const list = allSiswa.filter(s => s.rombel_saat_ini === srcRombel && (s.status_siswa || 'Aktif') === 'Aktif');
+            const lk = list.filter(s => (s.jenis_kelamin_siswa || '').toUpperCase() === 'L').length;
+            const pr = list.filter(s => (s.jenis_kelamin_siswa || '').toUpperCase() === 'P').length;
+            infoEl.innerHTML = `Total <b>${list.length} siswa aktif</b> (L: ${lk}, P: ${pr}) siap diproses.`;
+        };
+
+        window.renderTargetRombelMigrasi = function() {
+            const mode = document.getElementById('mig-mode').value;
+            const descEl = document.getElementById('mig-mode-desc');
+            const box = document.getElementById('mig-target-container');
+
+            if (mode === 'graduate') {
+                descEl.textContent = 'Menandai seluruh siswa rombel asal menjadi status "Lulus" (untuk Kelas 6).';
+                box.innerHTML = '<p class="text-emerald-700 font-semibold">Tidak perlu rombel tujuan — siswa akan berstatus Lulus.</p>';
+                return;
+            }
+
+            if (currentRombelList.length === 0) {
+                box.innerHTML = '<p class="text-slate-400">Belum ada rombel tujuan di Tahun Ajaran ini.</p>';
+                return;
+            }
+
+            if (mode === 'direct') {
+                descEl.textContent = 'Memindahkan seluruh siswa rombel asal ke 1 rombel tujuan.';
+                box.innerHTML = `
+                    <select id="mig-single-target" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs font-bold">
+                        ${currentRombelList.map(r => `<option value="${r.id}">${escHtml(r.nama_rombel)} (Tingkat ${r.tingkat})</option>`).join('')}
+                    </select>
+                `;
+            } else {
+                descEl.textContent = 'Mengacak dan membagi siswa secara merata (Laki-laki & Perempuan seimbang) ke rombel yang dicentang.';
+                box.innerHTML = currentRombelList.map(r => `
+                    <label class="flex items-center gap-2 py-1 px-2 rounded hover:bg-white cursor-pointer">
+                        <input type="checkbox" class="mig-multi-target rounded border-slate-300 text-blue-700" value="${r.id}">
+                        <span class="font-semibold text-slate-800">${escHtml(r.nama_rombel)}</span>
+                        <span class="text-slate-400">(Kls ${r.tingkat})</span>
+                    </label>
+                `).join('');
+            }
+        };
+
+        function fisherYatesShuffle(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        window.eksekusiPenempatanSiswa = async function() {
+            const srcRombel = document.getElementById('mig-source-rombel').value;
+            if (!srcRombel) {
+                alert('Pilih Rombel Asal terlebih dahulu!');
+                return;
+            }
+
+            const siswaList = allSiswa.filter(s => s.rombel_saat_ini === srcRombel && (s.status_siswa || 'Aktif') === 'Aktif');
+            if (siswaList.length === 0) {
+                alert('Tidak ada siswa aktif di rombel asal tersebut.');
+                return;
+            }
+
+            const mode = document.getElementById('mig-mode').value;
+            const syncMaster = document.getElementById('mig-sync-master').checked;
+            const btn = document.getElementById('btn-eksekusi-migrasi');
+
+            if (mode === 'graduate') {
+                if (!confirm(`Luluskan ${siswaList.length} siswa dari "${srcRombel}"?`)) return;
+                btn.disabled = true;
+                btn.textContent = 'Memproses kelulusan...';
+                const ids = siswaList.map(s => s.id);
+                const { error } = await db.from('master_siswa').update({ status_siswa: 'Lulus' }).in('id', ids);
+                btn.disabled = false;
+                btn.textContent = 'Jalankan Penempatan Siswa';
+                if (error) alert('Gagal memproses kelulusan: ' + error.message);
+                else {
+                    alert(`Berhasil meluluskan ${siswaList.length} siswa!`);
+                    await loadSiswa();
+                    await initRombelManagement();
+                }
+                return;
+            }
+
+            // Siapkan pasangan [siswa, targetRombelObj]
+            let assignments = [];
+            if (mode === 'direct') {
+                const targetId = document.getElementById('mig-single-target')?.value;
+                const targetObj = currentRombelList.find(r => String(r.id) === String(targetId));
+                if (!targetObj) {
+                    alert('Pilih rombel tujuan terlebih dahulu!');
+                    return;
+                }
+                if (!confirm(`Migrasi langsung ${siswaList.length} siswa dari "${srcRombel}" ke "${targetObj.nama_rombel}"?`)) return;
+                assignments = siswaList.map(s => ({ siswa: s, rombel: targetObj }));
+            } else {
+                const checkedIds = [...document.querySelectorAll('.mig-multi-target:checked')].map(el => el.value);
+                const targets = currentRombelList.filter(r => checkedIds.includes(String(r.id)));
+                if (targets.length < 2) {
+                    alert('Untuk mode Acak Merata, centang minimal 2 rombel tujuan!');
+                    return;
+                }
+                if (!confirm(`Acak merata ${siswaList.length} siswa dari "${srcRombel}" ke ${targets.length} rombel tujuan?`)) return;
+
+                // Acak terpisah Laki-laki dan Perempuan lalu bagi round-robin agar gender merata
+                const laki = fisherYatesShuffle(siswaList.filter(s => (s.jenis_kelamin_siswa || '').toUpperCase() === 'L'));
+                const perempuan = fisherYatesShuffle(siswaList.filter(s => (s.jenis_kelamin_siswa || '').toUpperCase() === 'P'));
+                const lainnya = fisherYatesShuffle(siswaList.filter(s => !['L', 'P'].includes((s.jenis_kelamin_siswa || '').toUpperCase())));
+                const combined = [...laki, ...perempuan, ...lainnya];
+
+                combined.forEach((s, idx) => {
+                    assignments.push({ siswa: s, rombel: targets[idx % targets.length] });
+                });
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Menyimpan penempatan...';
+
+            // 1. Catat ke anggota_rombel (riwayat per tahun ajaran)
+            const anggotaRows = assignments.map(item => ({
+                rombel_id: item.rombel.id,
+                siswa_id: item.siswa.id
+            }));
+            const { error: errAnggota } = await db
+                .from('anggota_rombel')
+                .upsert(anggotaRows, { onConflict: 'rombel_id,siswa_id' });
+
+            if (errAnggota) {
+                console.warn('Info anggota_rombel:', errAnggota.message);
+            }
+
+            // 2. Jika dicentang, update rombel_saat_ini pada master_siswa per rombel tujuan
+            if (syncMaster) {
+                const groupedByRombelName = {};
+                assignments.forEach(item => {
+                    const rName = item.rombel.nama_rombel;
+                    if (!groupedByRombelName[rName]) groupedByRombelName[rName] = [];
+                    groupedByRombelName[rName].push(item.siswa.id);
+                });
+
+                for (const [rName, ids] of Object.entries(groupedByRombelName)) {
+                    const { error: errUpd } = await db
+                        .from('master_siswa')
+                        .update({ rombel_saat_ini: rName })
+                        .in('id', ids);
+                    if (errUpd) {
+                        alert(`Gagal memperbarui rombel_saat_ini untuk ${rName}: ${errUpd.message}`);
+                        btn.disabled = false;
+                        btn.textContent = 'Jalankan Penempatan Siswa';
+                        return;
+                    }
+                }
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Jalankan Penempatan Siswa';
+            alert(`Berhasil menempatkan ${assignments.length} siswa!`);
+            await loadSiswa();
+            await initRombelManagement();
+        };
+
         document.getElementById('search-input').addEventListener('input', applyFilter);
         document.getElementById('filter-rombel').addEventListener('change', applyFilter);
         document.getElementById('search-user').addEventListener('input', renderUsers);
+        document.getElementById('search-pegawai').addEventListener('input', renderPegawaiTable);
         document.getElementById('btn-refresh').addEventListener('click', loadSiswa);
         document.getElementById('btn-prev').addEventListener('click', () => { currentPage--; renderTable(); });
         document.getElementById('btn-next').addEventListener('click', () => { currentPage++; renderTable(); });
@@ -2628,9 +3698,3 @@ html_rbac = """<!DOCTYPE html>
     </script>
 </body>
 </html>
-"""
-
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html_rbac.strip() + "\n")
-
-print("RBAC index.html generated:", len(html_rbac))

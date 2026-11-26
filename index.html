@@ -139,6 +139,7 @@
 
     <!-- HALAMAN LOGIN -->
     <div id="login-view" class="relative overflow-hidden min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+        <img src="foto1.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()"><div class="absolute inset-0 bg-gradient-to-r from-blue-950/90 via-blue-900/65 to-blue-900/20"></div>
         <svg class="wave-back absolute bottom-0 left-0 w-[200%] h-20 md:h-28 text-slate-50/50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,80 360,0 720,40 C1080,80 1080,0 1440,40 C1800,80 1800,0 2160,40 C2520,80 2520,0 2880,40 V80 H0Z"/></svg><svg class="wave-front absolute bottom-0 left-0 w-[200%] h-14 md:h-20 text-slate-50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,0 360,80 720,40 C1080,0 1080,80 1440,40 C1800,0 1800,80 2160,40 C2520,0 2520,80 2880,40 V80 H0Z"/></svg>
         <div class="relative z-10 bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 p-8">
             <div class="text-center mb-8">
@@ -168,7 +169,7 @@
                     Masuk ke Portal &rarr;
                 </button>
             </form>
-            <a href="../" class="block text-center text-xs font-semibold text-slate-500 hover:text-blue-700 mt-5">&larr; Kembali ke beranda sekolah</a>
+            <a href="https://sdnpluit03.github.io/web-sdnpluit03/" class="block text-center text-xs font-semibold text-slate-500 hover:text-blue-700 mt-5">&larr; Kembali ke beranda sekolah</a>
         </div>
     </div>
 
@@ -192,7 +193,7 @@
                         class="hidden bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-2 rounded-lg transition">
                         Profil Pegawai
                     </button>
-                    <a href="../" class="hidden sm:inline text-xs font-bold text-slate-600 hover:text-blue-700 px-2">Beranda</a>
+                    <a href="https://sdnpluit03.github.io/web-sdnpluit03/" class="text-xs font-bold text-slate-600 hover:text-blue-700 px-2">Beranda</a>
                     <button id="btn-open-pass" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-lg transition">
                         Ganti Password
                     </button>
@@ -201,6 +202,7 @@
                     </button>
                 </div>
             </div>
+            <div id="nav-menu" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-1 overflow-x-auto pb-2" role="navigation" aria-label="Menu utama"></div>
         </nav>
 
         <!-- Konten Utama -->
@@ -1561,10 +1563,9 @@
             document.getElementById('siswa-profile-card').classList.toggle('hidden', !isSiswa);
             const heroName = (document.getElementById('user-name').textContent || '').trim().split(/\s+/)[0];
             const heroMsg = { admin: 'Kelola seluruh data sekolah dari satu tempat.', guru: 'Isi nilai dan pantau data siswa di kelas Anda.', tendik: 'Kelola administrasi dan mutasi siswa.', siswa: 'Lihat dan lengkapi data diri Anda di sini.' }[currentRole] || '';
-            document.getElementById('welcome-hero').innerHTML = `<div class="relative overflow-hidden rounded-2xl text-white bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 shadow-md"><div class="relative z-10 px-6 sm:px-8 pt-7 pb-14"><span class="inline-block bg-blue-700/60 backdrop-blur-sm border border-blue-300/30 text-blue-100 text-xs font-semibold px-3 py-1 rounded-full mb-3">SDN Pluit 03 &bull; Penjaringan, Jakarta Utara</span><h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">Halo, ${escHtml(heroName)}</h2><p class="text-blue-100 text-sm sm:text-base mt-2 max-w-xl">${heroMsg}</p></div><svg class="wave-back absolute bottom-0 left-0 w-[200%] h-8 text-slate-50/50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,80 360,0 720,40 C1080,80 1080,0 1440,40 C1800,80 1800,0 2160,40 C2520,80 2520,0 2880,40 V80 H0Z"/></svg><svg class="wave-front absolute bottom-0 left-0 w-[200%] h-6 text-slate-50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,0 360,80 720,40 C1080,0 1080,80 1440,40 C1800,0 1800,80 2160,40 C2520,0 2520,80 2880,40 V80 H0Z"/></svg></div>`;
+            document.getElementById('welcome-hero').innerHTML = `<div class="relative overflow-hidden rounded-2xl text-white bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 shadow-md"><img src="foto1.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()"><div class="absolute inset-0 bg-gradient-to-r from-blue-950/90 via-blue-900/65 to-blue-900/20"></div><div class="relative z-10 px-6 sm:px-8 pt-10 pb-20"><span class="inline-block bg-blue-700/60 backdrop-blur-sm border border-blue-300/30 text-blue-100 text-xs font-semibold px-3 py-1 rounded-full mb-3">SDN Pluit 03 &bull; Penjaringan, Jakarta Utara</span><h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">Halo, ${escHtml(heroName)}</h2><p class="text-blue-100 text-sm sm:text-base mt-2 max-w-xl">${heroMsg}</p></div><svg class="wave-back absolute bottom-0 left-0 w-[200%] h-8 text-slate-50/50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,80 360,0 720,40 C1080,80 1080,0 1440,40 C1800,80 1800,0 2160,40 C2520,80 2520,0 2880,40 V80 H0Z"/></svg><svg class="wave-front absolute bottom-0 left-0 w-[200%] h-6 text-slate-50 pointer-events-none" viewBox="0 0 2880 80" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0,40 C360,0 360,80 720,40 C1080,0 1080,80 1440,40 C1800,0 1800,80 2160,40 C2520,0 2520,80 2880,40 V80 H0Z"/></svg></div>`;
             document.getElementById('toolbar-filter-siswa').classList.toggle('hidden', isSiswa);
-            document.getElementById('btn-open-pegawai-profile').classList.toggle('hidden', isSiswa);
-            document.getElementById('btn-open-absensi').classList.toggle('hidden', !(isGuru || isTendik));
+            
 
             const badgeText = {
                 admin: 'Role: ADMIN (Super Akses)',
@@ -1610,7 +1611,9 @@
             }
 
             applyRoleDashboardChrome();
+            buildNavMenu();
             loadSiswa();
+            navTo('profil');
         }
 
         window.switchTab = function(tab) {
@@ -2430,7 +2433,7 @@
             }
 
             if ((isAdmin || isTendik || isSiswa) && pendingCompressedBlob) {
-                const filePath = `${id}/kelas_${slot}.jpg`;
+                const filePath = `${id}/kelas_${slot}_${crypto.randomUUID().slice(0, 12)}.jpg`;
                 const { error: uploadErr } = await db.storage
                     .from('foto-siswa')
                     .upload(filePath, pendingCompressedBlob, {
@@ -3193,13 +3196,7 @@
         }
 
         window.backFromPegawaiPage = function() {
-            if (currentRole === 'admin') {
-                switchTab('siswa');
-            } else {
-                document.getElementById('section-profil-pegawai').classList.add('hidden');
-                document.getElementById('section-siswa').classList.remove('hidden');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            navTo(navActive === 'pegawai' && currentRole === 'admin' ? 'pegawai' : 'profil');
         };
 
         function getPegawaiFoto(pg) {
@@ -3458,7 +3455,7 @@
             let uploadedFotoUrl = getPegawaiFoto(activePegawaiRecord);
             if (pendingPegawaiFotoBlob) {
                 const ownerKey = targetUserId || pgId || ('ptk_' + Date.now());
-                const filePath = `pegawai/${ownerKey}.jpg`;
+                const filePath = `pegawai/${ownerKey}_${crypto.randomUUID().slice(0, 12)}.jpg`;
                 const { error: upErr } = await db.storage
                     .from('foto-siswa')
                     .upload(filePath, pendingPegawaiFotoBlob, {
@@ -4099,10 +4096,7 @@
             initAbsensi();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-        window.closeAbsensi = function() {
-            document.getElementById('section-absensi').classList.add('hidden');
-            document.getElementById('section-siswa').classList.remove('hidden');
-        };
+        window.closeAbsensi = function() { navTo('profil'); };
 
         window.initAbsensi = function() {
             const names = [...new Set(allSiswa.filter(s => (s.status_siswa || 'Aktif') === 'Aktif').map(s => s.rombel_saat_ini).filter(Boolean))].sort();
@@ -4247,6 +4241,44 @@
             if (error) return alert('Gagal menghapus: ' + error.message);
             if (!data || !data.length) return alert('Tidak terhapus (cek izin RLS).');
             await abLoadMonth();
+        };
+
+        // ==========================================
+        // NAVIGASI (Profil dulu, lalu menu fitur)
+        // ==========================================
+        const NAV_ITEMS = [
+            ['profil', 'Profil', ['admin', 'guru', 'tendik', 'siswa']],
+            ['siswa', 'Buku Induk', ['admin', 'guru', 'tendik']],
+            ['absensi', 'Absensi', ['admin', 'guru', 'tendik']],
+            ['rombel', 'Rombel', ['admin']],
+            ['pegawai', 'Pegawai', ['admin']],
+            ['users', 'User & Role', ['admin']]
+        ];
+        let navActive = 'profil';
+        function buildNavMenu() {
+            document.getElementById('nav-menu').innerHTML = NAV_ITEMS.filter(i => i[2].includes(currentRole))
+                .map(i => `<button type="button" id="nm-${i[0]}" onclick="navTo('${i[0]}')" class="shrink-0 px-4 py-2 rounded-xl text-sm font-bold transition">${i[1]}</button>`).join('');
+        }
+        function navShowOnly(k) {
+            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'absensi'].forEach(s => {
+                const el = document.getElementById('section-' + s); if (el) el.classList.toggle('hidden', s !== k);
+            });
+        }
+        window.navTo = function(v) {
+            navActive = v;
+            if (v === 'profil') { if (currentRole === 'siswa') navShowOnly('siswa'); else openPegawaiProfileModal(); }
+            else if (v === 'absensi') openAbsensi();
+            else if (currentRole === 'admin') switchTab(v);
+            else navShowOnly('siswa');
+            document.getElementById('welcome-hero').classList.toggle('hidden', v !== 'profil');
+            document.getElementById('stats-row').classList.toggle('hidden', !(v === 'siswa' && currentRole !== 'siswa'));
+            document.getElementById('admin-tabs').classList.add('hidden');
+            NAV_ITEMS.forEach(i => {
+                const b = document.getElementById('nm-' + i[0]); if (!b) return;
+                b.classList.toggle('bg-blue-700', i[0] === v); b.classList.toggle('text-white', i[0] === v);
+                b.classList.toggle('text-slate-600', i[0] !== v); b.classList.toggle('hover:bg-slate-100', i[0] !== v);
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         db.auth.onAuthStateChange((ev) => {

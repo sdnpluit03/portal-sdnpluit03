@@ -1469,8 +1469,8 @@
         }
 
         const ROLE_ALLOWED_TABS = {
-            admin: ['a', 'bcd', 'efjk', 'g', 'hi'],
-            guru: ['g', 'efjk'],
+            admin: ['a', 'bcd', 'efjk', 'hi'],
+            guru: ['efjk'],
             tendik: ['a', 'bcd', 'hi'],
             siswa: ['a', 'bcd']
         };
@@ -1764,10 +1764,10 @@
         }
 
         function getEditButtonLabel() {
-            if (currentRole === 'guru') return 'Input Nilai';
-            if (currentRole === 'tendik') return 'Edit TU';
+            if (currentRole === 'guru') return 'Ubah data';
+            if (currentRole === 'tendik') return 'Ubah data';
             if (currentRole === 'siswa') return 'Lengkapi Data';
-            return 'Edit';
+            return 'Ubah data';
         }
 
         function siswaCompleteness(s) {
@@ -2285,8 +2285,8 @@
             });
 
             if (isGuru) {
-                document.getElementById('edit-modal-title').textContent = 'Penilaian & Riwayat Kelas (Guru)';
-                document.getElementById('edit-note').textContent = 'Mode Guru: Fokus mengisi Nilai Rapor/Prestasi (G) serta Jasmani, Beasiswa, Perilaku & Pengembangan Diri (E, F, J, K).';
+                document.getElementById('edit-modal-title').textContent = 'Riwayat Kelas (Guru)';
+                document.getElementById('edit-note').textContent = 'Mode Guru: Fokus mengisi Jasmani, Beasiswa, Perilaku & Pengembangan Diri (E, F, J, K). Nilai diisi lewat menu Input Nilai.';
             } else if (isTendik) {
                 document.getElementById('edit-modal-title').textContent = 'Administrasi, Biodata & Mutasi Siswa (Tendik)';
                 document.getElementById('edit-note').textContent = 'Mode Tendik: Mengelola Biodata Siswa (A), Data Ortu/Wali (B–D), Pas Foto, serta Pindah/Mutasi & Catatan (H–I).';
@@ -2294,7 +2294,7 @@
                 document.getElementById('edit-modal-title').textContent = 'Lengkapi Biodata Siswa & Orang Tua / Wali';
                 document.getElementById('edit-note').textContent = 'Mode Siswa/Ortu: Lengkapi alamat, kontak, data Ayah/Ibu/Wali, serta Pas Foto. Identitas utama dikunci sekolah; nilai rapor dapat dilihat di menu Lihat Profil & Rapor.';
             } else {
-                document.getElementById('edit-modal-title').textContent = 'Edit Buku Induk Siswa (Lengkap)';
+                document.getElementById('edit-modal-title').textContent = 'Ubah Data Peserta Didik (Lengkap)';
                 document.getElementById('edit-note').textContent = 'Mode Admin: Akses penuh ke seluruh bagian Buku Induk (A–K) dan Pas Foto.';
             }
 
@@ -4129,7 +4129,7 @@
                 db.from('kalender_libur').select('tanggal,keterangan').gte('tanggal', first).lte('tanggal', last),
                 abS.sis.length ? db.from('absensi_siswa').select('siswa_id,tanggal,status').in('siswa_id', abS.sis.map(s => s.id)).gte('tanggal', first).lte('tanggal', last).range(0, 4999) : Promise.resolve({ data: [] })
             ]);
-            if (lb.error || ab.error) alert('Gagal memuat absensi: ' + (lb.error || ab.error).message + '\n\nPastikan absensi_setup.sql sudah dijalankan di Supabase.');
+            if (lb.error || ab.error) alert('Gagal memuat ' + (lb.error ? 'kalender libur' : 'absensi') + ': ' + (lb.error || ab.error).message + '\n\nPastikan absensi_setup.sql sudah dijalankan di Supabase.');
             abS.libur = {}; (lb.data || []).forEach(r => { abS.libur[r.tanggal] = r.keterangan; });
             abS.rec = {}; (ab.data || []).forEach(r => { (abS.rec[r.tanggal] = abS.rec[r.tanggal] || {})[r.siswa_id] = r.status; });
             if (abS.date.slice(0, 7) !== abS.ym) abS.date = first;

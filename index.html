@@ -50,7 +50,7 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            #login-view, #dashboard-view, #detail-modal, #edit-modal, #pass-modal, .no-print {
+            #app-footer, #login-view, #dashboard-view, #detail-modal, #edit-modal, #pass-modal, .no-print {
                 display: none !important;
             }
             #print-container {
@@ -257,7 +257,7 @@
                     <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <span class="text-blue-700 font-bold text-[11px] uppercase tracking-wider">Permendikdasmen No. 13 Tahun 2025</span>
-                            <h2 id="judul-daftar-siswa" class="font-extrabold text-slate-900 text-lg">Buku Induk Siswa</h2>
+                            <h2 id="judul-daftar-siswa" class="font-extrabold text-slate-900 text-lg">Data Peserta Didik</h2>
                             <p id="filter-info" class="text-xs text-slate-500">Memuat data...</p>
                         </div>
                         <div id="toolbar-filter-siswa" class="flex flex-col sm:flex-row gap-2.5">
@@ -554,6 +554,16 @@
                 </div>
             </div>
 
+            <div id="section-nilai" class="hidden space-y-5">
+                <div><h2 class="text-xl font-extrabold text-slate-900">Input Nilai</h2><p class="text-xs text-slate-500">Isi nilai satu kelas sekaligus. KKM diisi sekali per mata pelajaran.</p></div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-wrap items-center gap-3">
+                    <select id="nl-rombel" onchange="nlLoad()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm bg-white font-bold"></select>
+                    <select id="nl-sem" onchange="nlRender()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-sm bg-white font-bold"></select>
+                    <button id="nl-save" onclick="nlSave()" class="sm:ml-auto bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">Simpan nilai</button>
+                </div>
+                <div id="nl-grid" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto"></div>
+            </div>
+
             <div id="section-absensi" class="hidden space-y-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div><h2 class="text-xl font-extrabold text-slate-900">Absensi Siswa</h2>
@@ -583,7 +593,7 @@
 
             <!-- HALAMAN PENUH: PROFIL PEGAWAI (GURU, TENDIK, ADMIN & KEPSEK) -->
             <div id="section-profil-pegawai" class="hidden space-y-6">
-                <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white rounded-2xl p-6 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="hidden bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white rounded-2xl p-6 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <span class="inline-block bg-amber-400/20 border border-amber-300/40 text-amber-200 text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-2">
                             Halaman Profil Pegawai • SDN Pluit 03
@@ -1580,13 +1590,13 @@
                 document.getElementById('judul-daftar-siswa').textContent = 'Profil & Nilai Rapor Siswa';
                 document.getElementById('stat-role-info').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Akses Siswa / Orang Tua';
             } else if (isGuru) {
-                document.getElementById('judul-daftar-siswa').textContent = 'Penilaian & Data Kelas';
+                document.getElementById('judul-daftar-siswa').textContent = 'Data Peserta Didik';
                 document.getElementById('stat-role-info').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Mode Guru Kelas';
             } else if (isTendik) {
-                document.getElementById('judul-daftar-siswa').textContent = 'Administrasi & Mutasi Siswa';
+                document.getElementById('judul-daftar-siswa').textContent = 'Data Peserta Didik';
                 document.getElementById('stat-role-info').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Mode Tata Usaha (Tendik)';
             } else {
-                document.getElementById('judul-daftar-siswa').textContent = 'Buku Induk Siswa';
+                document.getElementById('judul-daftar-siswa').textContent = 'Data Peserta Didik';
                 document.getElementById('stat-role-info').innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Supabase RLS Aktif';
             }
         }
@@ -1612,13 +1622,14 @@
 
             applyRoleDashboardChrome();
             buildNavMenu();
+            document.getElementById('app-footer').classList.remove('hidden');
             loadSiswa();
             navTo('profil');
         }
 
         window.switchTab = function(tab) {
             if (currentRole !== 'admin') return;
-            const tabs = ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'absensi'];
+            const tabs = ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'absensi', 'nilai'];
             tabs.forEach(t => {
                 const sec = document.getElementById('section-' + t);
                 const btn = document.getElementById('tab-btn-' + t);
@@ -2632,7 +2643,7 @@
             `;
         }
 
-        window.printBukuInduk = function(id) {
+        window.printBukuInduk = async function(id) {
             if (currentRole === 'siswa') return;
             const s = allSiswa.find(x => x.id === id);
             if (!s) return;
@@ -3061,10 +3072,9 @@
                 </table>
             </div>`;
 
-            document.getElementById('print-container').innerHTML = page1 + page2 + page3 + page4;
-            const imgs = [...document.querySelectorAll('#print-container img')];
-            Promise.all(imgs.map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })))
-                .then(() => setTimeout(() => window.print(), 100));
+            const ttd = await getTtd(s.rombel_saat_ini);
+            document.getElementById('print-container').innerHTML = page1 + page2 + page3 + page4.replace(/<\/div>\s*$/, ttdHtml(ttd) + '</div>');
+            printWhenReady();
         };
 
         // ==========================================
@@ -3186,7 +3196,7 @@
         ]);
 
         function showPegawaiFullPage() {
-            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'absensi'].forEach(t => {
+            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'absensi', 'nilai'].forEach(t => {
                 const sec = document.getElementById('section-' + t);
                 if (sec) sec.classList.toggle('hidden', t !== 'profil-pegawai');
                 const btn = document.getElementById('tab-btn-' + t);
@@ -4091,7 +4101,7 @@
         const abInp = 'w-full px-3 py-2 rounded-xl border border-slate-300 text-sm';
 
         window.openAbsensi = function() {
-            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai'].forEach(k => { const s = document.getElementById('section-' + k); if (s) s.classList.add('hidden'); });
+            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'nilai'].forEach(k => { const s = document.getElementById('section-' + k); if (s) s.classList.add('hidden'); });
             document.getElementById('section-absensi').classList.remove('hidden');
             initAbsensi();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4191,7 +4201,7 @@
                 Object.keys(c).forEach(k => { tot[k] += c[k]; }); tot.B += bl;
                 return `<tr class="border-b border-slate-100"><td class="px-3 py-2 text-slate-400">${i + 1}</td><td class="px-3 py-2 font-bold text-slate-900">${escHtml(s.nama_lengkap_siswa)}</td><td class="px-3 py-2 text-center">${c.H}</td><td class="px-3 py-2 text-center">${c.S}</td><td class="px-3 py-2 text-center">${c.I}</td><td class="px-3 py-2 text-center ${c.A ? 'text-rose-600 font-bold' : ''}">${c.A}</td><td class="px-3 py-2 text-center text-amber-600">${bl}</td><td class="px-3 py-2 text-center font-bold ${pct < 80 ? 'text-rose-600' : 'text-emerald-700'}">${pct}%</td></tr>`;
             }).join('') || '<tr><td colspan="8" class="p-10 text-center text-slate-400">Belum ada siswa aktif di kelas ini.</td></tr>';
-            document.getElementById('ab-panel').innerHTML = `<div class="p-4 border-b border-slate-200"><h3 class="font-extrabold text-slate-900">Rekap kelas ${escHtml(abS.rombel)}</h3><p class="text-xs text-slate-500">Hari efektif sampai hari ini: <b>${eff.length}</b> hari (tanpa akhir pekan dan hari libur). Kolom Belum = hari efektif yang belum diabsen.</p></div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200"><tr><th class="px-3 py-2">No</th><th class="px-3 py-2">Nama</th><th class="px-3 py-2 text-center">Hadir</th><th class="px-3 py-2 text-center">Sakit</th><th class="px-3 py-2 text-center">Izin</th><th class="px-3 py-2 text-center">Alfa</th><th class="px-3 py-2 text-center">Belum</th><th class="px-3 py-2 text-center">% Hadir</th></tr></thead><tbody>${rows}</tbody><tfoot class="bg-slate-50 font-bold text-xs"><tr><td></td><td class="px-3 py-2">Total kelas</td><td class="px-3 py-2 text-center">${tot.H}</td><td class="px-3 py-2 text-center">${tot.S}</td><td class="px-3 py-2 text-center">${tot.I}</td><td class="px-3 py-2 text-center">${tot.A}</td><td class="px-3 py-2 text-center">${tot.B}</td><td></td></tr></tfoot></table></div>`;
+            document.getElementById('ab-panel').innerHTML = `<div class="p-4 border-b border-slate-200 relative"><button type="button" onclick="abPrint()" class="absolute right-4 top-4 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition">Cetak rekap</button><h3 class="font-extrabold text-slate-900">Rekap kelas ${escHtml(abS.rombel)}</h3><p class="text-xs text-slate-500">Hari efektif sampai hari ini: <b>${eff.length}</b> hari (tanpa akhir pekan dan hari libur). Kolom Belum = hari efektif yang belum diabsen.</p></div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200"><tr><th class="px-3 py-2">No</th><th class="px-3 py-2">Nama</th><th class="px-3 py-2 text-center">Hadir</th><th class="px-3 py-2 text-center">Sakit</th><th class="px-3 py-2 text-center">Izin</th><th class="px-3 py-2 text-center">Alfa</th><th class="px-3 py-2 text-center">Belum</th><th class="px-3 py-2 text-center">% Hadir</th></tr></thead><tbody>${rows}</tbody><tfoot class="bg-slate-50 font-bold text-xs"><tr><td></td><td class="px-3 py-2">Total kelas</td><td class="px-3 py-2 text-center">${tot.H}</td><td class="px-3 py-2 text-center">${tot.S}</td><td class="px-3 py-2 text-center">${tot.I}</td><td class="px-3 py-2 text-center">${tot.A}</td><td class="px-3 py-2 text-center">${tot.B}</td><td></td></tr></tfoot></table></div>`;
         }
 
         function abPanelLibur() {
@@ -4248,7 +4258,8 @@
         // ==========================================
         const NAV_ITEMS = [
             ['profil', 'Profil', ['admin', 'guru', 'tendik', 'siswa']],
-            ['siswa', 'Buku Induk', ['admin', 'guru', 'tendik']],
+            ['siswa', 'Data Peserta Didik', ['admin', 'guru', 'tendik']],
+            ['nilai', 'Input Nilai', ['admin', 'guru']],
             ['absensi', 'Absensi', ['admin', 'guru', 'tendik']],
             ['rombel', 'Rombel', ['admin']],
             ['pegawai', 'Pegawai', ['admin']],
@@ -4260,7 +4271,7 @@
                 .map(i => `<button type="button" id="nm-${i[0]}" onclick="navTo('${i[0]}')" class="shrink-0 px-4 py-2 rounded-xl text-sm font-bold transition">${i[1]}</button>`).join('');
         }
         function navShowOnly(k) {
-            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'absensi'].forEach(s => {
+            ['siswa', 'rombel', 'pegawai', 'users', 'profil-pegawai', 'absensi', 'nilai'].forEach(s => {
                 const el = document.getElementById('section-' + s); if (el) el.classList.toggle('hidden', s !== k);
             });
         }
@@ -4268,6 +4279,7 @@
             navActive = v;
             if (v === 'profil') { if (currentRole === 'siswa') navShowOnly('siswa'); else openPegawaiProfileModal(); }
             else if (v === 'absensi') openAbsensi();
+            else if (v === 'nilai') { navShowOnly('nilai'); initNilai(); }
             else if (currentRole === 'admin') switchTab(v);
             else navShowOnly('siswa');
             document.getElementById('welcome-hero').classList.toggle('hidden', v !== 'profil');
@@ -4281,11 +4293,96 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
+        // ==========================================
+        // INPUT NILAI + CETAK (TTD, KOP)
+        // ==========================================
+        const px = v => { try { return typeof v === 'string' ? JSON.parse(v || '{}') : (v || {}); } catch (e) { return {}; } };
+        const tglCetak = () => new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        async function getTtd(rombel) { const { data, error } = await db.rpc('info_ttd', { p_rombel: rombel }); return error ? {} : (data || {}); }
+        function ttdHtml(ttd) {
+            const w = ttd.wali || {}, k = ttd.kepsek || {};
+            const col = (head, o) => `<div style="text-align:center;width:46%">${head}<div style="height:62px"></div><b><u>${escHtml(o.nama) || '..............................'}</u></b><br>NIP. ${escHtml(o.nip) || '-'}</div>`;
+            return `<div style="display:flex;justify-content:space-between;margin-top:18px;font-size:10pt;page-break-inside:avoid"><div style="width:46%"><div style="height:1.3em"></div>${col('Wali Kelas,', w)}</div><div style="width:46%;text-align:center">Jakarta, ${tglCetak()}<br>${col('Kepala Sekolah,', k).replace('width:46%', 'width:100%')}</div></div>`;
+        }
+        function kopHtml() {
+            return `<div style="display:flex;align-items:center;gap:12px;font-family:Arial,sans-serif;text-align:center"><img src="logo-dki-jakarta-hitam-putih.png" alt="" style="height:76px"><div style="flex:1;line-height:1.25"><div style="font-size:13pt">PEMERINTAH PROVINSI DAERAH KHUSUS IBU KOTA JAKARTA</div><div style="font-size:12pt">DINAS PENDIDIKAN</div><div style="font-size:15pt;font-weight:bold">SD NEGERI PLUIT 03</div><div style="font-size:9pt">Jl. Komp. Nelayan Muara Angke Rt.001/001, Pluit, Penjaringan, Jakarta Utara 14450</div><div style="font-size:9pt">Web: sdnpluit03.com Telp. (021) 22668199 E-mail: sdnpluitnol3@gmail.com</div><div style="font-size:9pt;letter-spacing:3px">J A K A R T A</div></div><div style="width:68px"></div></div><div style="text-align:right;font-family:Arial,sans-serif;font-size:9pt">Kode Pos 14450</div><div style="border-top:3px double #000;margin:2px 0 10px"></div>`;
+        }
+        function printWhenReady() {
+            const imgs = [...document.querySelectorAll('#print-container img')];
+            Promise.all(imgs.map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))).then(() => setTimeout(() => window.print(), 100));
+        }
+        window.abPrint = async function() {
+            const [y, m] = abS.ym.split('-').map(Number), days = [];
+            for (let d = 1; d <= new Date(y, m, 0).getDate(); d++) { const iso = `${abS.ym}-${String(d).padStart(2, '0')}`; if (!abWhy(iso)) days.push(iso); }
+            const ttd = await getTtd(abS.rombel);
+            const bulan = new Date(y, m - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+            const rows = abS.sis.map((s, i) => {
+                const c = { H: 0, S: 0, I: 0, A: 0 };
+                const cells = days.map(d => { const st = (abS.rec[d] || {})[s.id]; if (st) c[st]++; return `<td style="text-align:center;font-size:7pt">${st || ''}</td>`; }).join('');
+                return `<tr><td style="text-align:center">${i + 1}</td><td style="padding:2px 4px;white-space:nowrap">${escHtml(s.nama_lengkap_siswa)}</td>${cells}<td style="text-align:center">${c.H}</td><td style="text-align:center">${c.S}</td><td style="text-align:center">${c.I}</td><td style="text-align:center">${c.A}</td></tr>`;
+            }).join('');
+            document.getElementById('print-container').innerHTML = `<div class="s4-page s4-landscape">${kopHtml()}<div style="text-align:center;font-weight:bold;font-size:11pt;margin-bottom:6px">REKAPITULASI ABSENSI SISWA<br><span style="font-weight:normal;font-size:10pt">Kelas ${escHtml(abS.rombel)} &bull; Bulan ${bulan}</span></div><table class="s4-table"><tr><th rowspan="2" style="width:26px">No</th><th rowspan="2">Nama Siswa</th><th colspan="${days.length}">Tanggal</th><th colspan="4">Jumlah</th></tr><tr>${days.map(d => `<th style="width:19px;font-size:7pt">${+d.slice(8)}</th>`).join('')}<th>H</th><th>S</th><th>I</th><th>A</th></tr>${rows}</table><div style="font-size:8pt;margin-top:4px">H = Hadir, S = Sakit, I = Izin, A = Alfa. Kolom tanggal hanya memuat hari sekolah (tanpa akhir pekan dan hari libur).</div>${ttdHtml(ttd)}</div>`;
+            printWhenReady();
+        };
+
+        const nl = { sis: [], sm: 1 };
+        window.initNilai = function() {
+            const names = [...new Set(allSiswa.filter(s => (s.status_siswa || 'Aktif') === 'Aktif').map(s => s.rombel_saat_ini).filter(Boolean))].sort();
+            document.getElementById('nl-rombel').innerHTML = names.map(r => `<option value="${escHtml(r)}">${escHtml(r)}</option>`).join('') || '<option value="">Belum ada rombel</option>';
+            nlLoad();
+        };
+        window.nlLoad = function() {
+            const r = document.getElementById('nl-rombel').value, k = parseInt((r.match(/[1-6]/) || [''])[0]);
+            const sems = k ? [2 * k - 1, 2 * k] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            document.getElementById('nl-sem').innerHTML = sems.map(sm => `<option value="${sm}">Semester ${sm % 2 ? 'Ganjil' : 'Genap'} (Kelas ${getKelasFromSemester(sm)})</option>`).join('');
+            nl.sis = allSiswa.filter(s => s.rombel_saat_ini === r && (s.status_siswa || 'Aktif') === 'Aktif').sort((a, b) => (a.nama_lengkap_siswa || '').localeCompare(b.nama_lengkap_siswa || ''));
+            nlRender();
+        };
+        const nlMapel = sm => MAPEL_LIST.map((m, i) => [m, i]).filter(([m]) => isMapelActiveInSemester(m, sm));
+        window.nlRender = function() {
+            const sm = +document.getElementById('nl-sem').value || 1, ms = nlMapel(sm), inp = 'w-16 text-center px-1.5 py-1 rounded border border-slate-300 text-sm';
+            const val = (s, i, f) => (((px(s.data_tambahan).bagian_g || {}).semester || {})[sm] || {}).mapel?.[i]?.[f] || '';
+            const head = ms.map(([m]) => `<th class="px-2 py-2 text-[11px] font-bold text-slate-600 align-bottom" style="min-width:84px">${escHtml(m.name)}</th>`).join('');
+            const kkm = ms.map(([m, i]) => `<td class="px-2 py-1 text-center"><input class="nl-kkm ${inp} bg-amber-50" data-m="${i}" value="${escHtml(nl.sis.map(s => val(s, i, 'kkm')).find(Boolean) || '')}" placeholder="KKM" aria-label="KKM ${escHtml(m.name)}"></td>`).join('');
+            const body = nl.sis.map((s, n) => `<tr class="border-t border-slate-100"><td class="px-3 py-1.5 text-slate-400">${n + 1}</td><td class="px-3 py-1.5 font-bold text-slate-900 whitespace-nowrap">${escHtml(s.nama_lengkap_siswa)}</td>${ms.map(([m, i]) => `<td class="px-2 py-1 text-center"><input class="nl-in ${inp}" data-sid="${s.id}" data-m="${i}" value="${escHtml(val(s, i, 'nilai'))}" inputmode="decimal" aria-label="Nilai ${escHtml(m.name)}"></td>`).join('')}</tr>`).join('');
+            document.getElementById('nl-grid').innerHTML = nl.sis.length ? `<table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="px-3 py-2 text-xs text-slate-500">No</th><th class="px-3 py-2 text-xs text-slate-500">Nama</th>${head}</tr><tr class="bg-amber-50/60"><td></td><td class="px-3 py-1 text-xs font-bold text-amber-800">KKM</td>${kkm}</tr></thead><tbody>${body}</tbody></table>` : '<div class="p-10 text-center text-sm text-slate-400">Belum ada siswa aktif di kelas ini.</div>';
+        };
+        window.nlSave = async function() {
+            const sm = +document.getElementById('nl-sem').value || 1, ms = nlMapel(sm);
+            const ins = [...document.querySelectorAll('#nl-grid .nl-in')], kk = {};
+            document.querySelectorAll('#nl-grid .nl-kkm').forEach(e => { kk[e.dataset.m] = e.value.trim(); });
+            const bad = [...ins, ...document.querySelectorAll('#nl-grid .nl-kkm')].find(e => e.value.trim() !== '' && !(+e.value.replace(',', '.') >= 0 && +e.value.replace(',', '.') <= 100));
+            if (bad) { bad.focus(); return alert('Nilai harus berupa angka 0-100.'); }
+            const btn = document.getElementById('nl-save'); btn.disabled = true; btn.textContent = 'Menyimpan...';
+            const ids = nl.sis.map(s => s.id);
+            const { data: fresh, error: e1 } = await db.from('master_siswa').select('id,data_tambahan').in('id', ids);
+            if (e1) { btn.disabled = false; btn.textContent = 'Simpan nilai'; return alert('Gagal memuat data: ' + e1.message); }
+            let fail = 0;
+            await Promise.all((fresh || []).map(async f => {
+                const ex = px(f.data_tambahan); ex.bagian_g = ex.bagian_g || {}; ex.bagian_g.semester = ex.bagian_g.semester || {};
+                const so = ex.bagian_g.semester[sm] = ex.bagian_g.semester[sm] || {}; so.mapel = so.mapel || [];
+                ms.forEach(([m, i]) => { const cur = so.mapel[i] || {}; const nv = (document.querySelector(`#nl-grid .nl-in[data-sid="${f.id}"][data-m="${i}"]`) || {}).value; so.mapel[i] = { ...cur, kkm: kk[i] ?? cur.kkm ?? '', nilai: (nv ?? cur.nilai ?? '').trim() }; });
+                for (let i = 0; i < so.mapel.length; i++) if (!so.mapel[i]) so.mapel[i] = {};
+                const { data, error } = await db.from('master_siswa').update({ data_tambahan: ex }).eq('id', f.id).select('id');
+                if (error || !data || !data.length) fail++; else { const loc = allSiswa.find(x => x.id === f.id); if (loc) loc.data_tambahan = ex; }
+            }));
+            btn.disabled = false; btn.textContent = 'Simpan nilai';
+            alert(fail ? `${fail} siswa gagal disimpan (cek izin RLS).` : 'Nilai tersimpan.');
+        };
+
         db.auth.onAuthStateChange((ev) => {
             if (ev === 'SIGNED_OUT' && !dashboardView.classList.contains('hidden')) location.reload();
         });
 
         checkSession();
     </script>
+<footer id="app-footer" class="hidden bg-slate-900 text-slate-300 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid md:grid-cols-3 gap-8 text-sm">
+            <div><h3 class="font-extrabold text-white mb-2">SDN PLUIT 03</h3><p class="leading-relaxed">Jl. Komp. Nelayan Muara Angke Rt.001/001<br>Kelurahan Pluit, Penjaringan,<br>Jakarta Utara 14450</p><a href="https://sdnpluit03.github.io/web-sdnpluit03/" class="inline-block mt-3 font-bold text-amber-400 hover:text-amber-300">Kunjungi web sekolah &rarr;</a></div>
+            <div><h3 class="font-extrabold text-white mb-2">Jam Layanan TU</h3><p>Senin &ndash; Jumat: 07.00 &ndash; 15.00 WIB<br>Sabtu &amp; Minggu: Tutup</p></div>
+            <div><h3 class="font-extrabold text-white mb-2">Hubungi Kami</h3><p>Email: sdnegeripluit3@gmail.com<br>Telepon: 0813 4567 8910</p></div>
+        </div>
+        <div class="border-t border-slate-800 text-center text-xs text-slate-500 py-4 px-4">&copy; 2026 SDN Pluit 03 Jakarta Utara. Dikembangkan oleh Zaq.</div>
+    </footer>
 </body>
 </html>
